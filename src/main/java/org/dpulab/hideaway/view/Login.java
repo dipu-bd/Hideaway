@@ -5,6 +5,9 @@
  */
 package org.dpulab.hideaway.view;
 
+import java.io.File;
+import javax.swing.JFileChooser;
+
 /**
  *
  * @author dipu
@@ -16,6 +19,27 @@ public class Login extends javax.swing.JFrame {
      */
     public Login() {
         initComponents();
+    }
+    
+    private void selectWorkFolder() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new java.io.File("~"));
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int returnVal = fileChooser.showSaveDialog(this);
+        if(returnVal == JFileChooser.APPROVE_OPTION) {
+            File workFolder = fileChooser.getSelectedFile();
+            this.selectedFolderInput.setText(workFolder.getAbsolutePath());
+        }
+    }
+    
+    private void initializeApp() {
+        String workFolder = this.selectedFolderInput.getText();
+        String password = new String(this.passwordInput.getPassword());
+        // TODO start app logic
+        System.out.println("Initializing app with:");
+        System.out.println("  Work folder: " + workFolder);
+        System.out.println("     Password: " + password);
+        this.dispose();
     }
 
     /**
@@ -81,15 +105,30 @@ public class Login extends javax.swing.JFrame {
 
         browseButton.setFont(browseButton.getFont().deriveFont(browseButton.getFont().getSize()+1f));
         browseButton.setText("Browse");
+        browseButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                browseButtonActionPerformed(evt);
+            }
+        });
 
         selectedFolderInput.setEditable(false);
         selectedFolderInput.setFont(new java.awt.Font("Monospaced", 0, 14)); // NOI18N
+        selectedFolderInput.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                selectedFolderInputMouseClicked(evt);
+            }
+        });
 
         passwordInputLabel.setFont(passwordInputLabel.getFont().deriveFont(passwordInputLabel.getFont().getSize()+2f));
         passwordInputLabel.setText("Enter your password here:");
 
         passwordInput.setToolTipText("Enter your password");
         passwordInput.setEchoChar('\u25cf');
+        passwordInput.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                passwordInputActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout frameBodyPanelLayout = new javax.swing.GroupLayout(frameBodyPanel);
         frameBodyPanel.setLayout(frameBodyPanelLayout);
@@ -187,8 +226,20 @@ public class Login extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void enterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enterButtonActionPerformed
-        // TODO add your handling code here:
+        this.initializeApp();
     }//GEN-LAST:event_enterButtonActionPerformed
+
+    private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButtonActionPerformed
+        this.selectWorkFolder();
+    }//GEN-LAST:event_browseButtonActionPerformed
+
+    private void selectedFolderInputMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_selectedFolderInputMouseClicked
+        this.selectWorkFolder();
+    }//GEN-LAST:event_selectedFolderInputMouseClicked
+
+    private void passwordInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passwordInputActionPerformed
+        this.initializeApp();
+    }//GEN-LAST:event_passwordInputActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton browseButton;

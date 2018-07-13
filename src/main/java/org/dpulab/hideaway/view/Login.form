@@ -173,6 +173,9 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Browse"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="browseButtonActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JTextField" name="selectedFolderInput">
           <Properties>
@@ -181,6 +184,9 @@
               <Font name="Monospaced" size="14" style="0"/>
             </Property>
           </Properties>
+          <Events>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="selectedFolderInputMouseClicked"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="passwordInputLabel">
           <Properties>
@@ -197,6 +203,9 @@
             <Property name="toolTipText" type="java.lang.String" value="Enter your password"/>
             <Property name="echoChar" type="char" value="&#x25cf;"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="passwordInputActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
