@@ -6,9 +6,7 @@
 package org.dpulab.hideaway;
 
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.spec.KeySpec;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Scanner;
 import javax.crypto.Cipher;
@@ -16,7 +14,6 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
 
 /**
  *
@@ -25,7 +22,7 @@ import org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
 public class Playground {
     
     public Playground() {
-        Security.addProvider(new BouncyCastlePQCProvider());
+        // Security.addProvider(new BouncyCastlePQCProvider());
     }
 
     void play() {
