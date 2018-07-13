@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Form version="1.5" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
+  <Properties>
+    <Property name="defaultCloseOperation" type="int" value="3"/>
+    <Property name="title" type="java.lang.String" value="Hideaway - Launch Screen"/>
+    <Property name="name" type="java.lang.String" value="loginFrame" noResource="true"/>
+    <Property name="resizable" type="boolean" value="false"/>
+  </Properties>
+  <SyntheticProperties>
+    <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
+    <SyntheticProperty name="generateCenter" type="boolean" value="true"/>
+  </SyntheticProperties>
+  <AuxValues>
+    <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_generateFQN" type="java.lang.Boolean" value="true"/>
+    <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_i18nAutoMode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_layoutCodeTarget" type="java.lang.Integer" value="1"/>
+    <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
+  </AuxValues>
+
+  <Layout>
+    <DimensionLayout dim="0">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Component id="frameActionPanel" alignment="0" max="32767" attributes="0"/>
+          <Component id="frameHeaderPanel" alignment="0" max="32767" attributes="0"/>
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+              <Component id="frameBodyPanel" max="32767" attributes="0"/>
+              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+    <DimensionLayout dim="1">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
+              <Component id="frameHeaderPanel" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+              <Component id="frameBodyPanel" max="32767" attributes="0"/>
+              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+              <Component id="frameActionPanel" min="-2" max="-2" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+  </Layout>
+  <SubComponents>
+    <Container class="javax.swing.JPanel" name="frameActionPanel">
+      <Properties>
+        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="ea" green="ea" red="ea" type="rgb"/>
+        </Property>
+        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+          <Border info="org.netbeans.modules.form.compat2.border.MatteColorBorderInfo">
+            <MatteColorBorder bottom="0" left="0" right="0" top="1">
+              <Color PropertyName="color" blue="cc" green="cc" red="cc" type="rgb"/>
+            </MatteColorBorder>
+          </Border>
+        </Property>
+      </Properties>
+
+      <Layout>
+        <DimensionLayout dim="0">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" alignment="1" attributes="0">
+                  <EmptySpace max="32767" attributes="0"/>
+                  <Component id="enterButton" min="-2" pref="150" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
+              </Group>
+          </Group>
+        </DimensionLayout>
+        <DimensionLayout dim="1">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" alignment="1" attributes="0">
+                  <EmptySpace max="32767" attributes="0"/>
+                  <Component id="enterButton" min="-2" pref="40" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+              </Group>
+          </Group>
+        </DimensionLayout>
+      </Layout>
+      <SubComponents>
+        <Component class="javax.swing.JButton" name="enterButton">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Enter"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="enterButtonActionPerformed"/>
+          </Events>
+        </Component>
+      </SubComponents>
+    </Container>
+    <Container class="javax.swing.JPanel" name="frameBodyPanel">
+      <Properties>
+        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="fa" green="fa" red="fa" type="rgb"/>
+        </Property>
+      </Properties>
+
+      <Layout>
+        <DimensionLayout dim="0">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" alignment="1" attributes="0">
+                  <EmptySpace min="-2" pref="25" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="1" attributes="0">
+                      <Component id="passwordInput" max="32767" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="selectedFolderInput" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="browseButton" min="-2" pref="100" max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="passwordInputLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="selectFolderInputLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      </Group>
+                  </Group>
+                  <EmptySpace min="-2" pref="25" max="-2" attributes="0"/>
+              </Group>
+          </Group>
+        </DimensionLayout>
+        <DimensionLayout dim="1">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace min="-2" pref="25" max="-2" attributes="0"/>
+                  <Component id="selectFolderInputLabel" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="selectedFolderInput" alignment="3" min="-2" pref="36" max="-2" attributes="0"/>
+                      <Component id="browseButton" alignment="3" min="-2" pref="36" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace min="-2" pref="29" max="-2" attributes="0"/>
+                  <Component id="passwordInputLabel" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="passwordInput" min="-2" pref="36" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="25" max="-2" attributes="0"/>
+              </Group>
+          </Group>
+        </DimensionLayout>
+      </Layout>
+      <SubComponents>
+        <Component class="javax.swing.JPasswordField" name="passwordInput">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="jPasswordField1"/>
+            <Property name="echoChar" type="char" value="&#x25cf;"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="selectedFolderInput">
+          <Properties>
+            <Property name="editable" type="boolean" value="false"/>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Monospaced" size="14" style="0"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="browseButton">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
+              <FontInfo relative="true">
+                <Font component="browseButton" property="font" relativeSize="true" size="2"/>
+              </FontInfo>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Browse"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="passwordInputLabel">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
+              <FontInfo relative="true">
+                <Font component="passwordInputLabel" property="font" relativeSize="true" size="2"/>
+              </FontInfo>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Enter your password here:"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="selectFolderInputLabel">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
+              <FontInfo relative="true">
+                <Font component="selectFolderInputLabel" property="font" relativeSize="true" size="2"/>
+              </FontInfo>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Select a directory to store encrypted files:"/>
+          </Properties>
+        </Component>
+      </SubComponents>
+    </Container>
+    <Container class="javax.swing.JPanel" name="frameHeaderPanel">
+      <Properties>
+        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="eb" green="e6" red="e6" type="rgb"/>
+        </Property>
+        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+          <Border info="org.netbeans.modules.form.compat2.border.MatteColorBorderInfo">
+            <MatteColorBorder bottom="1" left="0" right="0" top="0">
+              <Color PropertyName="color" blue="cc" green="cc" red="0" type="rgb"/>
+            </MatteColorBorder>
+          </Border>
+        </Property>
+      </Properties>
+
+      <Layout>
+        <DimensionLayout dim="0">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
+                  <Component id="frameTitleLabel" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="frameSubtitleLabel" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace pref="30" max="32767" attributes="0"/>
+              </Group>
+          </Group>
+        </DimensionLayout>
+        <DimensionLayout dim="1">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" alignment="0" attributes="0">
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="102" attributes="0">
+                          <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
+                          <Component id="frameTitleLabel" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <EmptySpace min="-2" pref="28" max="-2" attributes="0"/>
+                          <Component id="frameSubtitleLabel" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                  </Group>
+                  <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
+              </Group>
+          </Group>
+        </DimensionLayout>
+      </Layout>
+      <SubComponents>
+        <Component class="javax.swing.JLabel" name="frameTitleLabel">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
+              <FontInfo relative="true">
+                <Font bold="true" component="frameTitleLabel" property="font" relativeSize="true" size="24"/>
+              </FontInfo>
+            </Property>
+            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+              <Color blue="0" green="0" red="66" type="rgb"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Hideaway:"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="frameSubtitleLabel">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
+              <FontInfo relative="true">
+                <Font component="frameSubtitleLabel" property="font" relativeSize="true" size="6"/>
+              </FontInfo>
+            </Property>
+            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+              <Color blue="99" green="99" red="0" type="rgb"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Secure yourself with confidence"/>
+          </Properties>
+        </Component>
+      </SubComponents>
+    </Container>
+  </SubComponents>
+</Form>

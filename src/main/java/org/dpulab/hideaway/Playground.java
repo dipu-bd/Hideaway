@@ -33,7 +33,7 @@ public class Playground {
         Scanner scanner = new Scanner(System.in);
         try {            
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            IvParameterSpec iv = new IvParameterSpec("0102030405060708".getBytes());
+            IvParameterSpec iv = new IvParameterSpec("ZGlwdQ49dm2kllfa".getBytes());
             
             System.out.print("Enter message: ");
             String message = scanner.nextLine();
