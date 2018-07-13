@@ -30,23 +30,26 @@ public class Login extends javax.swing.JFrame {
         frameActionPanel = new javax.swing.JPanel();
         enterButton = new javax.swing.JButton();
         frameBodyPanel = new javax.swing.JPanel();
-        passwordInput = new javax.swing.JPasswordField();
-        selectedFolderInput = new javax.swing.JTextField();
-        browseButton = new javax.swing.JButton();
-        passwordInputLabel = new javax.swing.JLabel();
         selectFolderInputLabel = new javax.swing.JLabel();
+        browseButton = new javax.swing.JButton();
+        selectedFolderInput = new javax.swing.JTextField();
+        passwordInputLabel = new javax.swing.JLabel();
+        passwordInput = new javax.swing.JPasswordField();
         frameHeaderPanel = new javax.swing.JPanel();
         frameTitleLabel = new javax.swing.JLabel();
         frameSubtitleLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Hideaway - Launch Screen");
+        setMinimumSize(new java.awt.Dimension(550, 334));
         setName("loginFrame"); // NOI18N
+        setPreferredSize(new java.awt.Dimension(550, 335));
         setResizable(false);
 
         frameActionPanel.setBackground(new java.awt.Color(234, 234, 234));
         frameActionPanel.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 0, 0, 0, new java.awt.Color(204, 204, 204)));
 
+        enterButton.setFont(enterButton.getFont().deriveFont(enterButton.getFont().getStyle() | java.awt.Font.BOLD, enterButton.getFont().getSize()+2));
         enterButton.setText("Enter");
         enterButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -68,25 +71,25 @@ public class Login extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, frameActionPanelLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(enterButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGap(15, 15, 15))
         );
 
         frameBodyPanel.setBackground(new java.awt.Color(250, 250, 250));
 
-        passwordInput.setText("jPasswordField1");
-        passwordInput.setEchoChar('\u25cf');
+        selectFolderInputLabel.setFont(selectFolderInputLabel.getFont().deriveFont(selectFolderInputLabel.getFont().getSize()+2f));
+        selectFolderInputLabel.setText("Select a directory to store encrypted files:");
+
+        browseButton.setFont(browseButton.getFont().deriveFont(browseButton.getFont().getSize()+1f));
+        browseButton.setText("Browse");
 
         selectedFolderInput.setEditable(false);
         selectedFolderInput.setFont(new java.awt.Font("Monospaced", 0, 14)); // NOI18N
 
-        browseButton.setFont(browseButton.getFont().deriveFont(browseButton.getFont().getSize()+2f));
-        browseButton.setText("Browse");
-
         passwordInputLabel.setFont(passwordInputLabel.getFont().deriveFont(passwordInputLabel.getFont().getSize()+2f));
         passwordInputLabel.setText("Enter your password here:");
 
-        selectFolderInputLabel.setFont(selectFolderInputLabel.getFont().deriveFont(selectFolderInputLabel.getFont().getSize()+2f));
-        selectFolderInputLabel.setText("Select a directory to store encrypted files:");
+        passwordInput.setToolTipText("Enter your password");
+        passwordInput.setEchoChar('\u25cf');
 
         javax.swing.GroupLayout frameBodyPanelLayout = new javax.swing.GroupLayout(frameBodyPanel);
         frameBodyPanel.setLayout(frameBodyPanelLayout);
@@ -129,6 +132,7 @@ public class Login extends javax.swing.JFrame {
         frameTitleLabel.setFont(frameTitleLabel.getFont().deriveFont(frameTitleLabel.getFont().getStyle() | java.awt.Font.BOLD, frameTitleLabel.getFont().getSize()+24));
         frameTitleLabel.setForeground(new java.awt.Color(102, 0, 0));
         frameTitleLabel.setText("Hideaway:");
+        frameTitleLabel.setToolTipText("");
 
         frameSubtitleLabel.setFont(frameSubtitleLabel.getFont().deriveFont(frameSubtitleLabel.getFont().getSize()+6f));
         frameSubtitleLabel.setForeground(new java.awt.Color(0, 153, 153));
@@ -166,8 +170,7 @@ public class Login extends javax.swing.JFrame {
             .addComponent(frameHeaderPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addGap(0, 0, 0)
-                .addComponent(frameBodyPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(0, 0, 0))
+                .addComponent(frameBodyPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
