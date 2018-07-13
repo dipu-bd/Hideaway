@@ -5,14 +5,11 @@
  */
 package org.dpulab.hideaway;
 
-import java.security.SecureRandom;
-import java.security.spec.KeySpec;
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import java.util.Base64;
 import java.util.Scanner;
 import javax.crypto.Cipher;
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -43,13 +40,9 @@ public class Playground {
             System.out.print("Enter password: ");
             String password = scanner.next();
             
-             SecureRandom random = new SecureRandom();
-            byte[] salt = new byte[16];
-             random.nextBytes(salt);
-
-            KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 65536, 256); // AES-256
-            SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-            byte[] keyBytes = f.generateSecret(spec).getEncoded();
+            ByteOutputStream bos = new ByteOutputStream(16);
+            bos.write(password.getBytes("UTF-8"));
+            byte[] keyBytes = bos.getBytes();
             SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
             
             System.out.println("Encryption Key: ");
@@ -67,7 +60,6 @@ public class Playground {
             byte[] decipherText = cipher.doFinal(cipherText);
             System.out.println("Decrypted message:");
             System.out.println(new String(decipherText, "UTF-8"));
-            
             
         } catch (Exception ex) {
             ex.printStackTrace();
