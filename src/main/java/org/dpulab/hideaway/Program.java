@@ -12,5 +12,8 @@ package org.dpulab.hideaway;
 public class Program {
     public static void main(String[] args) {
         System.out.println("It works");
+        
+        Playground playground = new Playground();
+        playground.play();
     }
 }
