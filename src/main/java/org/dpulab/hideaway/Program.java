@@ -49,8 +49,7 @@ public class Program {
         }
         //</editor-fold>
                 
-        Playground playground = new Playground();
-        playground.play();
+        new Playground().play();
         
         /* Create and display the form */
         SwingUtilities.invokeLater(() -> {
@@ -76,7 +75,7 @@ public class Program {
         } catch (IOException | GeneralSecurityException | ClassNotFoundException ex) {
             Reporter.put(Program.class, ex);
             Reporter.dialog(Level.SEVERE, "Failed to configure work directory.\n\n[ %s ]  ", ex.getMessage());
-            System.exit(100);
+            System.exit(1);
         }
 
         // If a password is given show dashboard

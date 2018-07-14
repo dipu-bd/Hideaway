@@ -79,7 +79,7 @@ public class CipherIO {
             if (!folder.canWrite()) {
                 throw new FileSystemException("The work directory do not have write permission");
             }
-            Reporter.put("Created work directory", 20);
+            Reporter.put("Created work directory");
         } else if (!folder.isDirectory()) {
             throw new FileSystemException("The work directory is not a folder");
         }
@@ -94,19 +94,19 @@ public class CipherIO {
             // create new index file
             indexFile.createNewFile();
             this.backupIndex();
-            Reporter.put("Index file is created.", 70);
+            Reporter.put("Index file is created.");
         }
 
         File dataFolder = this.getDataFolder();
         if (!dataFolder.exists()) {
             dataFolder.mkdir();
-            Reporter.put("Data folder is created.", 80);
+            Reporter.put("Data folder is created.");
         }
 
         File keysFolder = this.getKeysFolder();
         if (!keysFolder.exists()) {
             keysFolder.mkdir();
-            Reporter.put("Folder for public keys is created.", 90);
+            Reporter.put("Folder for public keys is created.");
         }
 
         // Get list of available public keys

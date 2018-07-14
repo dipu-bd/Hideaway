@@ -26,7 +26,7 @@ public class Playground {
         System.out.println("Start playing with various things...");
         // AESEncryption();
         generateKeysPair();
-        
+        System.exit(0);
     }
     
     void AESEncryption() {
