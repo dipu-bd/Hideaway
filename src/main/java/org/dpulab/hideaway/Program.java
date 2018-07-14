@@ -49,12 +49,10 @@ public class Program {
         }
         //</editor-fold>
                 
-        new Playground().play();
+        // new Playground().play();
         
         /* Create and display the form */
-        SwingUtilities.invokeLater(() -> {
-            start();
-        });                
+        SwingUtilities.invokeLater(() -> { start(); });                
     }
     
     public static void start() {
