@@ -5,8 +5,8 @@
  */
 package org.dpulab.hideaway.view;
 
-import java.io.File;
-import javax.swing.JFileChooser;
+import java.awt.Color;
+import java.awt.Dimension;
 import org.dpulab.hideaway.utils.FileIO;
 import org.dpulab.hideaway.utils.Settings;
 
@@ -35,16 +35,28 @@ public class Login extends javax.swing.JFrame {
     private void initializeApp() {
         String workFolder = this.selectedFolderInput.getText();
         String password = new String(this.passwordInput.getPassword());
+        boolean errors = false;
+        
         if (workFolder == null || workFolder.isEmpty()) {
-                        
+            this.selectFolderHintLabel.setText("Error: You should select a folder");
+            this.selectFolderHintLabel.setForeground(Color.red);
+            errors = true;
+        } else {
+            this.selectFolderHintLabel.setText("");
         }
         
-        Settings.getDefault().set("WORK_DIRECTORY", workFolder);
-        // TODO start app logic
-        System.out.println("Initializing app with:");
-        System.out.println("  Work folder: " + workFolder);
-        System.out.println("     Password: " + password);
-        this.dispose();
+        if (password.length() < 8) {
+            this.passwordInputHintLabel.setText("Error: Password should be at least 8 characters long");
+            this.passwordInputHintLabel.setForeground(Color.red);
+            errors = true;
+        } else {
+            this.passwordInputHintLabel.setText("");
+        }
+        
+        if (!errors) {
+            Settings.getDefault().set("WORK_DIRECTORY", workFolder);
+            this.dispose();
+        }
     }
 
     /**
@@ -72,9 +84,9 @@ public class Login extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Hideaway - Launch Screen");
-        setMinimumSize(new java.awt.Dimension(550, 334));
+        setMinimumSize(new java.awt.Dimension(550, 359));
         setName("loginFrame"); // NOI18N
-        setPreferredSize(new java.awt.Dimension(550, 335));
+        setPreferredSize(new java.awt.Dimension(550, 360));
         setResizable(false);
 
         frameActionPanel.setBackground(new java.awt.Color(234, 234, 234));
@@ -150,7 +162,7 @@ public class Login extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, frameBodyPanelLayout.createSequentialGroup()
                 .addGap(25, 25, 25)
                 .addGroup(frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(selectFolderHintLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 500, Short.MAX_VALUE)
+                    .addComponent(selectFolderHintLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(passwordInput)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, frameBodyPanelLayout.createSequentialGroup()
                         .addComponent(selectedFolderInput)
@@ -171,13 +183,13 @@ public class Login extends javax.swing.JFrame {
                     .addComponent(selectedFolderInput, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(browseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(2, 2, 2)
-                .addComponent(selectFolderHintLabel)
+                .addComponent(selectFolderHintLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(passwordInputLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(passwordInput, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(2, 2, 2)
-                .addComponent(passwordInputHintLabel)
+                .addComponent(passwordInputHintLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(25, 25, 25))
         );
 
