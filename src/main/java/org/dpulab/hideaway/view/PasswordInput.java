@@ -20,6 +20,10 @@ public class PasswordInput extends javax.swing.JDialog {
         initComponents();
     }
     
+    public String getPassword() {
+        return new String(this.passwordInput.getPassword());
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -150,6 +154,7 @@ public class PasswordInput extends javax.swing.JDialog {
         );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void submitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitButtonActionPerformed
