@@ -5,7 +5,7 @@
  */
 package org.dpulab.hideaway;
 
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.Base64;
 import java.util.Scanner;
 import javax.crypto.Cipher;
@@ -40,9 +40,9 @@ public class Playground {
             System.out.print("Enter password: ");
             String password = scanner.next();
             
-            ByteOutputStream bos = new ByteOutputStream(16);
-            bos.write(password.getBytes("UTF-8"));
-            byte[] keyBytes = bos.getBytes();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(16);
+            baos.write(password.getBytes("UTF-8"));
+            byte[] keyBytes = baos.toByteArray();
             SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
             
             System.out.println("Encryption Key: ");
