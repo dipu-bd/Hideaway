@@ -52,3 +52,4 @@ It should have fixed width. Items should have icons.
 
 - Sync with google drive.
 - Create mobile app.
+- Advance backup with error recovery info.
