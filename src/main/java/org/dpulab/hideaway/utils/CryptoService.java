@@ -140,8 +140,8 @@ public class CryptoService {
      * @throws IOException in case of an I/O error.
      */
     public byte[]  loadDecrypted(final File inputFile, String password) throws GeneralSecurityException, IOException {
-        byte[] content = FileUtils.readFileToByteArray(inputFile);
-        return this.decryptAES(content, password);
+        byte[] cipherText = FileUtils.readFileToByteArray(inputFile);
+        return this.decryptAES(cipherText, password);
     }
 
 }
