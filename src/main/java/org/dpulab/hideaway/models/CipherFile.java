@@ -5,49 +5,109 @@
  */
 package org.dpulab.hideaway.models;
 
-import java.io.Externalizable;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  *
  * @author dipu
  */
-public class CipherFile implements Externalizable {
+public class CipherFile implements Serializable {
     
-    private String filePath;
-    private long fileSize;
-    private String publicKey;
-    private Date modfiedAt;
-    private Date createdAt;
-    private byte[] checkSum;
+    private static final byte VERSION = 1;
     
-    public CipherFile() {
+    /*------------------------------------------------------------------------*\
+    |                          MAIN FILE CONTENT                               |   
+    \*------------------------------------------------------------------------*/
+    
+    /**
+     * Reads an instance of this class from an input stream.
+     * @param in The stream to read from.
+     * @return An instance of this class.
+     * @throws IOException 
+     */
+    public static CipherFile fromStream(InputStream in) throws IOException {
+        return new CipherFile(in);
+    }
+    
+    /**
+     * Converts byte array to an instance of this class.
+     * @param data The array of bytes representing the instance.
+     * @return An instance of this class.
+     * @throws IOException 
+     */
+    public static CipherFile fromBytes(byte[] data) throws IOException {
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(data)) {
+            return new CipherFile(bais);
+        }
+    }
+    
+    /*------------------------------------------------------------------------*\
+    |                          MAIN FILE CONTENT                               |   
+    \*------------------------------------------------------------------------*/
+    
+    private final String filePath;
+    private final long fileSize;
+    private final String publicKey;
+    private final Date modfiedAt;
+    private final Date createdAt;
+    private final byte[] signature;
+    
+    private CipherFile(InputStream in) throws IOException {
+        int version = in.read();
+        try (DataInputStream dis = new DataInputStream(in)) {
+            switch(version) {
+                case 1:
+                    this.fileSize = dis.readLong();
+                    this.modfiedAt = new Date(dis.readLong());
+                    this.createdAt = new Date(dis.readLong());
+                    this.filePath = dis.readUTF();
+                    this.publicKey = dis.readUTF();
+                    int signLength = dis.readInt();
+                    this.signature = new byte[signLength];
+                    dis.read(this.signature);
+                    break;
+                default:
+                    throw new IOException("Unsupported version");
+            }
+        }   
+    }
+    
+    /**
+     * Writes the current instance to an output stream.
+     * @param out The output stream to write.
+     * @throws IOException 
+     */
+    public void writeBytes(OutputStream out) throws IOException {
+        out.write(VERSION);
+        try (DataOutputStream dos = new DataOutputStream(out)) {
+            dos.writeLong(this.getFileSize());
+            dos.writeLong(this.getModfiedAt().getTime());
+            dos.writeLong(this.getCreatedAt().getTime());
+            dos.writeUTF(this.getFilePath());
+            dos.writeUTF(this.getPublicKey());
+            dos.writeInt(this.getCheckSum().length);
+            dos.write(this.getCheckSum());
+        }
     }
 
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeLong(this.getFileSize());
-        out.writeLong(this.getModfiedAt().getTime());
-        out.writeLong(this.getCreatedAt().getTime());
-        out.writeUTF(this.getFilePath());
-        out.writeUTF(this.getPublicKey());
-        out.writeInt(this.getCheckSum().length);
-        out.write(this.getCheckSum());
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        this.fileSize = in.readLong();
-        this.modfiedAt = new Date(in.readLong());
-        this.createdAt = new Date(in.readLong());
-        this.filePath = in.readUTF();
-        this.publicKey = in.readUTF();
-        int cksumLength = in.readInt();
-        this.checkSum = new byte[cksumLength];
-        in.read(getCheckSum());        
+    /**
+     * Converts this instance into an array of bytes.
+     * @return The bytes representing this instance.
+     * @throws IOException
+     */
+    public byte[] toBytes() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        this.writeBytes(baos);
+        baos.close();
+        return baos.toByteArray();
     }
 
     /**
@@ -86,10 +146,10 @@ public class CipherFile implements Externalizable {
     }
 
     /**
-     * @return the checkSum
+     * @return the signature
      */
     public byte[] getCheckSum() {
-        return checkSum;
+        return signature;
     }
-    
+
 }
