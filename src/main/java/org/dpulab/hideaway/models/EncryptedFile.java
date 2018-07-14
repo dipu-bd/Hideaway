@@ -5,10 +5,16 @@
  */
 package org.dpulab.hideaway.models;
 
+import java.util.Map;
+
 /**
  *
  * @author dipu
  */
 public class EncryptedFile {
+
+    public EncryptedFile(Map<String, Object> toMap) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

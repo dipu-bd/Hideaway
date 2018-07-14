@@ -10,12 +10,16 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.FileSystemException;
 import java.nio.file.Path;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 import org.dpulab.hideaway.models.EncryptedFile;
 import org.dpulab.hideaway.view.PasswordInput;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *
@@ -39,16 +43,20 @@ public class Storage {
     }
     
     private final Path workDir;
-    private final ArrayList<EncryptedFile> files;
+    private final ArrayList<EncryptedFile> fileList;
     private final HashMap<String, String> publicKeys;
-    
+        
     private Storage(String folder) {
         this.workDir = new File(folder).toPath();
-        this.files = new ArrayList<>();
+        this.fileList = new ArrayList<>();
         this.publicKeys = new HashMap<>();
     }
     
-    public void checkFolder() throws IOException {
+    private void updateStatus(Level level, String status) {
+        Logger.getLogger(Storage.class.getName()).log(level, "Created work directory.");
+    }
+    
+    public void checkFolder() throws IOException, GeneralSecurityException {
         // Check the working directory
         File folder = this.workDir.toFile();
         if (!folder.exists()) {
@@ -58,7 +66,7 @@ public class Storage {
             if (!folder.canWrite()) {
                 throw new FileSystemException("The work directory do not have write permission");
             }
-            Logger.getLogger(Storage.class.getName()).log(Level.INFO, "Created work directory.");
+            this.updateStatus(Level.INFO, "Created work directory");
         } else if(!folder.isDirectory()) {
             throw new FileSystemException("The work directory is not a folder");
         }
@@ -67,11 +75,11 @@ public class Storage {
         String password = Settings.getDefault().getSession("PASSWORD");
         String passwordHash = CryptoService.getDefault().getHash(password);
         
-        File data = workDir.resolve("data").toFile();
-        File keys = workDir.resolve("keys").toFile();
-        File index = workDir.resolve(passwordHash + ".index").toFile();
+        File dataFolder = workDir.resolve("data").toFile();
+        File keysFolder = workDir.resolve("keys").toFile();
+        File indexFile = workDir.resolve(passwordHash + ".index").toFile();
         
-        if (!index.exists()) {
+        if (!indexFile.exists()) {
             // verify the password
             PasswordInput passwordInput = new PasswordInput(null);
             passwordInput.setVisible(true);
@@ -81,21 +89,44 @@ public class Storage {
                 throw new AccessDeniedException("Retyped password did not match the initial one");
             }
             // create new index file
-            index.createNewFile();
-            Logger.getLogger(Storage.class.getName()).log(Level.INFO, "Created index file.");
+            indexFile.createNewFile();
+            this.updateStatus(Level.INFO, "Created index file.");
         }
         
-        if (!data.exists()) {
-            data.mkdir();
-            Logger.getLogger(Storage.class.getName()).log(Level.INFO, "Created data folder.");
+        if (!dataFolder.exists()) {
+            dataFolder.mkdir();
+            this.updateStatus(Level.INFO, "Created data folder.");
         }
         
-        if (!keys.exists()) {
-            keys.mkdir();
-            Logger.getLogger(Storage.class.getName()).log(Level.INFO, "Created folder for public keys.");
+        if (!keysFolder.exists()) {
+            keysFolder.mkdir();
+            this.updateStatus(Level.INFO, "Created folder for public keys.");
         }
         
-        // TODO: Read index files, verify list
+        // Get list of available public keys
+        for (File keyFile : keysFolder.listFiles()) {
+            if (!keyFile.isFile() || !keyFile.canRead()) {
+                continue;
+            }
+            String name = keyFile.getName();
+            String publicKey = FileUtils.readFileToString(keyFile);
+            publicKeys.put(name, publicKey);
+        }
+        
+        // Read index fileList
+        String indexEntry = CryptoService.getDefault().decryptAES(indexFile, password);
+        JSONArray jsonArray = new JSONArray(indexEntry);
+        for (int i = 0; i < jsonArray.length(); ++i) {
+            JSONObject item = jsonArray.getJSONObject(i);
+            EncryptedFile file = new EncryptedFile(item.toMap());
+            this.fileList.add(file);
+        }
+                
+        // TODO: Verify file list
+        for (EncryptedFile file : this.fileList) {
+            
+        }
+        
     }
     
     
