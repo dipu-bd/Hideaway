@@ -23,7 +23,6 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Properties;
 import org.apache.commons.crypto.stream.CryptoInputStream;
@@ -37,10 +36,6 @@ import org.dpulab.hideaway.view.PasswordInput;
  */
 public class CipherIO {
 
-    static final String AES_ALGORITHM = "AES/CBC/PKCS5Padding";
-    static final String INDEX_KEY_ALIAS = "INDEX_PASSWD";
-    static final String INDEX_IV_ALIAS = "INDEX_IvParam";
-
     //<editor-fold defaultstate="collapsed" desc=" Get instance methods ">
     private static final HashMap<String, CipherIO> STORAGE = new HashMap<>();
 
@@ -53,7 +48,7 @@ public class CipherIO {
     }
 
     public static CipherIO getDefault() throws KeyStoreException {
-        String folder = Settings.getDefault().get("WORK_DIRECTORY");
+        String folder = Settings.getDefault().get(Settings.WORK_DIR);
         return CipherIO.getFor(folder);
     }
     //</editor-fold>
@@ -67,10 +62,10 @@ public class CipherIO {
 
     private CipherIO(String folder) throws KeyStoreException {
         this.workDir = new File(folder).toPath();
-        this.keyStore = KeyStore.getInstance("PKCS12");
+        this.keyStore = KeyStore.getInstance(Settings.STORE_TYPE);
         this.fileList = new ArrayList<>();
 
-        this.password = Settings.getDefault().getSession("PASSWORD");
+        this.password = Settings.getDefault().getSession(Settings.PASSWORD);
         this.passwordHash = CryptoService.getDefault().getHash(this.password);
     }
 
@@ -133,7 +128,6 @@ public class CipherIO {
             // verify the password
             if (!passwordVerified) {
                 this.confirmPassword();
-                passwordVerified = true;
             }
             // create ans save an empty index
             indexFile.getParentFile().mkdirs();
@@ -157,11 +151,11 @@ public class CipherIO {
      * @throws UnrecoverableKeyException
      */
     public Key getIndexSecret() throws IOException, GeneralSecurityException {
-        if (!this.keyStore.containsAlias(INDEX_KEY_ALIAS)) {
+        if (!this.keyStore.containsAlias(Settings.INDEX_KEY_ALIAS)) {
             Key key = CryptoService.getDefault().generateKey(this.password);
-            this.keyStore.setKeyEntry(INDEX_KEY_ALIAS, key, this.getKeystorePass(), null);
+            this.keyStore.setKeyEntry(Settings.INDEX_KEY_ALIAS, key, this.getKeystorePass(), null);
         }
-        Key key = this.keyStore.getKey(INDEX_KEY_ALIAS, this.getKeystorePass());
+        Key key = this.keyStore.getKey(Settings.INDEX_KEY_ALIAS, this.getKeystorePass());
         return key;
     }
 
@@ -230,7 +224,7 @@ public class CipherIO {
         AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
 
         try (FileInputStream fis = new FileInputStream(indexFile);
-                CryptoInputStream cos = new CryptoInputStream(AES_ALGORITHM, props, fis, key, params)) {
+                CryptoInputStream cos = new CryptoInputStream(Settings.AES_ALGORITHM, props, fis, key, params)) {
             byte[] total = new byte[4];
             cos.read(total);
             this.fileList.clear();
@@ -249,7 +243,7 @@ public class CipherIO {
         AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
 
         try (FileOutputStream fos = new FileOutputStream(indexFile);
-                CryptoOutputStream cos = new CryptoOutputStream(AES_ALGORITHM, new Properties(), fos, key, params)) {
+                CryptoOutputStream cos = new CryptoOutputStream(Settings.AES_ALGORITHM, props, fos, key, params)) {
             cos.write(CryptoService.toByteArray(this.fileList.size()));
             for (CipherFile cipherFile : this.fileList) {
                 cipherFile.writeBytes(cos);
@@ -262,7 +256,4 @@ public class CipherIO {
     public void verifyFileList() {
     }
 
-    public void addFile(File sourceFile, String destFolder) {
-
-    }
 }

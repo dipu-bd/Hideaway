@@ -24,7 +24,7 @@ public class CipherFile implements Serializable {
     private static final byte VERSION = 1;
     
     /*------------------------------------------------------------------------*\
-    |                          MAIN FILE CONTENT                               |   
+    |                             STATIC METHODS                               |   
     \*------------------------------------------------------------------------*/
     
     /**

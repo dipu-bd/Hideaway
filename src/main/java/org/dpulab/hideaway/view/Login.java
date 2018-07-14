@@ -22,7 +22,7 @@ public class Login extends javax.swing.JDialog {
         initComponents();
         
         // load defaults
-        String lastDirectory = Settings.getDefault().get("WORK_DIRECTORY");
+        String lastDirectory = Settings.getDefault().get(Settings.WORK_DIR);
         this.selectedFolderInput.setText(lastDirectory);
     }
     
@@ -53,8 +53,8 @@ public class Login extends javax.swing.JDialog {
         }
         
         if (!errors) {
-            Settings.getDefault().set("WORK_DIRECTORY", workFolder);
-            Settings.getDefault().setSession("PASSWORD", password);
+            Settings.getDefault().set(Settings.WORK_DIR, workFolder);
+            Settings.getDefault().setSession(Settings.PASSWORD, password);
             this.dispose();
         }       
     }

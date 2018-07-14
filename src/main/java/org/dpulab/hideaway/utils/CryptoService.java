@@ -5,7 +5,6 @@
  */
 package org.dpulab.hideaway.utils;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.MessageDigest;
@@ -16,10 +15,8 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.crypto.EncryptedPrivateKeyInfo;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import org.apache.commons.lang3.StringUtils;
 
@@ -49,7 +46,7 @@ public class CryptoService {
         String hash = text;
         try {
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-            sha256.update(text.getBytes("UTF-8"));
+            sha256.update(text.getBytes(Settings.CHAR_ENCODING));
             byte[] digest = sha256.digest();
             hash = Base64.getEncoder().encodeToString(digest);
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
@@ -74,7 +71,7 @@ public class CryptoService {
             password = StringUtils.reverse(temp.concat(password));
             sign *= -1;
         }
-        byte[] bytes = password.getBytes("UTF-8");
+        byte[] bytes = password.getBytes(Settings.CHAR_ENCODING);
         return Arrays.copyOf(bytes, blockSize);
     }
 
@@ -115,7 +112,7 @@ public class CryptoService {
      */
     public Key generateKey(String password) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         int keyBitSize = 256;
-        byte[] seed = password.getBytes("UTF-8");
+        byte[] seed = password.getBytes(Settings.CHAR_ENCODING);
         SecureRandom secureRandom = new SecureRandom(seed);
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
 

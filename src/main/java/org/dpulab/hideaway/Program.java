@@ -62,7 +62,7 @@ public class Program {
         loginFrame.dispose();
 
         // After login modal closed, check password
-        if (Settings.getDefault().getSession("PASSWORD") == null) {
+        if (Settings.getDefault().getSession(Settings.PASSWORD) == null) {
             Logger.getLogger(Login.class.getName()).log(Level.SEVERE, "No password found.");
             return;
         }
@@ -79,7 +79,5 @@ public class Program {
         // If a password is given show dashboard
         Dashboard dashboard = new Dashboard();
         dashboard.setVisible(true);
-
-        System.exit(0);
     }
 }
