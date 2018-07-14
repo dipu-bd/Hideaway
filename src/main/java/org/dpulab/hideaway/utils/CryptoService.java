@@ -7,6 +7,7 @@ package org.dpulab.hideaway.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
@@ -63,15 +64,51 @@ public class CryptoService {
         sb.reverse();
         sb.append(password.substring(0, password.length() / 2));
         sb.reverse();
-        sb.append("0102030405060708");
         return sb.toString();
     }
     
-    public SecretKeySpec generateKeySpec(String password, String algorithm) throws UnsupportedEncodingException {
+    SecretKeySpec generateKeySpec(String password, String algorithm) throws UnsupportedEncodingException {
         byte[] key = password.getBytes("UTF-8");
         key = Arrays.copyOf(key, 16); // use only first 128 bit
         SecretKeySpec spec = new SecretKeySpec(key, algorithm);
         return spec;
+    }
+    
+    IvParameterSpec generateIV() {
+        return new IvParameterSpec("1123581321345589".getBytes());
+    }
+    
+    /**
+     * Encrypt a plain text using AES encryption.
+     * @param plainText The text to encrypt
+     * @param password The password to use
+     * @return The encrypted text
+     * @throws GeneralSecurityException in case of failure in encryption.
+     * @throws UnsupportedEncodingException 
+     */
+    public byte[] encryptAES(final byte[] plainText, String password) throws GeneralSecurityException, UnsupportedEncodingException {
+        // Generate AES key spec
+        password = this.getModifierPassword(password);
+        SecretKeySpec key = generateKeySpec(password, "AES");
+        
+        // Decrypt using AES
+        IvParameterSpec iv = this.generateIV();
+        Cipher decryptor = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        decryptor.init(Cipher.ENCRYPT_MODE, key, iv);
+        return decryptor.doFinal(plainText);
+    }
+    
+    /**
+     * Encrypt a plain text using AES and store it into a file.
+     * @param plainText The text to encrypt.
+     * @param outputFile The output file.
+     * @param password The password to use.
+     * @throws java.security.GeneralSecurityException in case of failure in encryption.
+     * @throws java.io.IOException in case of an I/O error.
+     */
+    public void saveEncrypted(final byte[] plainText, final File outputFile, String password) throws GeneralSecurityException, IOException {
+        byte[] cipherText = this.encryptAES(plainText, password);
+        FileUtils.writeByteArrayToFile(outputFile, cipherText);
     }
     
     /***
@@ -79,33 +116,32 @@ public class CryptoService {
      * @param cipherText The bytes to decrypt.
      * @param password The password to use.
      * @return The decrypted plain text.
-     * @throws GeneralSecurityException
-     * @throws IOException 
+     * @throws GeneralSecurityException in case of failure in decryption.
+     * @throws java.io.UnsupportedEncodingException in case UTF-8 encoding scheme not found.
      */
-    public byte[] decryptAES(final byte[] cipherText, String password) throws GeneralSecurityException, IOException {
+    public byte[] decryptAES(final byte[] cipherText, String password) throws GeneralSecurityException, UnsupportedEncodingException {
         // Generate AES key spec
         password = this.getModifierPassword(password);
         SecretKeySpec key = generateKeySpec(password, "AES");
         
         // Decrypt using AES
+        IvParameterSpec iv = this.generateIV();
         Cipher decryptor = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        IvParameterSpec iv = new IvParameterSpec("Sudipto Chandra*".getBytes());
         decryptor.init(Cipher.DECRYPT_MODE, key, iv);
-        byte[] plainText = decryptor.doFinal(cipherText);
-        
-        return plainText;
+        return decryptor.doFinal(cipherText);
     }
     
     /**
      * Decrypt a file encrypted with AES and returns the plain text content.
-     * @param cipherFile The file to decrypt.
+     * @param inputFile The file to decrypt.
      * @param password The password to use.
      * @return The decrypted plain text.
-     * @throws GeneralSecurityException
-     * @throws IOException 
+     * @throws GeneralSecurityException in case of failure in decryption.
+     * @throws IOException in case of an I/O error.
      */
-    public byte[]  decryptAES(final File cipherFile, String password) throws GeneralSecurityException, IOException {
-        byte[] content = FileUtils.readFileToByteArray(cipherFile);
+    public byte[]  loadDecrypted(final File inputFile, String password) throws GeneralSecurityException, IOException {
+        byte[] content = FileUtils.readFileToByteArray(inputFile);
         return this.decryptAES(content, password);
     }
+
 }
