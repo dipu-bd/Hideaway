@@ -6,9 +6,11 @@
 package org.dpulab.hideaway;
 
 import java.util.HashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import org.dpulab.hideaway.view.Dashboard;
 import org.dpulab.hideaway.view.Login;
 
 /**
@@ -16,7 +18,7 @@ import org.dpulab.hideaway.view.Login;
  * @author dipu
  */
 public class Program {
-    public static void main(String[] args) {    
+    public static void main(String args[]) {
          /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -35,16 +37,23 @@ public class Program {
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
         }
         //</editor-fold>
-            
-        //Playground playground = new Playground();
-        //playground.play();
+        
+        Login loginFrame = new Login();
+        loginFrame.setModal(true);
+        
+        Dashboard dashboard = new Dashboard();
         
         /* Create and display the form */
         SwingUtilities.invokeLater(() -> {
-            new Login().setVisible(true);
+            loginFrame.setVisible(true);
+            dashboard.setVisible(true);
         });
+        
+                        
+        //Playground playground = new Playground();
+        //playground.play();
     }
 }
