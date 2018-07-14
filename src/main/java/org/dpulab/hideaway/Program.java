@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import org.dpulab.hideaway.utils.Settings;
 import org.dpulab.hideaway.view.Dashboard;
 import org.dpulab.hideaway.view.Login;
 
@@ -32,6 +33,7 @@ public class Program {
             String[] availableThemes = { "GTK+", "Windows", "Macintosh", "Nimbus" };
             for (String key : availableThemes) {
                 if (lfmap.containsKey(key)) {
+                    Logger.getLogger(Login.class.getName()).log(Level.INFO, "Using {0} look and feel.", key);
                     UIManager.setLookAndFeel(lfmap.get(key));
                     break;
                 }
@@ -40,18 +42,24 @@ public class Program {
             Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
         }
         //</editor-fold>
-        
-        Login loginFrame = new Login();
-        loginFrame.setModal(true);
-        
-        Dashboard dashboard = new Dashboard();
-        
+                
         /* Create and display the form */
         SwingUtilities.invokeLater(() -> {
+            // Display login modal
+            Login loginFrame = new Login();
+            loginFrame.setModal(true);       
             loginFrame.setVisible(true);
+             
+            // After login modal closed, check password
+            if (Settings.getDefault().getSession("PASSWORD") == null) {
+                Logger.getLogger(Login.class.getName()).log(Level.SEVERE, "No password found.");
+                return;
+            }
+            
+            // If a password is given show dashboard
+            Dashboard dashboard = new Dashboard();
             dashboard.setVisible(true);
         });
-        
                         
         //Playground playground = new Playground();
         //playground.play();

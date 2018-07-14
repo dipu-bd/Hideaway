@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+import org.dpulab.hideaway.view.Login;
 
 /**
  *
@@ -37,7 +38,7 @@ public class Settings {
             Logger.getLogger(Settings.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        System.out.println("Preferences @ " + this.preferences.absolutePath());
+        Logger.getLogger(Login.class.getName()).log(Level.INFO, "Preferences @ {0}", this.preferences.absolutePath());
     }
         
     public Preferences getPreferences() {

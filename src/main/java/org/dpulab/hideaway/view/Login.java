@@ -55,7 +55,7 @@ public class Login extends javax.swing.JDialog {
         if (!errors) {
             Settings.getDefault().set("WORK_DIRECTORY", workFolder);
             Settings.getDefault().setSession("PASSWORD", password);
-            this.setVisible(false);
+            this.dispose();
         }
     }
 
@@ -88,6 +88,11 @@ public class Login extends javax.swing.JDialog {
         setName("loginFrame"); // NOI18N
         setPreferredSize(new java.awt.Dimension(550, 370));
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         frameActionPanel.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 0, 0, 0, new java.awt.Color(204, 204, 204)));
 
@@ -264,6 +269,10 @@ public class Login extends javax.swing.JDialog {
     private void passwordInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passwordInputActionPerformed
         this.initializeApp();
     }//GEN-LAST:event_passwordInputActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        Settings.getDefault().setSession("PASSWORD", null);
+    }//GEN-LAST:event_formWindowClosing
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton browseButton;
