@@ -76,7 +76,6 @@ public class CipherIO {
         return workDir.resolve(passwordHash + ".index").toFile();
     }
 
-    // TODO: Use multi-threading here
     public void checkFolder() throws IOException, GeneralSecurityException, ClassNotFoundException {
         // Check the working directory
         File folder = this.workDir.toFile();
@@ -102,29 +101,43 @@ public class CipherIO {
             // create new index file
             indexFile.createNewFile();
             this.backupIndex();
-            this.updateStatus(Level.INFO, "Created index file.");
+            this.updateStatus(Level.INFO, "Index file is created.");
         }
 
         File dataFolder = this.getDataFolder();
         if (!dataFolder.exists()) {
             dataFolder.mkdir();
-            this.updateStatus(Level.INFO, "Created data folder.");
+            this.updateStatus(Level.INFO, "Data folder is created.");
         }
 
         File keysFolder = this.getKeysFolder();
         if (!keysFolder.exists()) {
             keysFolder.mkdir();
-            this.updateStatus(Level.INFO, "Created folder for public keys.");
+            this.updateStatus(Level.INFO, "Folder for public keys is created.");
         }
 
         // Get list of available public keys
-        this.loadPublicKeys();
+        new Thread(() -> {
+            try {
+                this.loadPublicKeys();
+            } catch (IOException ex) {
+                this.updateStatus(Level.SEVERE, "Failed to load public keys: " + ex.getMessage());
+            }
+        }).start();
 
         // Read index files
-        this.restoreIndex();
+        new Thread(() -> {
+            try {
+                this.restoreIndex();
+            } catch (IOException | ClassNotFoundException | GeneralSecurityException ex) {
+                this.updateStatus(Level.SEVERE, "Failed to load file index: " + ex.getMessage());
+            }
+        }).start();
 
         // Verify file list
-        this.verifyFileList();
+        new Thread(() -> {
+            this.verifyFileList();
+        }).start();
     }
 
     public boolean confirmPassword() {
@@ -181,6 +194,6 @@ public class CipherIO {
     }
 
     public void addFile(File sourceFile, String destFolder) {
-        
+
     }
 }
