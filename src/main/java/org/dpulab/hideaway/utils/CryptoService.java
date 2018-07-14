@@ -5,6 +5,7 @@
  */
 package org.dpulab.hideaway.utils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -44,14 +45,33 @@ public class CryptoService {
     public String getHash(final String text) {
         String hash = text;
         try {
-            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-            messageDigest.update(text.getBytes("UTF-8"));
-            byte[] digest = messageDigest.digest();
+            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+            sha256.update(text.getBytes("UTF-8"));
+            byte[] digest = sha256.digest();
             hash = Base64.getEncoder().encodeToString(digest);
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
             Logger.getLogger(CryptoService.class.getName()).log(Level.SEVERE, null, ex);
         }
         return hash;
+    }
+    
+    protected String getModifierPassword(String password) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(password);
+        sb.reverse();
+        sb.append(password.substring(password.length() / 2));
+        sb.reverse();
+        sb.append(password.substring(0, password.length() / 2));
+        sb.reverse();
+        sb.append("0102030405060708");
+        return sb.toString();
+    }
+    
+    public SecretKeySpec generateKeySpec(String password, String algorithm) throws UnsupportedEncodingException {
+        byte[] key = password.getBytes("UTF-8");
+        key = Arrays.copyOf(key, 16); // use only first 128 bit
+        SecretKeySpec spec = new SecretKeySpec(key, algorithm);
+        return spec;
     }
     
     /***
@@ -62,19 +82,18 @@ public class CryptoService {
      * @throws GeneralSecurityException
      * @throws IOException 
      */
-    public String decryptAES(final byte[] cipherText, String password) throws GeneralSecurityException, IOException {
-        byte[] key = password.getBytes("UTF-8");
-        MessageDigest sha = MessageDigest.getInstance("SHA-1");
-        key = sha.digest(key);
-        key = Arrays.copyOf(key, 16); // use only first 128 bit
-        SecretKeySpec keySpec = new SecretKeySpec(key, "AES");
+    public byte[] decryptAES(final byte[] cipherText, String password) throws GeneralSecurityException, IOException {
+        // Generate AES key spec
+        password = this.getModifierPassword(password);
+        SecretKeySpec key = generateKeySpec(password, "AES");
         
+        // Decrypt using AES
         Cipher decryptor = Cipher.getInstance("AES/CBC/PKCS5Padding");
         IvParameterSpec iv = new IvParameterSpec("Sudipto Chandra*".getBytes());
-        decryptor.init(Cipher.DECRYPT_MODE, keySpec, iv);
+        decryptor.init(Cipher.DECRYPT_MODE, key, iv);
         byte[] plainText = decryptor.doFinal(cipherText);
         
-        return new String(plainText, "UTF-8");
+        return plainText;
     }
     
     /**
@@ -85,7 +104,7 @@ public class CryptoService {
      * @throws GeneralSecurityException
      * @throws IOException 
      */
-    public String decryptAES(final File cipherFile, String password) throws GeneralSecurityException, IOException {
+    public byte[]  decryptAES(final File cipherFile, String password) throws GeneralSecurityException, IOException {
         byte[] content = FileUtils.readFileToByteArray(cipherFile);
         return this.decryptAES(content, password);
     }
