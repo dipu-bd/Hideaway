@@ -18,7 +18,6 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
@@ -124,11 +123,8 @@ public class Storage {
         // Read index files
         this.restoreIndex();
 
-        // TODO: Verify file list
-        for (CipherFile file : this.fileList) {
-
-        }
-
+        // Verify file list
+        this.verifyFileList();
     }
 
     public boolean confirmPassword() {
@@ -139,9 +135,9 @@ public class Storage {
         passwordInput.dispose();
         return password.equals(verifyPassword);
     }
-    
+
     public void loadPublicKeys() throws IOException {
-        File keysFolder = this.getKeysFolder();        
+        File keysFolder = this.getKeysFolder();
         for (File keyFile : keysFolder.listFiles()) {
             if (!keyFile.isFile() || !keyFile.canRead()) {
                 continue;
@@ -163,7 +159,7 @@ public class Storage {
             CryptoService.getDefault().saveEncrypted(plainText, indexFile, password);
         }
     }
-    
+
     public void restoreIndex() throws GeneralSecurityException, IOException, ClassNotFoundException {
         File indexFile = this.getIndexFile();
         String password = Settings.getDefault().getSession("PASSWORD");
@@ -177,4 +173,11 @@ public class Storage {
         }
     }
 
+    // TODO: Verify file list
+    public void verifyFileList() {
+    }
+
+    public void addFile(File sourceFile, String destFolder) {
+        
+    }
 }
