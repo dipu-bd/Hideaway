@@ -15,6 +15,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import org.dpulab.hideaway.utils.Settings;
 import org.dpulab.hideaway.utils.CipherIO;
+import org.dpulab.hideaway.utils.Reporter;
 import org.dpulab.hideaway.view.Dashboard;
 import org.dpulab.hideaway.view.Login;
 
@@ -63,8 +64,8 @@ public class Program {
             try {
                 CipherIO.getDefault().checkFolder();
             } catch (IOException | GeneralSecurityException | ClassNotFoundException ex) {
-                Logger.getLogger(Program.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showMessageDialog(null, "Failed to initialize work directory.\n\n" + ex.getMessage() + "\t");
+                Reporter.put(Program.class, ex);
+                Reporter.dialog(Level.SEVERE, "Failed to configure work directory.\n\n[ %s ]  ", ex.getMessage());
                 return;
             }
             

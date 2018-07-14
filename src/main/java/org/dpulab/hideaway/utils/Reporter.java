@@ -5,8 +5,10 @@
  */
 package org.dpulab.hideaway.utils;
 
+import java.awt.Component;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -14,11 +16,12 @@ import java.util.logging.Logger;
  */
 public class Reporter {
 
-    public static final Class DEFAULT_SOURCE = Reporter.class;
-    public static final Level DEFAULT_LEVEL = Level.INFO;
-    public static final String DEFAULT_STATUS = null;
-    public static final int DEFAULT_PROGRESS = 0;
-    public static final Exception DEFAULT_ERROR = null;
+    public static Class DEFAULT_SOURCE = Reporter.class;
+    public static Level DEFAULT_LEVEL = Level.INFO;
+    public static String DEFAULT_STATUS = null;
+    public static int DEFAULT_PROGRESS = 0;
+    public static Exception DEFAULT_ERROR = null;
+    public static Component DEFAULT_PARENT = null;
 
     public static void put(Class source, Level level, String status, int progress, Exception ex) {
         if (progress > 0) {
@@ -71,7 +74,7 @@ public class Reporter {
     public static void format(Class source, String fmt, Exception ex, Object... args) {
         Reporter.format(source, DEFAULT_LEVEL, fmt, ex, args);
     }
-    
+
     public static void format(String fmt, Exception ex, Object... args) {
         Reporter.format(DEFAULT_LEVEL, fmt, ex, args);
     }
@@ -79,7 +82,7 @@ public class Reporter {
     public static void format(Level level, String fmt, Exception ex, Object... args) {
         Reporter.format(DEFAULT_SOURCE, level, fmt, ex, args);
     }
-    
+
     public static void format(Class source, Level level, String fmt, Object... args) {
         Reporter.format(DEFAULT_SOURCE, level, fmt, DEFAULT_ERROR, args);
     }
@@ -87,7 +90,7 @@ public class Reporter {
     public static void format(Class source, String fmt, Object... args) {
         Reporter.format(source, DEFAULT_LEVEL, fmt, DEFAULT_ERROR, args);
     }
-    
+
     public static void format(Level level, String fmt, Object... args) {
         Reporter.format(DEFAULT_SOURCE, level, fmt, args);
     }
@@ -96,4 +99,35 @@ public class Reporter {
         Reporter.format(DEFAULT_LEVEL, fmt, args);
     }
 
+    public static void dialog(Component parent, Level level, String title, String status, Object ... args) {
+        int type;
+        String defTitle;
+        if (level == Level.SEVERE
+                || level == Level.FINE
+                || level == Level.FINER
+                || level == Level.FINEST) {
+            type = JOptionPane.ERROR_MESSAGE;
+            defTitle = "Hideaway :: Error";
+        } else if (level == Level.INFO) {
+            type = JOptionPane.INFORMATION_MESSAGE;
+            defTitle = "Hideaway :: Information";
+        } else if (level == Level.WARNING) {
+            type = JOptionPane.WARNING_MESSAGE;
+            defTitle = "Hideaway :: Warning!";
+        } else {
+            type = JOptionPane.PLAIN_MESSAGE;
+            defTitle = "Hideaway :: Message";
+        }
+        status = String.format(status, args);
+        if (title == null || title.length() == 0) title = defTitle;
+        JOptionPane.showMessageDialog(parent, status, title, type);
+    }
+    
+    public static void dialog(Level level, String status, Object ... args) {
+        Reporter.dialog(DEFAULT_PARENT, level, null, status, args);
+    }
+    
+    public static void dialog(String status, Object ... args) {
+        Reporter.dialog(DEFAULT_LEVEL, status, args);
+    }
 }
