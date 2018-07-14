@@ -85,6 +85,7 @@ public class Login extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Hideaway - Launcher");
         setMinimumSize(new java.awt.Dimension(550, 366));
+        setModal(true);
         setName("loginFrame"); // NOI18N
         setPreferredSize(new java.awt.Dimension(550, 370));
         setResizable(false);
