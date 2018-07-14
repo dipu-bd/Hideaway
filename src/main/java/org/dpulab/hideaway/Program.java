@@ -6,6 +6,7 @@
 package org.dpulab.hideaway;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,7 +62,7 @@ public class Program {
             // Check the folder
             try {
                 Storage.getDefault().checkFolder();
-            } catch (IOException ex) {
+            } catch (IOException | GeneralSecurityException ex) {
                 Logger.getLogger(Program.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showMessageDialog(null, "Failed to initialize work directory.\n\n" + ex.getMessage() + "\t");
                 return;

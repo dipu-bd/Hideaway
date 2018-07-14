@@ -27,6 +27,7 @@ import org.json.JSONObject;
  */
 public class Storage {
     
+    //<editor-fold defaultstate="collapsed" desc=" Get instance methods ">
     private static final HashMap<String, Storage> STORAGE = new HashMap<>();
     
     public static Storage getFor(String folder) {
@@ -41,6 +42,7 @@ public class Storage {
         String folder = Settings.getDefault().get("WORK_DIRECTORY");
         return Storage.getFor(folder);
     }
+    //</editor-fold>
     
     private final Path workDir;
     private final ArrayList<EncryptedFile> fileList;
@@ -52,10 +54,12 @@ public class Storage {
         this.publicKeys = new HashMap<>();
     }
     
+    // TODO: Save status somewhere and display them
     private void updateStatus(Level level, String status) {
-        Logger.getLogger(Storage.class.getName()).log(level, "Created work directory.");
+        Logger.getLogger(Storage.class.getName()).log(level, status);
     }
     
+    // TODO: Use multi-threading here
     public void checkFolder() throws IOException, GeneralSecurityException {
         // Check the working directory
         File folder = this.workDir.toFile();
@@ -113,7 +117,7 @@ public class Storage {
             publicKeys.put(name, publicKey);
         }
         
-        // Read index fileList
+        // Read index files
         String indexEntry = CryptoService.getDefault().decryptAES(indexFile, password);
         JSONArray jsonArray = new JSONArray(indexEntry);
         for (int i = 0; i < jsonArray.length(); ++i) {
