@@ -5,6 +5,7 @@
  */
 package org.dpulab.hideaway.utils;
 
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
@@ -23,10 +24,12 @@ public class Settings {
     }
     
     private final Preferences preferences;
+    private final HashMap<String, Object> session;
     
     public Settings() {
         String pathName = "org/dpulab/hideaway/v1";
         this.preferences = Preferences.userRoot().node(pathName);
+        this.session = new HashMap<>();
         
         try {
             this.preferences.sync();
@@ -34,7 +37,11 @@ public class Settings {
             Logger.getLogger(Settings.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        System.out.println("Created preferences: " + this.preferences.absolutePath());
+        System.out.println("Preferences @ " + this.preferences.absolutePath());
+    }
+        
+    public Preferences getPreferences() {
+        return this.preferences;
     }
     
     public String get(String name) {
@@ -43,5 +50,16 @@ public class Settings {
     
     public void set(String name, String value) {
         this.preferences.put(name, value);
+    }
+    
+    public Object getSession(String name) {
+        if (this.session.containsKey(name)) {
+            return this.session.get(name);
+        }
+        return null;
+    }
+    
+    public void setSession(String name, Object value) {
+        this.session.put(name, value);
     }
 }
