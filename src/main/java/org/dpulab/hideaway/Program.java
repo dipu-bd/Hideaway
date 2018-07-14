@@ -5,12 +5,15 @@
  */
 package org.dpulab.hideaway;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import org.dpulab.hideaway.utils.Settings;
+import org.dpulab.hideaway.utils.Storage;
 import org.dpulab.hideaway.view.Dashboard;
 import org.dpulab.hideaway.view.Login;
 
@@ -47,12 +50,20 @@ public class Program {
         SwingUtilities.invokeLater(() -> {
             // Display login modal
             Login loginFrame = new Login();
-            loginFrame.setModal(true);       
             loginFrame.setVisible(true);
              
             // After login modal closed, check password
             if (Settings.getDefault().getSession("PASSWORD") == null) {
                 Logger.getLogger(Login.class.getName()).log(Level.SEVERE, "No password found.");
+                return;
+            }
+            
+            // Check the folder
+            try {
+                Storage.getDefault().checkFolder();
+            } catch (IOException ex) {
+                Logger.getLogger(Program.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null, "Failed to initialize work directory.\n\n" + ex.getMessage() + "\t");
                 return;
             }
             
