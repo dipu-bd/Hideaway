@@ -18,8 +18,6 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.dpulab.hideaway.models.CipherFile;
 import org.dpulab.hideaway.view.PasswordInput;
@@ -57,14 +55,6 @@ public class CipherIO {
         this.publicKeys = new HashMap<>();
     }
 
-    // TODO: Save it somewhere and display them
-    private void updateStatus(Level level, String status, int progress) {
-        Logger.getLogger(CipherIO.class.getName()).log(level, status + " ... {0}%", progress);
-    }
-    private void updateStatus(Level level, String status) {
-        this.updateStatus(level, status, 0);
-    }
-
     public File getDataFolder() {
         return workDir.resolve("data").toFile();
     }
@@ -89,7 +79,7 @@ public class CipherIO {
             if (!folder.canWrite()) {
                 throw new FileSystemException("The work directory do not have write permission");
             }
-            this.updateStatus(Level.INFO, "Created work directory", 20);
+            Reporter.put("Created work directory", 20);
         } else if (!folder.isDirectory()) {
             throw new FileSystemException("The work directory is not a folder");
         }
@@ -104,19 +94,19 @@ public class CipherIO {
             // create new index file
             indexFile.createNewFile();
             this.backupIndex();
-            this.updateStatus(Level.INFO, "Index file is created.", 70);
+            Reporter.put("Index file is created.", 70);
         }
 
         File dataFolder = this.getDataFolder();
         if (!dataFolder.exists()) {
             dataFolder.mkdir();
-            this.updateStatus(Level.INFO, "Data folder is created.", 80);
+            Reporter.put("Data folder is created.", 80);
         }
 
         File keysFolder = this.getKeysFolder();
         if (!keysFolder.exists()) {
             keysFolder.mkdir();
-            this.updateStatus(Level.INFO, "Folder for public keys is created.", 90);
+            Reporter.put("Folder for public keys is created.", 90);
         }
 
         // Get list of available public keys
@@ -124,7 +114,7 @@ public class CipherIO {
             try {
                 this.loadPublicKeys();
             } catch (IOException ex) {
-                this.updateStatus(Level.SEVERE, "Failed to load public keys: " + ex.getMessage());
+                Reporter.put(CipherIO.class, "Failed to load public keys", ex);
             }
         }).start();
 
@@ -133,7 +123,7 @@ public class CipherIO {
             try {
                 this.restoreIndex();
             } catch (IOException | ClassNotFoundException | GeneralSecurityException ex) {
-                this.updateStatus(Level.SEVERE, "Failed to load file index: " + ex.getMessage());
+                Reporter.put(CipherIO.class, "Failed to load file index", ex);
             }
         }).start();
 
@@ -162,7 +152,7 @@ public class CipherIO {
             String publicKey = FileUtils.readFileToString(keyFile);
             publicKeys.put(name, publicKey);
         }
-        this.updateStatus(Level.INFO, String.format("Public keys are loaded. %d are available.", this.publicKeys.size()));
+        Reporter.format("Public keys are loaded. %d are available.", this.publicKeys.size());
     }
 
     public void backupIndex() throws GeneralSecurityException, IOException, ClassNotFoundException {
@@ -175,7 +165,7 @@ public class CipherIO {
             byte[] plainText = baos.toByteArray();
             CryptoService.getDefault().saveEncrypted(plainText, indexFile, password);
         }
-        this.updateStatus(Level.INFO, String.format("Index entry saved. %s files", this.fileList.size()));
+        Reporter.format("Index entry saved. %s files", this.fileList.size());
     }
 
     public void restoreIndex() throws GeneralSecurityException, IOException, ClassNotFoundException {
@@ -189,7 +179,7 @@ public class CipherIO {
             CipherFile[] list = (CipherFile[]) ois.readObject();
             this.fileList.addAll(Arrays.asList(list));
         }
-        this.updateStatus(Level.INFO, String.format("Index entry loaded. %d files", this.fileList.size()));
+        Reporter.format("Index entry loaded. %d files", this.fileList.size());
     }
 
     // TODO: Verify file list

@@ -21,7 +21,9 @@ public class Reporter {
     public static final Exception DEFAULT_ERROR = null;
 
     public static void put(Class source, Level level, String status, int progress, Exception ex) {
-        status = String.format("%2d%%: %s", progress, status);
+        if (progress > 0) {
+            status = String.format("%2d%%: %s", progress, status);
+        }
         Logger.getLogger(source.getName()).log(level, status, ex);
     }
 
@@ -47,6 +49,10 @@ public class Reporter {
 
     public static void put(Class source, Level level, Exception ex) {
         Reporter.put(source, level, DEFAULT_STATUS, DEFAULT_PROGRESS, ex);
+    }
+
+    public static void put(Class source, String status, Exception ex) {
+        Reporter.put(source, DEFAULT_LEVEL, status, DEFAULT_PROGRESS, ex);
     }
 
     public static void put(Class source, Exception ex) {
