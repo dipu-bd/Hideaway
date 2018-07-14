@@ -57,9 +57,12 @@ public class CipherIO {
         this.publicKeys = new HashMap<>();
     }
 
-    // TODO: Save status somewhere and display them
+    // TODO: Save it somewhere and display them
+    private void updateStatus(Level level, String status, int progress) {
+        Logger.getLogger(CipherIO.class.getName()).log(level, status + " ... {0}%", progress);
+    }
     private void updateStatus(Level level, String status) {
-        Logger.getLogger(CipherIO.class.getName()).log(level, status);
+        this.updateStatus(level, status, 0);
     }
 
     public File getDataFolder() {
@@ -86,7 +89,7 @@ public class CipherIO {
             if (!folder.canWrite()) {
                 throw new FileSystemException("The work directory do not have write permission");
             }
-            this.updateStatus(Level.INFO, "Created work directory");
+            this.updateStatus(Level.INFO, "Created work directory", 20);
         } else if (!folder.isDirectory()) {
             throw new FileSystemException("The work directory is not a folder");
         }
@@ -101,19 +104,19 @@ public class CipherIO {
             // create new index file
             indexFile.createNewFile();
             this.backupIndex();
-            this.updateStatus(Level.INFO, "Index file is created.");
+            this.updateStatus(Level.INFO, "Index file is created.", 70);
         }
 
         File dataFolder = this.getDataFolder();
         if (!dataFolder.exists()) {
             dataFolder.mkdir();
-            this.updateStatus(Level.INFO, "Data folder is created.");
+            this.updateStatus(Level.INFO, "Data folder is created.", 80);
         }
 
         File keysFolder = this.getKeysFolder();
         if (!keysFolder.exists()) {
             keysFolder.mkdir();
-            this.updateStatus(Level.INFO, "Folder for public keys is created.");
+            this.updateStatus(Level.INFO, "Folder for public keys is created.", 90);
         }
 
         // Get list of available public keys
