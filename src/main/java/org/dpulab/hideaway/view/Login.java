@@ -6,7 +6,6 @@
 package org.dpulab.hideaway.view;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import org.dpulab.hideaway.utils.FileIO;
 import org.dpulab.hideaway.utils.Settings;
 
