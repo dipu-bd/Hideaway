@@ -53,9 +53,9 @@ public class Settings {
         this.preferences.put(name, value);
     }
     
-    public Object getSession(String name) {
+    public <T> T getSession(String name) {
         if (this.session.containsKey(name)) {
-            return this.session.get(name);
+            return (T) this.session.get(name);
         }
         return null;
     }
