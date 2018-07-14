@@ -24,6 +24,7 @@ import org.dpulab.hideaway.view.Login;
  * @author dipu
  */
 public class Program {
+    
     public static void main(String args[]) {
          /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -48,33 +49,40 @@ public class Program {
         }
         //</editor-fold>
                 
+        Playground playground = new Playground();
+        playground.play();
+        
         /* Create and display the form */
         SwingUtilities.invokeLater(() -> {
-            // Display login modal
-            Login loginFrame = new Login();
-            loginFrame.setVisible(true);
-             
-            // After login modal closed, check password
-            if (Settings.getDefault().getSession("PASSWORD") == null) {
-                Logger.getLogger(Login.class.getName()).log(Level.SEVERE, "No password found.");
-                return;
-            }
-            
-            // Check the folder
-            try {
-                CipherIO.getDefault().checkFolder();
-            } catch (IOException | GeneralSecurityException | ClassNotFoundException ex) {
-                Reporter.put(Program.class, ex);
-                Reporter.dialog(Level.SEVERE, "Failed to configure work directory.\n\n[ %s ]  ", ex.getMessage());
-                return;
-            }
-            
-            // If a password is given show dashboard
-            Dashboard dashboard = new Dashboard();
-            dashboard.setVisible(true);
-        });
-                        
-        //Playground playground = new Playground();
-        //playground.play();
+            start();
+        });                
+    }
+    
+    public static void start() {
+        // Display login modal
+        Login loginFrame = new Login();
+        loginFrame.setVisible(true);
+        loginFrame.dispose();
+
+        // After login modal closed, check password
+        if (Settings.getDefault().getSession("PASSWORD") == null) {
+            Logger.getLogger(Login.class.getName()).log(Level.SEVERE, "No password found.");
+            return;
+        }
+
+        // Check the folder
+        try {
+            CipherIO.getDefault().checkFolder();
+        } catch (IOException | GeneralSecurityException | ClassNotFoundException ex) {
+            Reporter.put(Program.class, ex);
+            Reporter.dialog(Level.SEVERE, "Failed to configure work directory.\n\n[ %s ]  ", ex.getMessage());
+            System.exit(100);
+        }
+
+        // If a password is given show dashboard
+        Dashboard dashboard = new Dashboard();
+        dashboard.setVisible(true);
+
+        System.exit(0);
     }
 }
