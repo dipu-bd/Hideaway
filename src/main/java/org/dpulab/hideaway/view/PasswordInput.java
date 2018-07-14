@@ -9,22 +9,17 @@ package org.dpulab.hideaway.view;
  *
  * @author dipu
  */
-public class VerifyPassword extends javax.swing.JDialog {
+public class PasswordInput extends javax.swing.JDialog {
 
     /**
      * Creates new form VerifyPassword
      * @param parent
-     * @param modal
      */
-    public VerifyPassword(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public PasswordInput(java.awt.Frame parent) {
+        super(parent);
         initComponents();
     }
     
-    private void verifyPassword() {
-        
-    }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -41,7 +36,7 @@ public class VerifyPassword extends javax.swing.JDialog {
         passwordInput = new javax.swing.JPasswordField();
         passwordInputHintLabel = new javax.swing.JLabel();
         frameActionPanel = new javax.swing.JPanel();
-        verifyButton = new javax.swing.JButton();
+        submitButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Verify Password");
@@ -83,7 +78,7 @@ public class VerifyPassword extends javax.swing.JDialog {
         });
 
         passwordInputHintLabel.setForeground(new java.awt.Color(0, 153, 153));
-        passwordInputHintLabel.setText("You need to verify your password to proceed.");
+        passwordInputHintLabel.setText("Your password is non-recoverable. Keep it safe.");
 
         javax.swing.GroupLayout frameBodyPanelLayout = new javax.swing.GroupLayout(frameBodyPanel);
         frameBodyPanel.setLayout(frameBodyPanelLayout);
@@ -111,11 +106,11 @@ public class VerifyPassword extends javax.swing.JDialog {
 
         frameActionPanel.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 0, 0, 0, new java.awt.Color(204, 204, 204)));
 
-        verifyButton.setFont(verifyButton.getFont().deriveFont(verifyButton.getFont().getStyle() | java.awt.Font.BOLD, verifyButton.getFont().getSize()+2));
-        verifyButton.setText("Verify");
-        verifyButton.addActionListener(new java.awt.event.ActionListener() {
+        submitButton.setFont(submitButton.getFont().deriveFont(submitButton.getFont().getStyle() | java.awt.Font.BOLD, submitButton.getFont().getSize()+2));
+        submitButton.setText("OK");
+        submitButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                verifyButtonActionPerformed(evt);
+                submitButtonActionPerformed(evt);
             }
         });
 
@@ -125,14 +120,14 @@ public class VerifyPassword extends javax.swing.JDialog {
             frameActionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, frameActionPanelLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(verifyButton, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(submitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(15, 15, 15))
         );
         frameActionPanelLayout.setVerticalGroup(
             frameActionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, frameActionPanelLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(verifyButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(submitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(15, 15, 15))
         );
 
@@ -157,13 +152,13 @@ public class VerifyPassword extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void passwordInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passwordInputActionPerformed
-        this.verifyPassword();
-    }//GEN-LAST:event_passwordInputActionPerformed
+    private void submitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitButtonActionPerformed
+        this.setVisible(false);
+    }//GEN-LAST:event_submitButtonActionPerformed
 
-    private void verifyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_verifyButtonActionPerformed
-        this.verifyPassword();
-    }//GEN-LAST:event_verifyButtonActionPerformed
+    private void passwordInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passwordInputActionPerformed
+        this.setVisible(false);
+    }//GEN-LAST:event_passwordInputActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -174,6 +169,6 @@ public class VerifyPassword extends javax.swing.JDialog {
     private javax.swing.JPasswordField passwordInput;
     private javax.swing.JLabel passwordInputHintLabel;
     private javax.swing.JLabel passwordInputLabel;
-    private javax.swing.JButton verifyButton;
+    private javax.swing.JButton submitButton;
     // End of variables declaration//GEN-END:variables
 }
