@@ -6,11 +6,8 @@
 package org.dpulab.hideaway.utils;
 
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
-import org.dpulab.hideaway.view.Login;
 
 /**
  *
@@ -35,10 +32,10 @@ public class Settings {
         try {
             this.preferences.sync();
         } catch (BackingStoreException ex) {
-            Logger.getLogger(Settings.class.getName()).log(Level.SEVERE, null, ex);
+            Reporter.put(Settings.class, ex);
         }
         
-        Logger.getLogger(Login.class.getName()).log(Level.INFO, "Preferences @ {0}", this.preferences.absolutePath());
+        Reporter.format(Settings.class, "Preferences @ %s", this.preferences.absolutePath());
     }
         
     public Preferences getPreferences() {
