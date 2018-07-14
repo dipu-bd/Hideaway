@@ -16,11 +16,13 @@ import java.nio.file.FileSystemException;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
-import org.dpulab.hideaway.models.EncryptedFile;
+import org.dpulab.hideaway.models.CipherFile;
 import org.dpulab.hideaway.view.PasswordInput;
 
 /**
@@ -47,7 +49,7 @@ public class Storage {
     //</editor-fold>
 
     private final Path workDir;
-    private final ArrayList<EncryptedFile> fileList;
+    private final ArrayList<CipherFile> fileList;
     private final HashMap<String, String> publicKeys;
 
     private Storage(String folder) {
@@ -123,7 +125,7 @@ public class Storage {
         this.restoreIndex();
 
         // TODO: Verify file list
-        for (EncryptedFile file : this.fileList) {
+        for (CipherFile file : this.fileList) {
 
         }
 
@@ -150,13 +152,13 @@ public class Storage {
         }
     }
 
-    public void backupIndex() throws GeneralSecurityException, IOException {
+    public void backupIndex() throws GeneralSecurityException, IOException, ClassNotFoundException {
         File indexFile = this.getIndexFile();
         String password = Settings.getDefault().getSession("PASSWORD");
         try (
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-            oos.writeObject(this.fileList);
+            oos.writeObject(this.fileList.toArray(new CipherFile[0]));
             byte[] plainText = baos.toByteArray();
             CryptoService.getDefault().saveEncrypted(plainText, indexFile, password);
         }
@@ -170,7 +172,8 @@ public class Storage {
                 ByteArrayInputStream bais = new ByteArrayInputStream(indexBuffer);
                 ObjectInputStream ois = new ObjectInputStream(bais)) {
             this.fileList.clear();
-            this.fileList.addAll((ArrayList<EncryptedFile>) ois.readObject());
+            CipherFile[] list = (CipherFile[]) ois.readObject();
+            this.fileList.addAll(Arrays.asList(list));
         }
     }
 

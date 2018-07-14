@@ -62,7 +62,7 @@ public class Program {
             // Check the folder
             try {
                 Storage.getDefault().checkFolder();
-            } catch (IOException | GeneralSecurityException ex) {
+            } catch (IOException | GeneralSecurityException | ClassNotFoundException ex) {
                 Logger.getLogger(Program.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showMessageDialog(null, "Failed to initialize work directory.\n\n" + ex.getMessage() + "\t");
                 return;

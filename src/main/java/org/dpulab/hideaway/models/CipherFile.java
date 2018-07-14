@@ -15,7 +15,7 @@ import java.util.Date;
  *
  * @author dipu
  */
-public class EncryptedFile implements Externalizable {
+public class CipherFile implements Externalizable {
     
     private String filePath;
     private long fileSize;
@@ -24,7 +24,7 @@ public class EncryptedFile implements Externalizable {
     private Date createdAt;
     private byte[] checkSum;
     
-    public EncryptedFile() {
+    public CipherFile() {
     }
 
     @Override
