@@ -24,7 +24,9 @@ public class Playground {
 
     void play() {
         System.out.println("Start playing with various things...");
-        AESEncryption();
+        // AESEncryption();
+        generateKeysPair();
+        
     }
     
     void AESEncryption() {
@@ -64,6 +66,9 @@ public class Playground {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+    
+    void generateKeysPair() {
         
     }
 }

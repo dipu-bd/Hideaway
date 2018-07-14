@@ -14,7 +14,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import org.dpulab.hideaway.utils.Settings;
-import org.dpulab.hideaway.utils.Storage;
+import org.dpulab.hideaway.utils.CipherIO;
 import org.dpulab.hideaway.view.Dashboard;
 import org.dpulab.hideaway.view.Login;
 
@@ -61,7 +61,7 @@ public class Program {
             
             // Check the folder
             try {
-                Storage.getDefault().checkFolder();
+                CipherIO.getDefault().checkFolder();
             } catch (IOException | GeneralSecurityException | ClassNotFoundException ex) {
                 Logger.getLogger(Program.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showMessageDialog(null, "Failed to initialize work directory.\n\n" + ex.getMessage() + "\t");

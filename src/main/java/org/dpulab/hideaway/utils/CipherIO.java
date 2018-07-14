@@ -28,22 +28,22 @@ import org.dpulab.hideaway.view.PasswordInput;
  *
  * @author dipu
  */
-public class Storage {
+public class CipherIO {
 
     //<editor-fold defaultstate="collapsed" desc=" Get instance methods ">
-    private static final HashMap<String, Storage> STORAGE = new HashMap<>();
+    private static final HashMap<String, CipherIO> STORAGE = new HashMap<>();
 
-    public static Storage getFor(String folder) {
-        if (!Storage.STORAGE.containsKey(folder)) {
+    public static CipherIO getFor(String folder) {
+        if (!CipherIO.STORAGE.containsKey(folder)) {
             // attach a new storage class with the folder
-            Storage.STORAGE.put(folder, new Storage(folder));
+            CipherIO.STORAGE.put(folder, new CipherIO(folder));
         }
-        return Storage.STORAGE.get(folder);
+        return CipherIO.STORAGE.get(folder);
     }
 
-    public static Storage getDefault() {
+    public static CipherIO getDefault() {
         String folder = Settings.getDefault().get("WORK_DIRECTORY");
-        return Storage.getFor(folder);
+        return CipherIO.getFor(folder);
     }
     //</editor-fold>
 
@@ -51,7 +51,7 @@ public class Storage {
     private final ArrayList<CipherFile> fileList;
     private final HashMap<String, String> publicKeys;
 
-    private Storage(String folder) {
+    private CipherIO(String folder) {
         this.workDir = new File(folder).toPath();
         this.fileList = new ArrayList<>();
         this.publicKeys = new HashMap<>();
@@ -59,7 +59,7 @@ public class Storage {
 
     // TODO: Save status somewhere and display them
     private void updateStatus(Level level, String status) {
-        Logger.getLogger(Storage.class.getName()).log(level, status);
+        Logger.getLogger(CipherIO.class.getName()).log(level, status);
     }
 
     public File getDataFolder() {
@@ -146,6 +146,7 @@ public class Storage {
             String publicKey = FileUtils.readFileToString(keyFile);
             publicKeys.put(name, publicKey);
         }
+        this.updateStatus(Level.INFO, String.format("Public keys are loaded. %d are available.", this.publicKeys.size()));
     }
 
     public void backupIndex() throws GeneralSecurityException, IOException, ClassNotFoundException {
@@ -158,6 +159,7 @@ public class Storage {
             byte[] plainText = baos.toByteArray();
             CryptoService.getDefault().saveEncrypted(plainText, indexFile, password);
         }
+        this.updateStatus(Level.INFO, String.format("Index entry saved. %s files", this.fileList.size()));
     }
 
     public void restoreIndex() throws GeneralSecurityException, IOException, ClassNotFoundException {
@@ -171,6 +173,7 @@ public class Storage {
             CipherFile[] list = (CipherFile[]) ois.readObject();
             this.fileList.addAll(Arrays.asList(list));
         }
+        this.updateStatus(Level.INFO, String.format("Index entry loaded. %d files", this.fileList.size()));
     }
 
     // TODO: Verify file list
