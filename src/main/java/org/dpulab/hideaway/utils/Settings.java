@@ -27,7 +27,7 @@ public class Settings {
     private final Preferences preferences;
     private final HashMap<String, Object> session;
     
-    public Settings() {
+    private Settings() {
         String pathName = "org/dpulab/hideaway/v1";
         this.preferences = Preferences.userRoot().node(pathName);
         this.session = new HashMap<>();

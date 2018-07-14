@@ -56,7 +56,7 @@ public class Login extends javax.swing.JDialog {
             Settings.getDefault().set("WORK_DIRECTORY", workFolder);
             Settings.getDefault().setSession("PASSWORD", password);
             this.dispose();
-        }
+        }       
     }
 
     /**

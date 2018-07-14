@@ -22,6 +22,10 @@ public class FileIO {
         return FileIO.INSTANCE;
     }
     
+    private FileIO() {
+        // hides FileIO constructor
+    }
+    
     /**
      * Displays a file chooser dialog to select a folder.
      * It keeps the last visited folder path in memory.
@@ -43,4 +47,6 @@ public class FileIO {
         }
         return null;
     }
+    
+    
 }
