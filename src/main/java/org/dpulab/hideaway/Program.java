@@ -49,7 +49,7 @@ public class Program {
         }
         //</editor-fold>
                 
-        // new Playground().play();
+         // new Playground().play();
         
         /* Create and display the form */
         SwingUtilities.invokeLater(() -> { start(); });                
@@ -70,7 +70,7 @@ public class Program {
         // Check the folder
         try {
             CipherIO.getDefault().checkFolder();
-        } catch (IOException | GeneralSecurityException | ClassNotFoundException ex) {
+        } catch (IOException | GeneralSecurityException ex) {
             Reporter.put(Program.class, ex);
             Reporter.dialog(Level.SEVERE, "Failed to configure work directory.\n\n[ %s ]  ", ex.getMessage());
             System.exit(1);
