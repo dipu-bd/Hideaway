@@ -5,20 +5,29 @@
  */
 package org.dpulab.hideaway.utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.FileSystemException;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
+import java.security.Key;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.spec.AlgorithmParameterSpec;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
-import org.apache.commons.io.FileUtils;
+import java.util.Properties;
+import org.apache.commons.crypto.stream.CryptoInputStream;
+import org.apache.commons.crypto.stream.CryptoOutputStream;
 import org.dpulab.hideaway.models.CipherFile;
 import org.dpulab.hideaway.view.PasswordInput;
 
@@ -28,10 +37,14 @@ import org.dpulab.hideaway.view.PasswordInput;
  */
 public class CipherIO {
 
+    static final String AES_ALGORITHM = "AES/CBC/PKCS5Padding";
+    static final String INDEX_KEY_ALIAS = "INDEX_PASSWD";
+    static final String INDEX_IV_ALIAS = "INDEX_IvParam";
+
     //<editor-fold defaultstate="collapsed" desc=" Get instance methods ">
     private static final HashMap<String, CipherIO> STORAGE = new HashMap<>();
 
-    public static CipherIO getFor(String folder) {
+    public static CipherIO getFor(String folder) throws KeyStoreException {
         if (!CipherIO.STORAGE.containsKey(folder)) {
             // attach a new storage class with the folder
             CipherIO.STORAGE.put(folder, new CipherIO(folder));
@@ -39,147 +52,210 @@ public class CipherIO {
         return CipherIO.STORAGE.get(folder);
     }
 
-    public static CipherIO getDefault() {
+    public static CipherIO getDefault() throws KeyStoreException {
         String folder = Settings.getDefault().get("WORK_DIRECTORY");
         return CipherIO.getFor(folder);
     }
     //</editor-fold>
 
     private final Path workDir;
+    private final KeyStore keyStore;
     private final ArrayList<CipherFile> fileList;
-    private final HashMap<String, String> publicKeys;
 
-    private CipherIO(String folder) {
+    private final String password;
+    private final String passwordHash;
+
+    private CipherIO(String folder) throws KeyStoreException {
         this.workDir = new File(folder).toPath();
+        this.keyStore = KeyStore.getInstance("PKCS12");
         this.fileList = new ArrayList<>();
-        this.publicKeys = new HashMap<>();
+
+        this.password = Settings.getDefault().getSession("PASSWORD");
+        this.passwordHash = CryptoService.getDefault().getHash(this.password);
     }
 
     public File getDataFolder() {
-        return workDir.resolve("data").toFile();
+        return this.workDir.resolve("data").toFile();
     }
 
-    public File getKeysFolder() {
-        return workDir.resolve("keys").toFile();
+    public File getKeyStoreFile() {
+        return this.workDir.resolve(this.passwordHash + ".ks").toFile();
     }
 
     public File getIndexFile() {
-        String password = Settings.getDefault().getSession("PASSWORD");
-        String passwordHash = CryptoService.getDefault().getHash(password);
-        return workDir.resolve(passwordHash + ".index").toFile();
+        return this.workDir.resolve(this.passwordHash + ".index").toFile();
     }
 
-    public void checkFolder() throws IOException, GeneralSecurityException, ClassNotFoundException {
+    public char[] getKeystorePass() {
+        return this.password.toCharArray();
+    }
+
+    public void checkFolder() throws IOException, GeneralSecurityException {
         // Check the working directory
         File folder = this.workDir.toFile();
         if (!folder.exists()) {
             if (!folder.mkdirs()) {
-                throw new FileSystemException("Failed to create work directory");
-            }
-            if (!folder.canWrite()) {
-                throw new FileSystemException("The work directory do not have write permission");
+                throw new FileSystemException("Failed to create the work directory");
             }
             Reporter.put("Created work directory");
+        } else if (!folder.canWrite()) {
+            throw new FileSystemException("The work directory do not have write permission");
         } else if (!folder.isDirectory()) {
             throw new FileSystemException("The work directory is not a folder");
         }
 
-        // Check the subdirectories and index file
-        File indexFile = this.getIndexFile();
-        if (!indexFile.exists()) {
-            // verify the password
-            if (!this.confirmPassword()) {
-                throw new AccessDeniedException("Retyped password did not match the initial one");
-            }
-            // create new index file
-            indexFile.createNewFile();
-            this.backupIndex();
-            Reporter.put("Index file is created.");
-        }
+        boolean passwordVerified = false;
 
+        // Create data folder if not exists
         File dataFolder = this.getDataFolder();
         if (!dataFolder.exists()) {
-            dataFolder.mkdir();
+            dataFolder.mkdirs();
             Reporter.put("Data folder is created.");
         }
 
-        File keysFolder = this.getKeysFolder();
-        if (!keysFolder.exists()) {
-            keysFolder.mkdir();
-            Reporter.put("Folder for public keys is created.");
+        // Load the keystore
+        File keyStoreFile = this.getKeyStoreFile();
+        if (!keyStoreFile.exists()) {
+            // verify the password
+            this.confirmPassword();
+            passwordVerified = true;
+            // create and save an empty keystore
+            this.keyStore.load(null, this.getKeystorePass());
+            keyStoreFile.getParentFile().mkdirs();
+            this.saveKeystore();
+        } else {
+            this.loadKeystore();
         }
 
-        // Get list of available public keys
-        new Thread(() -> {
-            try {
-                this.loadPublicKeys();
-            } catch (IOException ex) {
-                Reporter.put(CipherIO.class, "Failed to load public keys", ex);
+        // Check the index file
+        File indexFile = this.getIndexFile();
+        if (!indexFile.exists()) {
+            // verify the password
+            if (!passwordVerified) {
+                this.confirmPassword();
+                passwordVerified = true;
             }
-        }).start();
+            // create ans save an empty index
+            indexFile.getParentFile().mkdirs();
+            this.fileList.clear();
+            this.saveIndex();
+        } else {
+            this.loadIndex();
+        }
 
-        // Read index files
-        new Thread(() -> {
-            try {
-                this.restoreIndex();
-            } catch (IOException | ClassNotFoundException | GeneralSecurityException ex) {
-                Reporter.put(CipherIO.class, "Failed to load file index", ex);
-            }
-        }).start();
-
-        // Verify file list
-        new Thread(() -> {
-            this.verifyFileList();
-        }).start();
+        // Verify the index entry
+        this.verifyFileList();
     }
 
-    public boolean confirmPassword() {
-        String password = Settings.getDefault().getSession("PASSWORD");
+    /**
+     * Get the key to encrypt/decrypt the index file.
+     *
+     * @return The saved key or a new key.
+     * @throws KeyStoreException
+     * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
+     * @throws UnrecoverableKeyException
+     */
+    public Key getIndexSecret() throws IOException, GeneralSecurityException {
+        if (!this.keyStore.containsAlias(INDEX_KEY_ALIAS)) {
+            Key key = CryptoService.getDefault().generateKey(this.password);
+            this.keyStore.setKeyEntry(INDEX_KEY_ALIAS, key, this.getKeystorePass(), null);
+        }
+        Key key = this.keyStore.getKey(INDEX_KEY_ALIAS, this.getKeystorePass());
+        return key;
+    }
+
+    /**
+     * Gets a collection of default system properties.
+     *
+     * @return
+     */
+    public Properties defaultProperties() {
+        return org.apache.commons.crypto.utils.Utils.getDefaultProperties();
+    }
+
+    /**
+     * Verify current password by asking it again.
+     *
+     * @throws java.nio.file.AccessDeniedException
+     */
+    public void confirmPassword() throws AccessDeniedException {
         PasswordInput passwordInput = new PasswordInput(null);
         passwordInput.setVisible(true);
         String verifyPassword = passwordInput.getPassword();
         passwordInput.dispose();
-        return password.equals(verifyPassword);
-    }
-
-    public void loadPublicKeys() throws IOException {
-        File keysFolder = this.getKeysFolder();
-        for (File keyFile : keysFolder.listFiles()) {
-            if (!keyFile.isFile() || !keyFile.canRead()) {
-                continue;
-            }
-            String name = keyFile.getName();
-            String publicKey = FileUtils.readFileToString(keyFile);
-            publicKeys.put(name, publicKey);
+        if (!this.password.equals(verifyPassword)) {
+            throw new AccessDeniedException("Retyped password did not match the initial one");
         }
-        Reporter.format("Public keys are loaded. %d are available.", this.publicKeys.size());
     }
 
-    public void backupIndex() throws GeneralSecurityException, IOException, ClassNotFoundException {
-        File indexFile = this.getIndexFile();
-        String password = Settings.getDefault().getSession("PASSWORD");
-        try (
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-            oos.writeObject(this.fileList.toArray(new CipherFile[0]));
-            byte[] plainText = baos.toByteArray();
-            CryptoService.getDefault().saveEncrypted(plainText, indexFile, password);
+    /**
+     * Loads the current key-store from file.
+     *
+     * @throws FileNotFoundException
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     * @throws CertificateException
+     * @throws java.security.KeyStoreException
+     */
+    public void loadKeystore() throws IOException, GeneralSecurityException {
+        File keyStoreFile = this.getKeyStoreFile();
+        try (FileInputStream fis = new FileInputStream(keyStoreFile)) {
+            this.keyStore.load(fis, this.getKeystorePass());
         }
-        Reporter.format("Index entry saved. %s files", this.fileList.size());
+        Reporter.format("Keystore loaded with %d keys.", this.keyStore.size());
     }
 
-    public void restoreIndex() throws GeneralSecurityException, IOException, ClassNotFoundException {
+    /**
+     * Store the current key-store to file.
+     *
+     * @throws FileNotFoundException
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     * @throws CertificateException
+     * @throws java.security.KeyStoreException
+     */
+    public void saveKeystore() throws IOException, GeneralSecurityException {
+        File keyStoreFile = this.getKeyStoreFile();
+        try (FileOutputStream fos = new FileOutputStream(keyStoreFile)) {
+            this.keyStore.store(fos, this.getKeystorePass());
+        }
+        Reporter.format("Keystore saved with %s keys.", this.keyStore.size());
+    }
+
+    public void loadIndex() throws IOException, GeneralSecurityException {
         File indexFile = this.getIndexFile();
-        String password = Settings.getDefault().getSession("PASSWORD");
-        byte[] indexBuffer = CryptoService.getDefault().loadDecrypted(indexFile, password);
-        try (
-                ByteArrayInputStream bais = new ByteArrayInputStream(indexBuffer);
-                ObjectInputStream ois = new ObjectInputStream(bais)) {
+        Key key = this.getIndexSecret();
+        Properties props = this.defaultProperties();
+        AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
+
+        try (FileInputStream fis = new FileInputStream(indexFile);
+                CryptoInputStream cos = new CryptoInputStream(AES_ALGORITHM, props, fis, key, params)) {
+            byte[] total = new byte[4];
+            cos.read(total);
             this.fileList.clear();
-            CipherFile[] list = (CipherFile[]) ois.readObject();
-            this.fileList.addAll(Arrays.asList(list));
+            for (int i = 0; i < CryptoService.fromByteArray(total); ++i) {
+                CipherFile file = CipherFile.fromStream(cos);
+                this.fileList.add(file);
+            }
         }
         Reporter.format("Index entry loaded. %d files", this.fileList.size());
+    }
+
+    public void saveIndex() throws IOException, GeneralSecurityException {
+        File indexFile = this.getIndexFile();
+        Key key = this.getIndexSecret();
+        Properties props = this.defaultProperties();
+        AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
+
+        try (FileOutputStream fos = new FileOutputStream(indexFile);
+                CryptoOutputStream cos = new CryptoOutputStream(AES_ALGORITHM, new Properties(), fos, key, params)) {
+            cos.write(CryptoService.toByteArray(this.fileList.size()));
+            for (CipherFile cipherFile : this.fileList) {
+                cipherFile.writeBytes(cos);
+            }
+        }
+        Reporter.format("Index entry saved. Total files: %s", this.fileList.size());
     }
 
     // TODO: Verify file list
