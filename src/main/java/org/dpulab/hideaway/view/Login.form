@@ -113,19 +113,16 @@
               <Group type="102" alignment="1" attributes="0">
                   <EmptySpace min="-2" pref="25" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
+                      <Component id="selectFolderHintLabel" pref="500" max="32767" attributes="0"/>
                       <Component id="passwordInput" max="32767" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="selectedFolderInput" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="browseButton" min="-2" pref="100" max="-2" attributes="0"/>
                       </Group>
-                      <Group type="102" alignment="0" attributes="0">
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="passwordInputLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="selectFolderInputLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                      </Group>
+                      <Component id="passwordInputHintLabel" alignment="0" max="32767" attributes="0"/>
+                      <Component id="passwordInputLabel" max="32767" attributes="0"/>
+                      <Component id="selectFolderInputLabel" alignment="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" pref="25" max="-2" attributes="0"/>
               </Group>
@@ -141,10 +138,14 @@
                       <Component id="selectedFolderInput" alignment="3" min="-2" pref="36" max="-2" attributes="0"/>
                       <Component id="browseButton" alignment="3" min="-2" pref="36" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace min="-2" pref="29" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
+                  <Component id="selectFolderHintLabel" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="passwordInputLabel" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="passwordInput" min="-2" pref="36" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
+                  <Component id="passwordInputHintLabel" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="25" max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -185,6 +186,14 @@
             <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="selectedFolderInputMouseClicked"/>
           </Events>
         </Component>
+        <Component class="javax.swing.JLabel" name="selectFolderHintLabel">
+          <Properties>
+            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+              <Color blue="66" green="66" red="66" type="rgb"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="The folder to store encrypted files. You can select a completely new folder."/>
+          </Properties>
+        </Component>
         <Component class="javax.swing.JLabel" name="passwordInputLabel">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
@@ -203,6 +212,14 @@
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="passwordInputActionPerformed"/>
           </Events>
+        </Component>
+        <Component class="javax.swing.JLabel" name="passwordInputHintLabel">
+          <Properties>
+            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+              <Color blue="66" green="66" red="66" type="rgb"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Do not loose it. Otherwise, access to your files will be lost permanently."/>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>
