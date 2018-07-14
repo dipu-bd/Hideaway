@@ -28,6 +28,8 @@ public class Dashboard extends javax.swing.JFrame {
     private void initComponents() {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Hideaway");
+        setName("hideawayDashboard"); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -39,6 +41,8 @@ public class Dashboard extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 600, Short.MAX_VALUE)
         );
+
+        getAccessibleContext().setAccessibleDescription("Hideaway - Secure yourself with confidence");
 
         pack();
         setLocationRelativeTo(null);

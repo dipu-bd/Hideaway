@@ -45,6 +45,7 @@ public class PasswordInput extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Verify Password");
         setModalityType(java.awt.Dialog.ModalityType.APPLICATION_MODAL);
+        setName("passwordConfirmDialog"); // NOI18N
 
         frameHeaderPanel.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(0, 204, 204)));
 
