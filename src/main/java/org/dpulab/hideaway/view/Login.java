@@ -7,6 +7,7 @@ package org.dpulab.hideaway.view;
 
 import java.io.File;
 import javax.swing.JFileChooser;
+import org.dpulab.hideaway.utils.FileIO;
 import org.dpulab.hideaway.utils.Settings;
 
 /**
@@ -23,16 +24,8 @@ public class Login extends javax.swing.JFrame {
     }
     
     private void selectWorkFolder() {
-        String lastDirectory = Settings.getDefault().get("LAST_DIRECTORY");
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(new java.io.File(lastDirectory));
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int returnVal = fileChooser.showSaveDialog(this);
-        if(returnVal == JFileChooser.APPROVE_OPTION) {
-            File workFolder = fileChooser.getSelectedFile();
-            Settings.getDefault().set("LAST_DIRECTORY", workFolder.getParent());
-            this.selectedFolderInput.setText(workFolder.getAbsolutePath());
-        }
+        String folder = FileIO.getDefault().chooseFolder(this);
+        this.selectedFolderInput.setText(folder);
     }
     
     private void initializeApp() {
