@@ -66,14 +66,12 @@ public class CryptoService {
      * @throws UnsupportedEncodingException
      */
     public static byte[] getKeyBlock(String password, int blockSize) throws UnsupportedEncodingException {
-        int sign = 1;
-        while (password.length() < blockSize) {
-            int rotc = sign * password.length() / 4;
-            String temp = StringUtils.rotate(password, rotc);
-            password = StringUtils.reverse(temp.concat(password));
-            sign *= -1;
+        StringBuilder sb = new StringBuilder();
+        while(sb.length() < blockSize) {
+            sb.append(password);
+            sb.reverse();
         }
-        byte[] bytes = password.getBytes(Settings.DEFAULT_CHARSET);
+        byte[] bytes = sb.toString().getBytes(Settings.DEFAULT_CHARSET);
         return Arrays.copyOf(bytes, blockSize);
     }
 
