@@ -46,7 +46,9 @@ public class CryptoService {
         String hash = text;
         try {
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-            sha256.update(text.getBytes(Settings.CHAR_ENCODING));
+            sha256.update(text.getBytes(Settings.DEFAULT_CHARSET));
+            sha256.update(StringUtils.reverse(Settings.DEFAULT_CHARSET).getBytes(Settings.DEFAULT_CHARSET));
+            sha256.update(StringUtils.rotate(text, text.length() / 4).getBytes(Settings.DEFAULT_CHARSET));
             byte[] digest = sha256.digest();
             hash = Base64.getEncoder().encodeToString(digest);
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
@@ -71,7 +73,7 @@ public class CryptoService {
             password = StringUtils.reverse(temp.concat(password));
             sign *= -1;
         }
-        byte[] bytes = password.getBytes(Settings.CHAR_ENCODING);
+        byte[] bytes = password.getBytes(Settings.DEFAULT_CHARSET);
         return Arrays.copyOf(bytes, blockSize);
     }
 
@@ -112,7 +114,7 @@ public class CryptoService {
      */
     public Key generateKey(String password) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         int keyBitSize = 256;
-        byte[] seed = password.getBytes(Settings.CHAR_ENCODING);
+        byte[] seed = password.getBytes(Settings.DEFAULT_CHARSET);
         SecureRandom secureRandom = new SecureRandom(seed);
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
 
