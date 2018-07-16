@@ -37,20 +37,24 @@ public class CryptoService {
     }
 
     /**
-     * Get the hash of given text using SHA-256 algorithm.
+     * Get the hash of given text using SHA-1 algorithm.
      *
      * @param text The input text.
      * @return The hash of the text.
      */
-    public String getHash(final String text) {
+    public String getHash(String text) {
         String hash = text;
         try {
-            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-            sha256.update(text.getBytes(Settings.DEFAULT_CHARSET));
-            sha256.update(StringUtils.reverse(Settings.DEFAULT_CHARSET).getBytes(Settings.DEFAULT_CHARSET));
-            sha256.update(StringUtils.rotate(text, text.length() / 4).getBytes(Settings.DEFAULT_CHARSET));
-            byte[] digest = sha256.digest();
-            hash = Base64.getEncoder().encodeToString(digest);
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
+            text = StringUtils.swapCase(text);
+            digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
+            text = StringUtils.rotate(text, text.length() / 3);
+            digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
+            text = StringUtils.reverse(text);
+            digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
+            hash = Base64.getEncoder().encodeToString(digest.digest());
+            hash = hash.replace('/', '-');
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
             Logger.getLogger(CryptoService.class.getName()).log(Level.SEVERE, null, ex);
         }

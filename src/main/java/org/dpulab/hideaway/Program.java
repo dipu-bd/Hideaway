@@ -10,7 +10,6 @@ import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import org.dpulab.hideaway.utils.Settings;
@@ -70,7 +69,7 @@ public class Program {
         // Check the folder
         try {
             CipherIO.getDefault().checkFolder();
-        } catch (IOException | GeneralSecurityException ex) {
+        } catch (IOException | GeneralSecurityException | ClassNotFoundException ex) {
             Reporter.put(Program.class, ex);
             Reporter.dialog(Level.SEVERE, "Failed to configure work directory.\n\n[ %s ]  ", ex.getMessage());
             System.exit(1);
