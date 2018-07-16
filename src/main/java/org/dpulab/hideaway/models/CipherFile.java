@@ -13,93 +13,59 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  *
  * @author dipu
  */
-public class CipherFile implements Serializable {
-    
+public class CipherFile extends CipherDocument implements Serializable {
+
     private static final byte VERSION = 1;
-    
+
     /*------------------------------------------------------------------------*\
     |                             STATIC METHODS                               |   
     \*------------------------------------------------------------------------*/
-    
     /**
      * Reads an instance of this class from an input stream.
+     *
      * @param in The stream to read from.
      * @return An instance of this class.
-     * @throws IOException 
+     * @throws IOException
      */
     public static CipherFile fromStream(InputStream in) throws IOException {
         return new CipherFile(in);
     }
-    
+
     /**
      * Converts byte array to an instance of this class.
+     *
      * @param data The array of bytes representing the instance.
      * @return An instance of this class.
-     * @throws IOException 
+     * @throws IOException
      */
     public static CipherFile fromBytes(byte[] data) throws IOException {
         try (ByteArrayInputStream bais = new ByteArrayInputStream(data)) {
             return new CipherFile(bais);
         }
     }
-    
+
     /*------------------------------------------------------------------------*\
     |                          MAIN FILE CONTENT                               |   
     \*------------------------------------------------------------------------*/
-    
-    private final String filePath;
-    private final long fileSize;
-    private final String publicKey;
-    private final Date modfiedAt;
-    private final Date createdAt;
-    private final byte[] signature;
-    
     private CipherFile(InputStream in) throws IOException {
         int version = in.read();
-        try (DataInputStream dis = new DataInputStream(in)) {
-            switch(version) {
-                case 1:
-                    this.fileSize = dis.readLong();
-                    this.modfiedAt = new Date(dis.readLong());
-                    this.createdAt = new Date(dis.readLong());
-                    this.filePath = dis.readUTF();
-                    this.publicKey = dis.readUTF();
-                    int signLength = dis.readInt();
-                    this.signature = new byte[signLength];
-                    dis.read(this.signature);
-                    break;
-                default:
-                    throw new IOException("Unsupported version");
-            }
-        }   
-    }
-    
-    /**
-     * Writes the current instance to an output stream.
-     * @param out The output stream to write.
-     * @throws IOException 
-     */
-    public void writeBytes(OutputStream out) throws IOException {
-        out.write(VERSION);
-        try (DataOutputStream dos = new DataOutputStream(out)) {
-            dos.writeLong(this.getFileSize());
-            dos.writeLong(this.getModfiedAt().getTime());
-            dos.writeLong(this.getCreatedAt().getTime());
-            dos.writeUTF(this.getFilePath());
-            dos.writeUTF(this.getPublicKey());
-            dos.writeInt(this.getCheckSum().length);
-            dos.write(this.getCheckSum());
+        switch (version) {
+            case 1:
+                this.readBytesV1(in);
+                break;
+            default:
+                throw new IOException("Unsupported version");
         }
     }
 
     /**
      * Converts this instance into an array of bytes.
+     *
      * @return The bytes representing this instance.
      * @throws IOException
      */
@@ -111,45 +77,54 @@ public class CipherFile implements Serializable {
     }
 
     /**
-     * @return the filePath
+     * Writes the current instance to an output stream.
+     *
+     * @param out The output stream to write.
+     * @throws IOException
      */
-    public String getFilePath() {
-        return filePath;
+    public void writeBytes(OutputStream out) throws IOException {
+        out.write(VERSION);
+        try (DataOutputStream dos = new DataOutputStream(out)) {
+            dos.writeLong(this.getFileSize());
+            dos.writeLong(this.getModfiedAt().getTime());
+            dos.writeLong(this.getCreatedAt().getTime());
+            dos.writeUTF(this.getFilePath());
+            dos.writeUTF(this.getPublicKey());
+            dos.writeInt(this.getSignature().length);
+            dos.write(this.getSignature());
+        }
     }
-
+    
     /**
-     * @return the fileSize
+     * Reads the data of current instance from an input stream. [VERSION = 1]
+     * @param in Input stream
+     * @throws IOException 
      */
-    public long getFileSize() {
-        return fileSize;
+    protected final void readBytesV1(InputStream in) throws IOException {
+        try (DataInputStream dis = new DataInputStream(in)) {
+            this.setFileSize(dis.readLong());
+            this.setModfiedAt(dis.readLong());
+            this.setCreatedAt(dis.readLong());
+            this.setFilePath(dis.readUTF());
+            this.setPublicKey(dis.readUTF());
+            int signLength = dis.readInt();
+            byte[] signature = new byte[signLength];
+            this.setSignature(signature);
+        }
+    }   
+
+    @Override
+    public boolean isFile() {
+        return true;
     }
 
-    /**
-     * @return the publicKey
-     */
-    public String getPublicKey() {
-        return publicKey;
+    @Override
+    public boolean isFolder() {
+        return false;
     }
 
-    /**
-     * @return the modfiedAt
-     */
-    public Date getModfiedAt() {
-        return modfiedAt;
+    @Override
+    public boolean exists() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
-    /**
-     * @return the createdAt
-     */
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    /**
-     * @return the signature
-     */
-    public byte[] getCheckSum() {
-        return signature;
-    }
-
 }

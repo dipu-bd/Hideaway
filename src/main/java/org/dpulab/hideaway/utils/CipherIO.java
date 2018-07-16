@@ -28,6 +28,7 @@ import java.util.Properties;
 import org.apache.commons.crypto.stream.CryptoInputStream;
 import org.apache.commons.crypto.stream.CryptoOutputStream;
 import org.dpulab.hideaway.models.CipherFile;
+import org.dpulab.hideaway.models.CipherFolder;
 import org.dpulab.hideaway.view.PasswordInput;
 
 /**
@@ -55,6 +56,7 @@ public class CipherIO {
 
     private final Path workDir;
     private final KeyStore keyStore;
+    private final CipherFolder rootFolder;
     private final ArrayList<CipherFile> fileList;
 
     private final String password;
@@ -64,7 +66,8 @@ public class CipherIO {
         this.workDir = new File(folder).toPath();
         this.keyStore = KeyStore.getInstance(Settings.STORE_TYPE);
         this.fileList = new ArrayList<>();
-
+        this.rootFolder = new CipherFolder();
+        
         this.password = Settings.getDefault().getSession(Settings.PASSWORD);
         this.passwordHash = CryptoService.getDefault().getHash(this.password);
     }
@@ -254,6 +257,7 @@ public class CipherIO {
 
     // TODO: Verify file list
     public void verifyFileList() {
+        
     }
-
+        
 }
