@@ -107,4 +107,8 @@ public class Settings {
     public void setSession(String name, Object value) {
         this.session.put(name, value);
     }
+
+    public void flush() throws BackingStoreException {
+        this.preferences.flush();
+    }
 }

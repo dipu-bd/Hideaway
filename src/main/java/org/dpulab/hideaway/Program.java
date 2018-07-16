@@ -1,15 +1,31 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2018 dipu
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.dpulab.hideaway;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.KeyStoreException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import org.dpulab.hideaway.utils.Settings;
@@ -78,5 +94,22 @@ public class Program {
         // If a password is given show dashboard
         Dashboard dashboard = new Dashboard();
         dashboard.setVisible(true);
+        
+        dashboard.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                Program.beforeExit();
+            }
+        });
+    }
+    
+    public static void beforeExit() {
+        try {
+            Settings.getDefault().flush();
+            CipherIO.getDefault().saveIndex();
+            CipherIO.getDefault().saveKeystore();
+        } catch (IOException | GeneralSecurityException | BackingStoreException ex) {
+            Reporter.put(ex);
+        }
     }
 }
