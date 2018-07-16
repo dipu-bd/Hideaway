@@ -16,14 +16,10 @@
  */
 package org.dpulab.hideaway.models;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -307,33 +303,5 @@ public final class IndexEntry implements Externalizable {
         entry.setParentEntry(this);
         this.children.put(name, entry);
         return entry;
-    }
-
-    /**
-     * Converts this instance into an array of bytes.
-     *
-     * @return The bytes representing this instance.
-     * @throws IOException
-     */
-    public byte[] toBytes() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-            oos.writeObject(this);
-        }
-        baos.close();
-        return baos.toByteArray();
-    }
-
-    public void loadBytes(byte[] data) throws IOException, ClassNotFoundException {
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(data);
-                ObjectInputStream ois = new ObjectInputStream(bais)) {
-            IndexEntry entry = (IndexEntry) ois.readObject();
-            this.name = entry.getName();
-            this.checksum = entry.checksum;
-            this.fileSize = entry.fileSize;
-            this.privateKeyAlias = entry.privateKeyAlias;
-            this.children.clear();
-            this.children.putAll(entry.children);
-        }
     }
 }

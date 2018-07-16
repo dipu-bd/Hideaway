@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.Properties;
 import org.apache.commons.crypto.stream.CryptoInputStream;
 import org.apache.commons.crypto.stream.CryptoOutputStream;
-import org.apache.commons.io.FileUtils;
 import org.dpulab.hideaway.models.IndexEntry;
 import org.dpulab.hideaway.view.PasswordInput;
 
@@ -234,18 +233,13 @@ public class CipherIO {
         Key key = this.getIndexSecret();
         Properties props = new Properties();
         AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
-        System.out.println(Base64.getEncoder().encodeToString(key.getEncoded()));
 
         try (FileInputStream fis = new FileInputStream(indexFile);
-                CryptoInputStream cis = new CryptoInputStream(Settings.AES_ALGORITHM, props, fis, key, params)) {
-            byte[] data = new byte[(int) indexFile.length()];
-            cis.read(data);
-            rootEntry.loadBytes(data);
+                CryptoInputStream cis = new CryptoInputStream(Settings.AES_ALGORITHM, props, fis, key, params);
+                ObjectInputStream ois = new ObjectInputStream(cis)) {
+            rootEntry = (IndexEntry) ois.readObject();
         }
         Reporter.format("Index entry loaded. Total file size: %s", rootEntry.getFileSizeReadable());
-        rootEntry.getChildren().forEach(x -> {
-            System.out.println(x.getName());
-        });
     }
     
     /**
@@ -258,11 +252,14 @@ public class CipherIO {
         Key key = this.getIndexSecret();
         Properties props = new Properties();
         AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
-        System.out.println(Base64.getEncoder().encodeToString(key.getEncoded()));
-        
+                
         try (FileOutputStream fos = new FileOutputStream(indexFile);
-                CryptoOutputStream cos = new CryptoOutputStream(Settings.AES_ALGORITHM, props, fos, key, params)) {
-            cos.write(rootEntry.toBytes());
+                CryptoOutputStream cos = new CryptoOutputStream(Settings.AES_ALGORITHM, props, fos, key, params);
+                ObjectOutputStream oos = new ObjectOutputStream(cos)) {
+            oos.writeObject(rootEntry);
+        } catch (Exception ex) {
+            indexFile.delete();
+            throw ex;
         }
         Reporter.format("Index entry saved. Total file size: %s", rootEntry.getFileSizeReadable());
     }
