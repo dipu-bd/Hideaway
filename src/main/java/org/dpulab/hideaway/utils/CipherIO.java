@@ -33,9 +33,9 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.spec.AlgorithmParameterSpec;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Properties;
 import org.apache.commons.crypto.stream.CryptoInputStream;
@@ -78,7 +78,7 @@ public class CipherIO {
     private CipherIO(String folder) throws KeyStoreException {
         this.workDir = new File(folder).toPath();
         this.keyStore = KeyStore.getInstance(Settings.STORE_TYPE);
-        this.rootEntry = new IndexEntry();
+        this.rootEntry = IndexEntry.getRoot();
         
         this.password = Settings.getDefault().getSession(Settings.PASSWORD);
         this.passwordHash = CryptoService.getDefault().getHash(this.password);
@@ -104,7 +104,13 @@ public class CipherIO {
         return this.password.toCharArray();
     }
 
-    public void checkFolder() throws IOException, GeneralSecurityException, ClassNotFoundException {
+    /**
+     * Checks the folder
+     * @throws IOException
+     * @throws GeneralSecurityException
+     * @throws ClassNotFoundException 
+     */
+    public void checkFolder() throws IOException, GeneralSecurityException, ClassNotFoundException  {
         // Check the working directory
         File folder = this.workDir.toFile();
         if (!folder.exists()) {
@@ -160,6 +166,7 @@ public class CipherIO {
      * Get the key to encrypt/decrypt the index file.
      *
      * @return The saved key or a new key.
+     * @throws IOException
      * @throws KeyStoreException
      * @throws NoSuchAlgorithmException
      * @throws UnsupportedEncodingException
@@ -168,11 +175,36 @@ public class CipherIO {
     public Key getIndexSecret() throws IOException, GeneralSecurityException {
         if (!this.keyStore.containsAlias(Settings.INDEX_KEY_ALIAS)) {
             Key key = CryptoService.getDefault().generateKey(this.password);
-            this.keyStore.setKeyEntry(Settings.INDEX_KEY_ALIAS, key, this.getKeystorePass(), null);
-            this.saveKeystore();
+            this.setSecretKey(Settings.INDEX_KEY_ALIAS, key, null);
         }
         Key key = this.keyStore.getKey(Settings.INDEX_KEY_ALIAS, this.getKeystorePass());
         return key;
+    }
+    
+    /**
+     * Gets a secret key by its alias.
+     * @param alias
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws UnrecoverableKeyException
+     * @throws KeyStoreException 
+     */
+    public Key getSecretKey(String alias) throws GeneralSecurityException {
+        return this.keyStore.getKey(alias, this.getKeystorePass());
+    }
+    
+    /**
+     * Sets a secret key by its alias. Certificate chain can be null unless it is a RSA Key pair.
+     * @param alias
+     * @param key
+     * @param chain
+     * @throws GeneralSecurityException 
+     * @throws IOException
+     * @throws UnsupportedEncodingException
+     */
+    public void setSecretKey(String alias, Key key, Certificate[] chain) throws GeneralSecurityException, IOException {
+        this.keyStore.setKeyEntry(alias, key, this.getKeystorePass(), chain);
+        this.saveKeystore();
     }
 
     /**
@@ -237,9 +269,9 @@ public class CipherIO {
      * Loads the root index entry from the index file
      * @throws IOException
      * @throws GeneralSecurityException 
-     * @throws java.lang.ClassNotFoundException 
+     * @throws java.lang.UnsupportedClassVersionError 
      */
-    public void loadIndex() throws IOException, GeneralSecurityException, ClassNotFoundException {
+    public void loadIndex() throws IOException, GeneralSecurityException, UnsupportedClassVersionError {
         File indexFile = this.getIndexFile();
         Key key = this.getIndexSecret();
         Properties props = new Properties();
@@ -248,9 +280,13 @@ public class CipherIO {
         try (FileInputStream fis = new FileInputStream(indexFile);
                 CryptoInputStream cis = new CryptoInputStream(Settings.AES_ALGORITHM, props, fis, key, params);
                 ObjectInputStream ois = new ObjectInputStream(cis)) {
-            rootEntry = (IndexEntry) ois.readObject();
+            rootEntry = IndexEntry.readExternal(ois);
         }
         Reporter.format("Index entry loaded. Total file size: %s", rootEntry.getFileSizeReadable());
+        
+        rootEntry.getChildren().forEach(child -> {
+            System.out.println(child.getFileName());
+        });
     }
     
     /**
@@ -263,11 +299,14 @@ public class CipherIO {
         Key key = this.getIndexSecret();
         Properties props = new Properties();
         AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
+        
+        rootEntry.createNewFolder("Foo");
+        rootEntry.createNewFolder("Bar");
                 
         try (FileOutputStream fos = new FileOutputStream(indexFile);
                 CryptoOutputStream cos = new CryptoOutputStream(Settings.AES_ALGORITHM, props, fos, key, params);
                 ObjectOutputStream oos = new ObjectOutputStream(cos)) {
-            oos.writeObject(rootEntry);
+            rootEntry.writeExternal(oos);
         } catch (Exception ex) {
             indexFile.delete();
             throw ex;

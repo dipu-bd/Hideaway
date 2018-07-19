@@ -20,6 +20,8 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serializable;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,24 +34,28 @@ import org.dpulab.hideaway.utils.Reporter;
  *
  * @author dipu
  */
-public final class IndexEntry implements Externalizable {
+public class IndexEntry implements Serializable {
 
     public static final String SEPARATOR = "/";
 
     private static final int VERSION = 1;
-
+    
+    public static IndexEntry getRoot() {
+        return new IndexEntry();
+    }
+    
     /*------------------------------------------------------------------------*\
     |                          MAIN FILE CONTENT                               |   
     \*------------------------------------------------------------------------*/
     private IndexEntry parentEntry;
-    private String name = "";
+    private String fileName = "";
     private long fileSize = 0;
     private String checksum = null;
     private String privateKeyAlias = null;
     private final HashMap<String, IndexEntry> children = new HashMap<>();
 
-    public IndexEntry() {
-        // creates a new index entry as root
+    // hide access to new IndexEntry
+    private IndexEntry() {
     }
 
     /**
@@ -58,7 +64,7 @@ public final class IndexEntry implements Externalizable {
      * @param other The entry to clone
      */
     public IndexEntry(IndexEntry other) {
-        this.setName(other.getName());
+        this.setFileName(other.getFileName());
         this.setFileSize(other.getFileSize());
         this.setChecksum(other.getChecksum());
         this.setPrivateKeyAlias(other.getPrivateKeyAlias());
@@ -66,11 +72,10 @@ public final class IndexEntry implements Externalizable {
         this.children.putAll(other.children);
     }
 
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public synchronized void writeExternal(ObjectOutput out) throws IOException {
         out.writeInt(VERSION);
         out.writeBoolean(this.isFile());
-        out.writeUTF(this.name);
+        out.writeUTF(this.fileName);
         if (this.isFile()) {
             out.writeLong(this.fileSize);
             out.writeUTF(this.checksum);
@@ -78,34 +83,35 @@ public final class IndexEntry implements Externalizable {
         } else {
             out.writeInt(this.children.size());
             for (IndexEntry entry : this.children.values()) {
-                out.writeObject(entry);
+                entry.writeExternal(out);
             }
         }
     }
 
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public static IndexEntry readExternal(ObjectInput in) throws IOException, UnsupportedClassVersionError {
         int version = in.readInt();
         if (version == 1) {
+            IndexEntry entry = new IndexEntry();
             boolean file = in.readBoolean();
-            this.name = in.readUTF();
+            entry.setFileName(in.readUTF());
             if (file) {
-                this.fileSize = in.readLong();
-                this.checksum = in.readUTF();
-                this.privateKeyAlias = in.readUTF();
+                entry.setFileSize(in.readLong());
+                entry.setChecksum(in.readUTF());
+                entry.setPrivateKeyAlias(in.readUTF());
             } else {
                 long totalFileSize = 0;
                 int childrenCount = in.readInt();
                 for (int i = 0; i < childrenCount; ++i) {
-                    IndexEntry entry = (IndexEntry) in.readObject();
-                    this.children.put(entry.name, entry);
-                    entry.parentEntry = this;
-                    totalFileSize += entry.fileSize;
+                    IndexEntry child = IndexEntry.readExternal(in);
+                    totalFileSize += child.fileSize;
+                    entry.addChild(child);
                 }
-                this.fileSize = totalFileSize;
+                entry.setFileSize(totalFileSize);
             }
+            return entry;
         } else {
-            Reporter.format(Level.WARNING, "Unsupported version: ", version);
+            //Reporter.format(Level.WARNING, "Unsupported version: ", version);
+            throw new UnsupportedClassVersionError(String.format("Version %d is not supported", version));
         }
     }
 
@@ -116,52 +122,52 @@ public final class IndexEntry implements Externalizable {
     /**
      * @return true if the top folder
      */
-    public boolean isRoot() {
+    public final boolean isRoot() {
         return this.getParentEntry() == null;
     }
 
     /**
      * @return true if this is a file
      */
-    public boolean isFile() {
+    public final boolean isFile() {
         return this.checksum != null;
     }
 
     /**
      * @return true if this is a folder
      */
-    public boolean isDirectory() {
+    public final boolean isDirectory() {
         return this.checksum == null;
     }
 
     /**
      * @return the absolute path
      */
-    public String getPath() {
+    public final String getPath() {
         if (this.isRoot()) {
             return "";
         }
-        return this.getParentEntry().getPath() + SEPARATOR + this.getName();
+        return this.getParentEntry().getPath() + SEPARATOR + this.getFileName();
     }
 
     /**
-     * @return the name
+     * @return the fileName
      */
-    public String getName() {
-        return this.name;
+    public final String getFileName() {
+        return this.fileName;
     }
 
     /**
      * @return the fileSize
      */
-    public long getFileSize() {
+    public final long getFileSize() {
         return this.fileSize;
     }
 
     /**
      * @return the fileSize
      */
-    public String getFileSizeReadable() {
+    public final String getFileSizeReadable() {
         final String[] suffix = {"B", "KB", "MB", "GB", "TB"};
         int p = 0;
         double size = this.fileSize;
@@ -175,66 +181,66 @@ public final class IndexEntry implements Externalizable {
     /**
      * @return the checksum
      */
-    public String getChecksum() {
+    public final String getChecksum() {
         return this.checksum;
     }
 
     /**
      * @return the privateKeyAlias
      */
-    public String getPrivateKeyAlias() {
+    public final String getPrivateKeyAlias() {
         return this.privateKeyAlias;
     }
 
     /**
      * @return the parentEntry
      */
-    public IndexEntry getParentEntry() {
+    public final IndexEntry getParentEntry() {
         return this.parentEntry;
     }
 
     /**
      * @return the children
      */
-    public Collection<IndexEntry> getChildren() {
+    public final Collection<IndexEntry> getChildren() {
         return this.children.values();
     }
-
+    
     /*------------------------------------------------------------------------*\
     |                               SETTERS                                    |   
     \*------------------------------------------------------------------------*/
     /**
-     * @param name the name to set
+     * @param fileName the fileName to set
      */
-    protected void setName(String name) {
-        this.name = name;
+    protected final void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     /**
      * @param fileSize the fileSize to set
      */
-    protected void setFileSize(long fileSize) {
+    protected final void setFileSize(long fileSize) {
         this.fileSize = fileSize;
     }
 
     /**
      * @param checksum the checksum to set
      */
-    protected void setChecksum(String checksum) {
+    protected final void setChecksum(String checksum) {
         this.checksum = checksum;
     }
 
     /**
      * @param privateKeyAlias the privateKeyAlias to set
      */
-    protected void setPrivateKeyAlias(String privateKeyAlias) {
+    protected final void setPrivateKeyAlias(String privateKeyAlias) {
         this.privateKeyAlias = privateKeyAlias;
     }
 
     /**
      * @param parentEntry the parentEntry to set
      */
-    protected void setParentEntry(IndexEntry parentEntry) {
+    protected final void setParentEntry(IndexEntry parentEntry) {
         this.parentEntry = parentEntry;
     }
 
@@ -242,28 +248,50 @@ public final class IndexEntry implements Externalizable {
     |                               METHODS                                    |   
     \*------------------------------------------------------------------------*/
     /**
+     * Gets the CipherFile that this entry represents.
+     * @return a CipherFile instance
+     * @throws java.security.GeneralSecurityException
+     */
+    public final CipherFile getCipherFile() throws GeneralSecurityException {
+        if (this.isFile()) {
+            return new CipherFile(this);
+        }
+        return null;
+    }
+
+    /**
      * @param name
      * @return true if the child exists
      */
-    public IndexEntry getChild(String name) {
+    public final IndexEntry getChild(String name) {
         return this.children.getOrDefault(name, null);
     }
 
     /**
+     * @param entry
+     * @return true if the child exists
+     */
+    public final IndexEntry addChild(IndexEntry entry) {
+        this.children.put(entry.fileName, entry);
+        entry.parentEntry = this;
+        return entry;
+    }
+
+    /**
      * Resolve an index entry by given path. Each of the path value can be
-     * either a valid name, or a path separated by the default separator.
+ either a valid fileName, or a path separated by the default separator.
      *
      * @param path A single path or list of path parts.
      * @return
      */
-    public IndexEntry resolve(String... path) {
+    public final IndexEntry resolve(String... path) {
         ArrayList<String> normalized = new ArrayList<>();
         for (String item : path) {
             String[] parts = StringUtils.split(item, SEPARATOR);
             normalized.addAll(Arrays.asList(parts));
         }
         String first = normalized.get(0);
-        IndexEntry child = this.children.getOrDefault(name, null);
+        IndexEntry child = this.children.getOrDefault(first, null);
         if (child != null) {
             normalized.remove(0);
             return child.resolve(normalized.toArray(path));
@@ -275,7 +303,7 @@ public final class IndexEntry implements Externalizable {
      * @param name
      * @return true if the child exists
      */
-    public boolean hasChild(String name) {
+    public final boolean hasChild(String name) {
         return this.children.containsKey(name);
     }
 
@@ -284,8 +312,8 @@ public final class IndexEntry implements Externalizable {
      * @param entry The index entry
      * @return True if the child exists
      */
-    public boolean hasChild(IndexEntry entry) {
-        return this.children.containsKey(entry.getName());
+    public final boolean hasChild(IndexEntry entry) {
+        return this.children.containsKey(entry.getFileName());
     }
 
     /**
@@ -294,12 +322,12 @@ public final class IndexEntry implements Externalizable {
      * @param name
      * @return
      */
-    public IndexEntry createNewFolder(String name) {
+    public final IndexEntry createNewFolder(String name) {
         if (name == null) {
             return null;
         }
         IndexEntry entry = new IndexEntry();
-        entry.setName(name);
+        entry.setFileName(name);
         entry.setParentEntry(this);
         this.children.put(name, entry);
         return entry;
