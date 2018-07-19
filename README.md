@@ -7,8 +7,6 @@ Store files hidden away from others with the help of latest cryptographic algori
 
 ### Models
 
-- IndexTree: `[total index entry][list of IndexEntry]`
-- IndexEntry: `[cipher file's checksum][file path][file size][last access date]`
 - CipherFile: `[created at][modified at][content digest length][content digest][file length][file content]`
 - CipherFolder
 
