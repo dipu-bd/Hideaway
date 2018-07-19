@@ -283,10 +283,6 @@ public class CipherIO {
             rootEntry = IndexEntry.readExternal(ois);
         }
         Reporter.format("Index entry loaded. Total file size: %s", rootEntry.getFileSizeReadable());
-        
-        rootEntry.getChildren().forEach(child -> {
-            System.out.println(child.getFileName());
-        });
     }
     
     /**
@@ -299,10 +295,7 @@ public class CipherIO {
         Key key = this.getIndexSecret();
         Properties props = new Properties();
         AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
-        
-        rootEntry.createNewFolder("Foo");
-        rootEntry.createNewFolder("Bar");
-                
+                        
         try (FileOutputStream fos = new FileOutputStream(indexFile);
                 CryptoOutputStream cos = new CryptoOutputStream(Settings.AES_ALGORITHM, props, fos, key, params);
                 ObjectOutputStream oos = new ObjectOutputStream(cos)) {
