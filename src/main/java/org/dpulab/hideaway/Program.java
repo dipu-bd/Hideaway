@@ -30,7 +30,6 @@ import org.dpulab.hideaway.utils.Settings;
 import org.dpulab.hideaway.utils.CipherIO;
 import org.dpulab.hideaway.utils.Reporter;
 import org.dpulab.hideaway.view.Dashboard;
-import org.dpulab.hideaway.view.KeyPairGenerator;
 import org.dpulab.hideaway.view.Login;
 
 /**
@@ -50,7 +49,7 @@ public class Program {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 lfmap.put(info.getName(), info.getClassName());
             }
-            String[] availableThemes = { "GTK+", "Windows", "Macintosh", "Nimbus" };
+            String[] availableThemes = { "Nimbus", "GTK+", "Windows", "Macintosh" };
             for (String key : availableThemes) {
                 if (lfmap.containsKey(key)) {
                     Logger.getLogger(Login.class.getName()).log(Level.INFO, "Using {0} look and feel.", key);
