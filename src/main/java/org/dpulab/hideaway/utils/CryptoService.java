@@ -190,7 +190,7 @@ public final class CryptoService {
      * @param countryCode
      * @return
      */
-    public X500Name generateX500Principal(
+    public X500Name generateX500Name(
             String alias,
             String clientName,
             String clientEmail,
