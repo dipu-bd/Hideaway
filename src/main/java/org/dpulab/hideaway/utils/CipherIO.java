@@ -29,9 +29,12 @@ import java.nio.file.FileSystemException;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.Key;
+import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -51,7 +54,7 @@ import org.dpulab.hideaway.view.PasswordInput;
  * @author dipu
  */
 public class CipherIO {
-    
+
     public static final String SEPARATOR = "/";
 
     //<editor-fold defaultstate="collapsed" desc=" Get instance methods ">
@@ -82,11 +85,11 @@ public class CipherIO {
         this.workDir = new File(folder).toPath();
         this.keyStore = KeyStore.getInstance(Settings.STORE_TYPE);
         this.rootEntry = IndexEntry.getRoot();
-        
+
         this.password = Settings.getDefault().getSession(Settings.PASSWORD);
         this.passwordHash = CryptoService.getDefault().getHash(this.password);
     }
-    
+
     public File getDataFolder() {
         return this.workDir.resolve("data").toFile();
     }
@@ -94,7 +97,7 @@ public class CipherIO {
     public File getDataFile(String checksum) {
         return this.workDir.resolve("data").resolve(checksum).toFile();
     }
-    
+
     public File getKeyStoreFile() {
         return this.workDir.resolve(this.passwordHash + ".jks").toFile();
     }
@@ -109,11 +112,12 @@ public class CipherIO {
 
     /**
      * Checks the folder
+     *
      * @throws IOException
      * @throws GeneralSecurityException
-     * @throws ClassNotFoundException 
+     * @throws ClassNotFoundException
      */
-    public void checkFolder() throws IOException, GeneralSecurityException, ClassNotFoundException  {
+    public void checkFolder() throws IOException, GeneralSecurityException, ClassNotFoundException {
         // Check the working directory
         File folder = this.workDir.toFile();
         if (!folder.exists()) {
@@ -172,41 +176,69 @@ public class CipherIO {
      * @throws IOException
      * @throws KeyStoreException
      * @throws NoSuchAlgorithmException
+     * @throws java.security.cert.CertificateException
+     * @throws java.security.UnrecoverableKeyException
      * @throws UnsupportedEncodingException
-     * @throws UnrecoverableKeyException
      */
-    public Key getIndexSecret() throws IOException, GeneralSecurityException {
+    public Key getIndexSecret()
+            throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
         if (!this.keyStore.containsAlias(Settings.INDEX_KEY_ALIAS)) {
             Key key = CryptoService.getDefault().generateKey(this.password);
-            this.setSecretKey(Settings.INDEX_KEY_ALIAS, key, null);
+            this.storeSecretKey(Settings.INDEX_KEY_ALIAS, key);
         }
         Key key = this.keyStore.getKey(Settings.INDEX_KEY_ALIAS, this.getKeystorePass());
         return key;
     }
-    
+
     /**
-     * Gets a secret key by its alias.
+     * Stores a secret key of PKCS algorithm.
+     * 
+     * @param alias
+     * @param secret
+     * @throws IOException
+     * @throws KeyStoreException
+     * @throws NoSuchAlgorithmException
+     * @throws CertificateException
+     */
+    public void storeSecretKey(String alias, Key secret)
+            throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+        this.keyStore.setKeyEntry(alias, secret, this.getKeystorePass(), null);
+        this.saveKeystore();
+    }
+
+    /**
+     * Gets a RSA key pair key by its alias.
+     *
      * @param alias
      * @return
-     * @throws NoSuchAlgorithmException
-     * @throws UnrecoverableKeyException
-     * @throws KeyStoreException 
+     * @throws java.security.KeyStoreException
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws java.security.UnrecoverableKeyException
      */
-    public Key getSecretKey(String alias) throws GeneralSecurityException {
-        return this.keyStore.getKey(alias, this.getKeystorePass());
+    public KeyPair getKeyPair(String alias)
+            throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
+        Key publicKey = this.keyStore.getKey(alias + "_public", this.getKeystorePass());
+        Key privateKey = this.keyStore.getKey(alias + "_private", this.getKeystorePass());
+        return new KeyPair((PublicKey) publicKey, (PrivateKey) privateKey);
     }
-    
+
     /**
-     * Sets a secret key by its alias. Certificate chain can be null unless it is a RSA Key pair.
+     * Sets a secret key by its alias. Certificate chain can be null unless it
+     * is a RSA Key pair.
+     *
      * @param alias
-     * @param key
-     * @param chain
-     * @throws GeneralSecurityException 
+     * @param keyPair
+     * @param certificate
      * @throws IOException
-     * @throws UnsupportedEncodingException
+     * @throws KeyStoreException
+     * @throws NoSuchAlgorithmException
+     * @throws CertificateException
      */
-    public void setSecretKey(String alias, Key key, Certificate[] chain) throws GeneralSecurityException, IOException {
-        this.keyStore.setKeyEntry(alias, key, this.getKeystorePass(), chain);
+    public void storeKeyPair(String alias, KeyPair keyPair, Certificate certificate) 
+            throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+        Certificate[] certChain = {certificate};
+        this.keyStore.setKeyEntry(alias + "_public", keyPair.getPublic(), this.getKeystorePass(), certChain);
+        this.keyStore.setKeyEntry(alias + "_private", keyPair.getPrivate(), this.getKeystorePass(), certChain);
         this.saveKeystore();
     }
 
@@ -249,8 +281,8 @@ public class CipherIO {
             this.keyStore.load(fis, this.getKeystorePass());
         }
         Reporter.format("Keystore loaded with %d keys.", this.keyStore.size());
-        
-        for(String alias : Collections.list(this.keyStore.aliases())) {
+
+        for (String alias : Collections.list(this.keyStore.aliases())) {
             Key key = this.keyStore.getKey(alias, this.getKeystorePass());
             System.out.printf("%s %s %s\n", alias, key.getAlgorithm(), key.getFormat());
             System.out.println(WordUtils.wrap(Base64.getEncoder().encodeToString(key.getEncoded()), 64, "\n", true));
@@ -266,7 +298,7 @@ public class CipherIO {
      * @throws CertificateException
      * @throws java.security.KeyStoreException
      */
-    public void saveKeystore() throws IOException, GeneralSecurityException {
+    public void saveKeystore() throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
         File keyStoreFile = this.getKeyStoreFile();
         try (FileOutputStream fos = new FileOutputStream(keyStoreFile)) {
             this.keyStore.store(fos, this.getKeystorePass());
@@ -276,9 +308,10 @@ public class CipherIO {
 
     /**
      * Loads the root index entry from the index file
+     *
      * @throws IOException
-     * @throws GeneralSecurityException 
-     * @throws java.lang.UnsupportedClassVersionError 
+     * @throws GeneralSecurityException
+     * @throws java.lang.UnsupportedClassVersionError
      */
     public void loadIndex() throws IOException, GeneralSecurityException, UnsupportedClassVersionError {
         File indexFile = this.getIndexFile();
@@ -293,18 +326,19 @@ public class CipherIO {
         }
         Reporter.format("Index entry loaded. Total file size: %s", rootEntry.getFileSizeReadable());
     }
-    
+
     /**
      * Saves the root index entry to the index file.
+     *
      * @throws IOException
-     * @throws GeneralSecurityException 
+     * @throws GeneralSecurityException
      */
     public void saveIndex() throws IOException, GeneralSecurityException {
         File indexFile = this.getIndexFile();
         Key key = this.getIndexSecret();
         Properties props = new Properties();
         AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
-                        
+
         try (FileOutputStream fos = new FileOutputStream(indexFile);
                 CryptoOutputStream cos = new CryptoOutputStream(Settings.AES_ALGORITHM, props, fos, key, params);
                 ObjectOutputStream oos = new ObjectOutputStream(cos)) {
