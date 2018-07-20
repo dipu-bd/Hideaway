@@ -16,6 +16,18 @@
  */
 package org.dpulab.hideaway.view;
 
+import java.security.KeyPair;
+import java.security.cert.Certificate;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.logging.Level;
+import javax.swing.DefaultComboBoxModel;
+import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.dpulab.hideaway.utils.CipherIO;
+import org.dpulab.hideaway.utils.CryptoService;
+import org.dpulab.hideaway.utils.Reporter;
+
 /**
  *
  * @author dipu
@@ -24,10 +36,66 @@ public class KeyPairGenerator extends javax.swing.JDialog {
 
     /**
      * Creates new form NameBuilder
+     *
+     * @param parent
      */
-    public KeyPairGenerator(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public KeyPairGenerator(java.awt.Frame parent) {
+        super(parent, true);
         initComponents();
+        loadCountryList();
+    }
+
+    public X500Name getSubject() {
+        String alias = this.aliasInput.getText();
+        if (alias == null) {
+            return null;
+        }
+        return CryptoService.getDefault().generateX500Name(
+                alias,
+                this.nameInput.getText(),
+                this.emailInput.getText(),
+                this.orgUnitInput.getText(),
+                this.organizationInput.getText(),
+                (String) this.countrySelector.getSelectedItem());
+    }
+
+    private void generateAndSave() {
+        try {
+            // check the alias name
+            String alias = this.aliasInput.getText();
+            if (StringUtils.isEmpty(alias)) {
+                throw new Exception("Can not create key without an alias");
+            }
+            // get the subjects data
+            X500Name subject = this.getSubject();
+            // generate RSA key pair
+            KeyPair keyPair = CryptoService.getDefault().generateKeyPair(4096);
+            // self sign the key
+            Certificate certificate = CryptoService.getDefault().generateSelfSignedX509Certificate(keyPair, subject);
+            // save to keystore
+            CipherIO.getDefault().setSecretKey(alias, keyPair.getPrivate(), new Certificate[]{certificate});
+        } catch (Exception ex) {
+            Reporter.dialog(this, Level.SEVERE, ex.getMessage());
+        }
+    }
+
+    private void clearInputs() {
+        this.aliasInput.setText("");
+        this.nameInput.setText("");
+        this.emailInput.setText("");
+        this.orgUnitInput.setText("");
+        this.organizationInput.setText("");
+        this.countrySelector.setSelectedIndex(-1);
+    }
+
+    private void loadCountryList() {
+        String[] locales = Locale.getISOCountries();
+        for (int i = 0; i < locales.length; ++i) {
+            Locale obj = new Locale("", locales[i]);
+            locales[i] = String.format("%s - %s", obj.getDisplayCountry(), obj.getCountry());
+        }
+        Arrays.sort(locales);
+        this.countrySelector.setModel(new DefaultComboBoxModel<>(locales));
     }
 
     /**
@@ -42,14 +110,33 @@ public class KeyPairGenerator extends javax.swing.JDialog {
         frameHeaderPanel = new javax.swing.JPanel();
         frameTitleLabel = new javax.swing.JLabel();
         frameActionPanel = new javax.swing.JPanel();
-        submitButton = new javax.swing.JButton();
-        submitButton1 = new javax.swing.JButton();
+        generateButton = new javax.swing.JButton();
+        cancelButton = new javax.swing.JButton();
+        frameBodyPanel = new javax.swing.JPanel();
+        aliasLabel = new javax.swing.JLabel();
+        aliasInput = new javax.swing.JTextField();
+        aliasHintLabel = new javax.swing.JLabel();
+        nameLabel = new javax.swing.JLabel();
+        nameInput = new javax.swing.JTextField();
+        emailLabel = new javax.swing.JLabel();
+        emailInput = new javax.swing.JTextField();
+        organizationLabel = new javax.swing.JLabel();
+        organizationInput = new javax.swing.JTextField();
+        organizationHintLabel = new javax.swing.JLabel();
+        orgUnitLabel = new javax.swing.JLabel();
+        orgUnitInput = new javax.swing.JTextField();
+        orgUnitHintLabel = new javax.swing.JLabel();
+        countryLabel = new javax.swing.JLabel();
+        countrySelector = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Generate RSA pair");
+        setMinimumSize(new java.awt.Dimension(550, 520));
+        setPreferredSize(new java.awt.Dimension(550, 550));
 
         frameHeaderPanel.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(0, 204, 204)));
 
-        frameTitleLabel.setFont(frameTitleLabel.getFont().deriveFont(frameTitleLabel.getFont().getSize()+6f));
+        frameTitleLabel.setFont(frameTitleLabel.getFont().deriveFont(frameTitleLabel.getFont().getSize()+8f));
         frameTitleLabel.setForeground(new java.awt.Color(0, 153, 153));
         frameTitleLabel.setText("Generate RSA key pair");
 
@@ -60,7 +147,7 @@ public class KeyPairGenerator extends javax.swing.JDialog {
             .addGroup(frameHeaderPanelLayout.createSequentialGroup()
                 .addGap(15, 15, 15)
                 .addComponent(frameTitleLabel)
-                .addContainerGap(332, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         frameHeaderPanelLayout.setVerticalGroup(
             frameHeaderPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -70,21 +157,21 @@ public class KeyPairGenerator extends javax.swing.JDialog {
                 .addGap(15, 15, 15))
         );
 
-        frameActionPanel.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 0, 0, 0, new java.awt.Color(204, 204, 204)));
+        frameActionPanel.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 0, 0, 0, new java.awt.Color(0, 102, 102)));
 
-        submitButton.setFont(submitButton.getFont().deriveFont(submitButton.getFont().getStyle() | java.awt.Font.BOLD, submitButton.getFont().getSize()+2));
-        submitButton.setText("Generate");
-        submitButton.addActionListener(new java.awt.event.ActionListener() {
+        generateButton.setFont(generateButton.getFont().deriveFont(generateButton.getFont().getStyle() | java.awt.Font.BOLD, generateButton.getFont().getSize()+2));
+        generateButton.setText("Generate");
+        generateButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                submitButtonActionPerformed(evt);
+                generateButtonActionPerformed(evt);
             }
         });
 
-        submitButton1.setFont(submitButton1.getFont().deriveFont(submitButton1.getFont().getSize()+2f));
-        submitButton1.setText("Cancel");
-        submitButton1.addActionListener(new java.awt.event.ActionListener() {
+        cancelButton.setFont(cancelButton.getFont().deriveFont(cancelButton.getFont().getSize()+2f));
+        cancelButton.setText("Cancel");
+        cancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                submitButton1ActionPerformed(evt);
+                cancelButtonActionPerformed(evt);
             }
         });
 
@@ -94,9 +181,9 @@ public class KeyPairGenerator extends javax.swing.JDialog {
             frameActionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, frameActionPanelLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(submitButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(submitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(generateButton, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(15, 15, 15))
         );
         frameActionPanelLayout.setVerticalGroup(
@@ -104,9 +191,120 @@ public class KeyPairGenerator extends javax.swing.JDialog {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, frameActionPanelLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(frameActionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(submitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(submitButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(generateButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(15, 15, 15))
+        );
+
+        aliasLabel.setFont(aliasLabel.getFont().deriveFont(aliasLabel.getFont().getSize()+2f));
+        aliasLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        aliasLabel.setText("Key Alias:");
+
+        aliasInput.setFont(aliasInput.getFont());
+
+        aliasHintLabel.setForeground(new java.awt.Color(0, 153, 153));
+        aliasHintLabel.setText("The alias under which you key is saved.");
+
+        nameLabel.setFont(nameLabel.getFont().deriveFont(nameLabel.getFont().getSize()+2f));
+        nameLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        nameLabel.setText("Name:");
+
+        nameInput.setFont(nameInput.getFont());
+
+        emailLabel.setFont(emailLabel.getFont().deriveFont(emailLabel.getFont().getSize()+2f));
+        emailLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        emailLabel.setText("Email:");
+
+        emailInput.setFont(emailInput.getFont());
+
+        organizationLabel.setFont(organizationLabel.getFont().deriveFont(organizationLabel.getFont().getSize()+2f));
+        organizationLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        organizationLabel.setText("Organization:");
+
+        organizationInput.setFont(organizationInput.getFont());
+
+        organizationHintLabel.setForeground(new java.awt.Color(0, 153, 153));
+        organizationHintLabel.setText("The name of your organization");
+
+        orgUnitLabel.setFont(orgUnitLabel.getFont().deriveFont(orgUnitLabel.getFont().getSize()+2f));
+        orgUnitLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        orgUnitLabel.setText("Org. Unit:");
+
+        orgUnitInput.setFont(orgUnitInput.getFont());
+
+        orgUnitHintLabel.setForeground(new java.awt.Color(0, 153, 153));
+        orgUnitHintLabel.setText("The organizational unit that requires this key.");
+
+        countryLabel.setFont(countryLabel.getFont().deriveFont(countryLabel.getFont().getSize()+2f));
+        countryLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        countryLabel.setText("Country:");
+
+        countrySelector.setToolTipText("Select your country");
+
+        javax.swing.GroupLayout frameBodyPanelLayout = new javax.swing.GroupLayout(frameBodyPanel);
+        frameBodyPanel.setLayout(frameBodyPanelLayout);
+        frameBodyPanelLayout.setHorizontalGroup(
+            frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(frameBodyPanelLayout.createSequentialGroup()
+                .addGap(25, 25, 25)
+                .addGroup(frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(countryLabel)
+                    .addComponent(emailLabel)
+                    .addComponent(orgUnitLabel)
+                    .addComponent(organizationLabel)
+                    .addComponent(nameLabel)
+                    .addComponent(aliasLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(frameBodyPanelLayout.createSequentialGroup()
+                        .addComponent(organizationHintLabel)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(frameBodyPanelLayout.createSequentialGroup()
+                        .addGroup(frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(emailInput)
+                            .addComponent(organizationInput, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(orgUnitInput, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(nameInput)
+                            .addComponent(aliasInput)
+                            .addComponent(orgUnitHintLabel)
+                            .addComponent(aliasHintLabel)
+                            .addComponent(countrySelector, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(25, 25, 25))))
+        );
+        frameBodyPanelLayout.setVerticalGroup(
+            frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(frameBodyPanelLayout.createSequentialGroup()
+                .addGap(25, 25, 25)
+                .addGroup(frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(aliasLabel)
+                    .addComponent(aliasInput, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 0, 0)
+                .addComponent(aliasHintLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(nameInput, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(nameLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(emailInput, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(emailLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(organizationInput, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(organizationLabel))
+                .addGap(0, 0, 0)
+                .addComponent(organizationHintLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(orgUnitInput, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(orgUnitLabel))
+                .addGap(0, 0, 0)
+                .addComponent(orgUnitHintLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(countryLabel)
+                    .addComponent(countrySelector, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(25, 25, 25))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -115,74 +313,52 @@ public class KeyPairGenerator extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(frameHeaderPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(frameActionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(frameBodyPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(frameHeaderPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 285, Short.MAX_VALUE)
+                .addGap(0, 0, 0)
+                .addComponent(frameBodyPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(0, 0, 0)
                 .addComponent(frameActionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void submitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitButtonActionPerformed
+    private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
+        this.clearInputs();
         this.setVisible(false);
-    }//GEN-LAST:event_submitButtonActionPerformed
+    }//GEN-LAST:event_cancelButtonActionPerformed
 
-    private void submitButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_submitButton1ActionPerformed
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(KeyPairGenerator.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(KeyPairGenerator.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(KeyPairGenerator.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(KeyPairGenerator.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                KeyPairGenerator dialog = new KeyPairGenerator(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
+    private void generateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generateButtonActionPerformed
+        this.generateAndSave();
+    }//GEN-LAST:event_generateButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel aliasHintLabel;
+    private javax.swing.JTextField aliasInput;
+    private javax.swing.JLabel aliasLabel;
+    private javax.swing.JButton cancelButton;
+    private javax.swing.JLabel countryLabel;
+    private javax.swing.JComboBox<String> countrySelector;
+    private javax.swing.JTextField emailInput;
+    private javax.swing.JLabel emailLabel;
     private javax.swing.JPanel frameActionPanel;
+    private javax.swing.JPanel frameBodyPanel;
     private javax.swing.JPanel frameHeaderPanel;
     private javax.swing.JLabel frameTitleLabel;
-    private javax.swing.JButton submitButton;
-    private javax.swing.JButton submitButton1;
+    private javax.swing.JButton generateButton;
+    private javax.swing.JTextField nameInput;
+    private javax.swing.JLabel nameLabel;
+    private javax.swing.JLabel orgUnitHintLabel;
+    private javax.swing.JTextField orgUnitInput;
+    private javax.swing.JLabel orgUnitLabel;
+    private javax.swing.JLabel organizationHintLabel;
+    private javax.swing.JTextField organizationInput;
+    private javax.swing.JLabel organizationLabel;
     // End of variables declaration//GEN-END:variables
 }

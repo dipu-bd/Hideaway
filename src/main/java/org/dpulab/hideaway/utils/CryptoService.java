@@ -180,7 +180,7 @@ public final class CryptoService {
     }
 
     /**
-     * Generates an instance of X500Principal.
+     * Generates an instance of X500Name.
      *
      * @param alias
      * @param clientName
@@ -198,18 +198,32 @@ public final class CryptoService {
             String organization,
             String countryCode
     ) {
-        return new X500NameBuilder(BCStyle.INSTANCE)
-                .addRDN(BCStyle.CN, alias)
-                .addRDN(BCStyle.OU, organizationalUnit)
-                .addRDN(BCStyle.O, organization)
-                .addRDN(BCStyle.C, countryCode)
-                .addRDN(BCStyle.NAME, clientName)
-                .addRDN(BCStyle.E, clientEmail)
-                .build();
+        if (StringUtils.isEmpty(alias)) {
+            return null;
+        }
+        X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
+        builder.addRDN(BCStyle.CN, alias);
+        if (StringUtils.isEmpty(clientName)) {
+            builder.addRDN(BCStyle.NAME, clientName);
+        }
+        if (StringUtils.isEmpty(clientEmail)) {
+            builder.addRDN(BCStyle.E, clientEmail);
+        }
+        if (StringUtils.isEmpty(countryCode)) {
+            builder.addRDN(BCStyle.C, countryCode);
+        }
+        if (StringUtils.isEmpty(organization)) {
+            builder.addRDN(BCStyle.O, organization);
+        }
+        if (StringUtils.isEmpty(organizationalUnit)) {
+            builder.addRDN(BCStyle.OU, organizationalUnit);
+        }
+        return builder.build();
     }
 
     /**
-     * Generates a self signed certificate for the keyPair with provided subject.
+     * Generates a self signed certificate for the keyPair with provided
+     * subject.
      *
      * @param keyPair the RSA key pair
      * @param subject the subject's information

@@ -18,10 +18,8 @@ package org.dpulab.hideaway;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.KeyStoreException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,6 +30,7 @@ import org.dpulab.hideaway.utils.Settings;
 import org.dpulab.hideaway.utils.CipherIO;
 import org.dpulab.hideaway.utils.Reporter;
 import org.dpulab.hideaway.view.Dashboard;
+import org.dpulab.hideaway.view.KeyPairGenerator;
 import org.dpulab.hideaway.view.Login;
 
 /**
@@ -65,9 +64,12 @@ public class Program {
         //</editor-fold>
                 
          // new Playground().play();
+         
+         KeyPairGenerator kpGen = new KeyPairGenerator(null);
+         kpGen.setVisible(true);
         
         /* Create and display the form */
-        SwingUtilities.invokeLater(() -> { start(); });                
+        // SwingUtilities.invokeLater(() -> { start(); });                
     }
     
     public static void start() {
