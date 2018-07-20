@@ -307,12 +307,10 @@ public class CipherIO {
         for (String alias : Collections.list(this.keyStore.aliases())) {
             if (this.keyStore.isKeyEntry(alias)) {
                 Key key = this.keyStore.getKey(alias, this.getKeystorePass());
-                System.out.printf("%s %s %s\n", alias, key.getAlgorithm(), key.getFormat());
-                System.out.println(WordUtils.wrap(Base64.getEncoder().encodeToString(key.getEncoded()), 64, "\n", true));
+                System.out.printf("  ^ Key: %s {%s}{%s} %d bytes\n", alias, key.getAlgorithm(), key.getFormat(), key.getEncoded().length);
             } else if (this.keyStore.isCertificateEntry(alias)) {
                 Certificate cert = this.keyStore.getCertificate(alias);
-                System.out.printf("%s %s\n", alias, cert.getType());
-                System.out.println(WordUtils.wrap(Base64.getEncoder().encodeToString(cert.getPublicKey().getEncoded()), 64, "\n", true));
+                System.out.printf("  ^ Certificate: %s {%s} %d bytes\n", alias, cert.getType(), cert.getPublicKey().getEncoded().length);
             }
         }
     }
