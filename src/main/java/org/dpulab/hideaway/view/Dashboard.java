@@ -5,17 +5,26 @@
  */
 package org.dpulab.hideaway.view;
 
+import javax.swing.table.TableModel;
+import org.dpulab.hideaway.models.DashboardPage;
+
 /**
  *
  * @author dipu
  */
 public class Dashboard extends javax.swing.JFrame {
+    
+    private DashboardPage selectedPage = DashboardPage.KEY_STORE;
 
     /**
      * Creates new form Dashboard
      */
     public Dashboard() {
         initComponents();
+    }
+    
+    void selectPage(DashboardPage page) {
+        this.selectedPage = page;
     }
     
     /**
@@ -29,12 +38,12 @@ public class Dashboard extends javax.swing.JFrame {
 
         topPanel = new javax.swing.JPanel();
         navigationToolbar = new javax.swing.JToolBar();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        goBackButton = new javax.swing.JButton();
+        goForwardButton = new javax.swing.JButton();
         verticalSeparator1 = new javax.swing.JSeparator();
-        jPanel1 = new javax.swing.JPanel();
+        pathSelectorPanel = new javax.swing.JPanel();
         rootButton = new javax.swing.JButton();
-        jTextField1 = new javax.swing.JTextField();
+        pathInput = new javax.swing.JTextField();
         verticalSeparator2 = new javax.swing.JSeparator();
         actionToolbar = new javax.swing.JToolBar();
         newFileButton = new javax.swing.JButton();
@@ -47,8 +56,8 @@ public class Dashboard extends javax.swing.JFrame {
         favoriteButton = new javax.swing.JButton();
         generateKeyPairButton = new javax.swing.JButton();
         horizontalSeparator2 = new javax.swing.JSeparator();
-        jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        importFileButton = new javax.swing.JButton();
+        importFolderButton = new javax.swing.JButton();
         horizontalSeparator3 = new javax.swing.JSeparator();
         keystoreButton = new javax.swing.JButton();
         verticalSeparator3 = new javax.swing.JSeparator();
@@ -68,34 +77,34 @@ public class Dashboard extends javax.swing.JFrame {
         navigationToolbar.setBorderPainted(false);
         navigationToolbar.setMargin(new java.awt.Insets(3, 10, 3, 10));
 
-        jButton1.setFont(jButton1.getFont().deriveFont(jButton1.getFont().getSize()+4f));
-        jButton1.setText("<html>&#10094;</html>");
-        jButton1.setToolTipText("Backward");
-        jButton1.setFocusPainted(false);
-        jButton1.setPreferredSize(new java.awt.Dimension(40, 40));
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        goBackButton.setFont(goBackButton.getFont().deriveFont(goBackButton.getFont().getSize()+4f));
+        goBackButton.setText("<html>&#10094;</html>");
+        goBackButton.setToolTipText("Backward");
+        goBackButton.setFocusPainted(false);
+        goBackButton.setPreferredSize(new java.awt.Dimension(40, 40));
+        goBackButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                goBackButtonActionPerformed(evt);
             }
         });
-        navigationToolbar.add(jButton1);
+        navigationToolbar.add(goBackButton);
 
-        jButton2.setFont(jButton2.getFont().deriveFont(jButton2.getFont().getSize()+4f));
-        jButton2.setText("<html>&#10095;</html>");
-        jButton2.setToolTipText("Forward");
-        jButton2.setFocusPainted(false);
-        jButton2.setPreferredSize(new java.awt.Dimension(40, 40));
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        goForwardButton.setFont(goForwardButton.getFont().deriveFont(goForwardButton.getFont().getSize()+4f));
+        goForwardButton.setText("<html>&#10095;</html>");
+        goForwardButton.setToolTipText("Forward");
+        goForwardButton.setFocusPainted(false);
+        goForwardButton.setPreferredSize(new java.awt.Dimension(40, 40));
+        goForwardButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                goForwardButtonActionPerformed(evt);
             }
         });
-        navigationToolbar.add(jButton2);
+        navigationToolbar.add(goForwardButton);
 
         verticalSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
         verticalSeparator1.setToolTipText("");
 
-        jPanel1.setOpaque(false);
+        pathSelectorPanel.setOpaque(false);
 
         rootButton.setFont(rootButton.getFont().deriveFont(rootButton.getFont().getStyle() | java.awt.Font.BOLD, rootButton.getFont().getSize()+12));
         rootButton.setText("<html>&#x1f5dd;</html>");
@@ -110,32 +119,32 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
-        jTextField1.setBackground(new java.awt.Color(214, 217, 223));
-        jTextField1.setFont(new java.awt.Font("Monospaced", 1, 16)); // NOI18N
-        jTextField1.setForeground(new java.awt.Color(32, 78, 78));
-        jTextField1.setText("Keystore");
-        jTextField1.setToolTipText("");
-        jTextField1.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(182, 187, 193)), javax.swing.BorderFactory.createEmptyBorder(3, 8, 3, 8)));
-        jTextField1.setMargin(new java.awt.Insets(5, 10, 5, 10));
-        jTextField1.setOpaque(true);
+        pathInput.setBackground(new java.awt.Color(214, 217, 223));
+        pathInput.setFont(new java.awt.Font("Monospaced", 1, 16)); // NOI18N
+        pathInput.setForeground(new java.awt.Color(32, 78, 78));
+        pathInput.setText("Keystore");
+        pathInput.setToolTipText("");
+        pathInput.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(182, 187, 193)), javax.swing.BorderFactory.createEmptyBorder(3, 8, 3, 8)));
+        pathInput.setMargin(new java.awt.Insets(5, 10, 5, 10));
+        pathInput.setOpaque(true);
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        javax.swing.GroupLayout pathSelectorPanelLayout = new javax.swing.GroupLayout(pathSelectorPanel);
+        pathSelectorPanel.setLayout(pathSelectorPanelLayout);
+        pathSelectorPanelLayout.setHorizontalGroup(
+            pathSelectorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pathSelectorPanelLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
                 .addComponent(rootButton, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(3, 3, 3)
-                .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 665, Short.MAX_VALUE)
+                .addComponent(pathInput, javax.swing.GroupLayout.DEFAULT_SIZE, 665, Short.MAX_VALUE)
                 .addGap(10, 10, 10))
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+        pathSelectorPanelLayout.setVerticalGroup(
+            pathSelectorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pathSelectorPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTextField1)
+                .addGroup(pathSelectorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pathInput)
                     .addComponent(rootButton))
                 .addGap(5, 5, 5))
         );
@@ -191,7 +200,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGap(0, 0, 0)
                 .addComponent(verticalSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(pathSelectorPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(0, 0, 0)
                 .addComponent(verticalSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
@@ -206,7 +215,7 @@ public class Dashboard extends javax.swing.JFrame {
             .addComponent(navigationToolbar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, topPanelLayout.createSequentialGroup()
                 .addGap(0, 0, 0)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(pathSelectorPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(0, 0, 0))
         );
 
@@ -216,14 +225,29 @@ public class Dashboard extends javax.swing.JFrame {
         homeButton.setFont(homeButton.getFont().deriveFont(homeButton.getFont().getSize()+5f));
         homeButton.setText("<html>&#x1f5b4; Home</html>");
         homeButton.setBorderPainted(false);
+        homeButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                homeButtonActionPerformed(evt);
+            }
+        });
 
         recentsButton.setFont(recentsButton.getFont().deriveFont(recentsButton.getFont().getSize()+5f));
         recentsButton.setText("<html>&#x23f2; Recents</html>");
         recentsButton.setBorderPainted(false);
+        recentsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                recentsButtonActionPerformed(evt);
+            }
+        });
 
         favoriteButton.setFont(favoriteButton.getFont().deriveFont(favoriteButton.getFont().getSize()+5f));
         favoriteButton.setText("<html>&#x2605; Favorites</html>");
         favoriteButton.setBorderPainted(false);
+        favoriteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                favoriteButtonActionPerformed(evt);
+            }
+        });
 
         generateKeyPairButton.setBackground(new java.awt.Color(186, 182, 180));
         generateKeyPairButton.setFont(generateKeyPairButton.getFont().deriveFont(generateKeyPairButton.getFont().getSize()+2f));
@@ -235,17 +259,22 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
-        jButton3.setBackground(new java.awt.Color(192, 190, 196));
-        jButton3.setFont(jButton3.getFont().deriveFont(jButton3.getFont().getSize()+2f));
-        jButton3.setText("<html>&#x21b4; Import File</html>");
+        importFileButton.setBackground(new java.awt.Color(192, 190, 196));
+        importFileButton.setFont(importFileButton.getFont().deriveFont(importFileButton.getFont().getSize()+2f));
+        importFileButton.setText("<html>&#x21b4; Import File</html>");
 
-        jButton4.setBackground(new java.awt.Color(192, 190, 196));
-        jButton4.setFont(jButton4.getFont().deriveFont(jButton4.getFont().getSize()+2f));
-        jButton4.setText("<html>&#x2bb7; Import Folder</html>");
+        importFolderButton.setBackground(new java.awt.Color(192, 190, 196));
+        importFolderButton.setFont(importFolderButton.getFont().deriveFont(importFolderButton.getFont().getSize()+2f));
+        importFolderButton.setText("<html>&#x2bb7; Import Folder</html>");
 
         keystoreButton.setFont(keystoreButton.getFont().deriveFont(keystoreButton.getFont().getSize()+5f));
         keystoreButton.setText("<html>&#x1f5dd; Keystore</html>");
         keystoreButton.setBorderPainted(false);
+        keystoreButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                keystoreButtonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout sidePanelLayout = new javax.swing.GroupLayout(sidePanel);
         sidePanel.setLayout(sidePanelLayout);
@@ -256,13 +285,13 @@ public class Dashboard extends javax.swing.JFrame {
             .addGroup(sidePanelLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
                 .addGroup(sidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jButton3)
+                    .addComponent(importFileButton)
                     .addComponent(favoriteButton, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(homeButton, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(keystoreButton)
                     .addComponent(recentsButton)
                     .addComponent(generateKeyPairButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
-                    .addComponent(jButton4, javax.swing.GroupLayout.Alignment.LEADING))
+                    .addComponent(importFolderButton, javax.swing.GroupLayout.Alignment.LEADING))
                 .addGap(10, 10, 10))
         );
         sidePanelLayout.setVerticalGroup(
@@ -277,9 +306,9 @@ public class Dashboard extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(horizontalSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(importFileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(importFolderButton, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(horizontalSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -371,17 +400,33 @@ public class Dashboard extends javax.swing.JFrame {
         kpGen.dispose();
     }//GEN-LAST:event_generateKeyPairButtonActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void goBackButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goBackButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_goBackButtonActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void goForwardButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goForwardButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_goForwardButtonActionPerformed
 
     private void rootButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rootButtonActionPerformed
-        // TODO add your handling code here:
+       this.selectPage(this.selectedPage);
     }//GEN-LAST:event_rootButtonActionPerformed
+
+    private void keystoreButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_keystoreButtonActionPerformed
+        this.selectPage(DashboardPage.KEY_STORE);
+    }//GEN-LAST:event_keystoreButtonActionPerformed
+
+    private void homeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_homeButtonActionPerformed
+        this.selectPage(DashboardPage.BROWSER);
+    }//GEN-LAST:event_homeButtonActionPerformed
+
+    private void recentsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_recentsButtonActionPerformed
+        this.selectPage(DashboardPage.RECENT_ITEMS);
+    }//GEN-LAST:event_recentsButtonActionPerformed
+
+    private void favoriteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_favoriteButtonActionPerformed
+        this.selectPage(DashboardPage.FAVORITES);
+    }//GEN-LAST:event_favoriteButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToolBar actionToolbar;
@@ -390,21 +435,21 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JScrollPane dataViewerScrollPane;
     private javax.swing.JButton favoriteButton;
     private javax.swing.JButton generateKeyPairButton;
+    private javax.swing.JButton goBackButton;
+    private javax.swing.JButton goForwardButton;
     private javax.swing.JButton homeButton;
     private javax.swing.JSeparator horizontalSeparator1;
     private javax.swing.JSeparator horizontalSeparator2;
     private javax.swing.JSeparator horizontalSeparator3;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JButton importFileButton;
+    private javax.swing.JButton importFolderButton;
     private javax.swing.JButton keystoreButton;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JToolBar navigationToolbar;
     private javax.swing.JButton newFileButton;
     private javax.swing.JButton newFolderButton;
+    private javax.swing.JTextField pathInput;
+    private javax.swing.JPanel pathSelectorPanel;
     private javax.swing.JButton recentsButton;
     private javax.swing.JButton rootButton;
     private javax.swing.JPanel sidePanel;

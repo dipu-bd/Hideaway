@@ -77,7 +77,7 @@
                   <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
                   <Component id="verticalSeparator1" min="-2" pref="2" max="-2" attributes="0"/>
                   <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
-                  <Component id="jPanel1" max="32767" attributes="0"/>
+                  <Component id="pathSelectorPanel" max="32767" attributes="0"/>
                   <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
                   <Component id="verticalSeparator2" min="-2" pref="2" max="-2" attributes="0"/>
                   <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
@@ -94,7 +94,7 @@
               <Component id="navigationToolbar" alignment="0" max="32767" attributes="0"/>
               <Group type="102" alignment="1" attributes="0">
                   <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
-                  <Component id="jPanel1" max="32767" attributes="0"/>
+                  <Component id="pathSelectorPanel" max="32767" attributes="0"/>
                   <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -113,11 +113,11 @@
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout"/>
           <SubComponents>
-            <Component class="javax.swing.JButton" name="jButton1">
+            <Component class="javax.swing.JButton" name="goBackButton">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
                   <FontInfo relative="true">
-                    <Font component="jButton1" property="font" relativeSize="true" size="4"/>
+                    <Font component="goBackButton" property="font" relativeSize="true" size="4"/>
                   </FontInfo>
                 </Property>
                 <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#10094;&lt;/html&gt;"/>
@@ -128,14 +128,14 @@
                 </Property>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="goBackButtonActionPerformed"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JButton" name="jButton2">
+            <Component class="javax.swing.JButton" name="goForwardButton">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
                   <FontInfo relative="true">
-                    <Font component="jButton2" property="font" relativeSize="true" size="4"/>
+                    <Font component="goForwardButton" property="font" relativeSize="true" size="4"/>
                   </FontInfo>
                 </Property>
                 <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#10095;&lt;/html&gt;"/>
@@ -146,7 +146,7 @@
                 </Property>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton2ActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="goForwardButtonActionPerformed"/>
               </Events>
             </Component>
           </SubComponents>
@@ -157,7 +157,7 @@
             <Property name="toolTipText" type="java.lang.String" value=""/>
           </Properties>
         </Component>
-        <Container class="javax.swing.JPanel" name="jPanel1">
+        <Container class="javax.swing.JPanel" name="pathSelectorPanel">
           <Properties>
             <Property name="opaque" type="boolean" value="false"/>
           </Properties>
@@ -169,7 +169,7 @@
                       <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                       <Component id="rootButton" min="-2" pref="50" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
-                      <Component id="jTextField1" pref="665" max="32767" attributes="0"/>
+                      <Component id="pathInput" pref="665" max="32767" attributes="0"/>
                       <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -179,7 +179,7 @@
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="jTextField1" max="32767" attributes="0"/>
+                          <Component id="pathInput" max="32767" attributes="0"/>
                           <Component id="rootButton" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace min="5" pref="5" max="-2" attributes="0"/>
@@ -212,7 +212,7 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="rootButtonActionPerformed"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JTextField" name="jTextField1">
+            <Component class="javax.swing.JTextField" name="pathInput">
               <Properties>
                 <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="df" green="d9" red="d6" type="rgb"/>
@@ -392,13 +392,13 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
-                      <Component id="jButton3" max="32767" attributes="0"/>
+                      <Component id="importFileButton" max="32767" attributes="0"/>
                       <Component id="favoriteButton" alignment="0" max="32767" attributes="0"/>
                       <Component id="homeButton" alignment="0" max="32767" attributes="0"/>
                       <Component id="keystoreButton" alignment="1" max="32767" attributes="0"/>
                       <Component id="recentsButton" alignment="1" max="32767" attributes="0"/>
                       <Component id="generateKeyPairButton" alignment="0" pref="180" max="32767" attributes="0"/>
-                      <Component id="jButton4" alignment="0" max="32767" attributes="0"/>
+                      <Component id="importFolderButton" alignment="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
               </Group>
@@ -416,9 +416,9 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="horizontalSeparator2" min="-2" pref="2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                  <Component id="jButton3" min="-2" pref="39" max="-2" attributes="0"/>
+                  <Component id="importFileButton" min="-2" pref="39" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jButton4" min="-2" pref="39" max="-2" attributes="0"/>
+                  <Component id="importFolderButton" min="-2" pref="39" max="-2" attributes="0"/>
                   <EmptySpace max="32767" attributes="0"/>
                   <Component id="horizontalSeparator3" min="-2" pref="2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -441,6 +441,9 @@
             <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#x1f5b4; Home&lt;/html&gt;"/>
             <Property name="borderPainted" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="homeButtonActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="recentsButton">
           <Properties>
@@ -452,6 +455,9 @@
             <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#x23f2; Recents&lt;/html&gt;"/>
             <Property name="borderPainted" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="recentsButtonActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="favoriteButton">
           <Properties>
@@ -463,6 +469,9 @@
             <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#x2605; Favorites&lt;/html&gt;"/>
             <Property name="borderPainted" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="favoriteButtonActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="generateKeyPairButton">
           <Properties>
@@ -483,27 +492,27 @@
         </Component>
         <Component class="javax.swing.JSeparator" name="horizontalSeparator2">
         </Component>
-        <Component class="javax.swing.JButton" name="jButton3">
+        <Component class="javax.swing.JButton" name="importFileButton">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="c4" green="be" red="c0" type="rgb"/>
             </Property>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
               <FontInfo relative="true">
-                <Font component="jButton3" property="font" relativeSize="true" size="2"/>
+                <Font component="importFileButton" property="font" relativeSize="true" size="2"/>
               </FontInfo>
             </Property>
             <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#x21b4; Import File&lt;/html&gt;"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="jButton4">
+        <Component class="javax.swing.JButton" name="importFolderButton">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="c4" green="be" red="c0" type="rgb"/>
             </Property>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
               <FontInfo relative="true">
-                <Font component="jButton4" property="font" relativeSize="true" size="2"/>
+                <Font component="importFolderButton" property="font" relativeSize="true" size="2"/>
               </FontInfo>
             </Property>
             <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#x2bb7; Import Folder&lt;/html&gt;"/>
@@ -521,6 +530,9 @@
             <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#x1f5dd; Keystore&lt;/html&gt;"/>
             <Property name="borderPainted" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="keystoreButtonActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
