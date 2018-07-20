@@ -85,6 +85,7 @@ public class KeyPairGenerator extends javax.swing.JDialog {
             // save to keystore
             CipherIO.getDefault().storeKeyPair(alias, keyPair, certificate);
         } catch (Exception ex) {
+            Reporter.put(this.getClass(), ex);
             Reporter.dialog(this, Level.SEVERE, "Error: %s", ex.toString());
         }
     }
