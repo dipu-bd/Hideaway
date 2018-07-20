@@ -53,6 +53,8 @@ public class Dashboard extends javax.swing.JFrame {
         keystoreButton = new javax.swing.JButton();
         verticalSeparator3 = new javax.swing.JSeparator();
         mainPanel = new javax.swing.JPanel();
+        dataViewerScrollPane = new javax.swing.JScrollPane();
+        dataViewer = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Hideaway");
@@ -241,7 +243,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 167, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(horizontalSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(generateKeyPairButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -255,15 +257,35 @@ public class Dashboard extends javax.swing.JFrame {
 
         mainPanel.setBackground(new java.awt.Color(250, 250, 255));
 
+        dataViewer.setBackground(new java.awt.Color(250, 250, 255));
+        dataViewer.setFont(dataViewer.getFont().deriveFont(dataViewer.getFont().getSize()+2f));
+        dataViewer.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        dataViewer.setCellSelectionEnabled(true);
+        dataViewer.setDoubleBuffered(true);
+        dataViewer.setFillsViewportHeight(true);
+        dataViewer.setRowHeight(24);
+        dataViewer.setRowMargin(3);
+        dataViewerScrollPane.setViewportView(dataViewer);
+
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addComponent(dataViewerScrollPane)
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addComponent(dataViewerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 523, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -318,6 +340,8 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JToolBar actionToolbar;
     private javax.swing.JButton addBookmarkButton;
     private javax.swing.JToolBar breadcrumbToolbar;
+    private javax.swing.JTable dataViewer;
+    private javax.swing.JScrollPane dataViewerScrollPane;
     private javax.swing.JButton favoriteButton;
     private javax.swing.JButton generateKeyPairButton;
     private javax.swing.JButton homeButton;
