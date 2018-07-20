@@ -27,27 +27,30 @@ public class Dashboard extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        jSeparator1 = new javax.swing.JSeparator();
-        jSeparator3 = new javax.swing.JSeparator();
-        jToolBar1 = new javax.swing.JToolBar();
-        jButton6 = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
-        jToolBar2 = new javax.swing.JToolBar();
-        jButton5 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jToolBar3 = new javax.swing.JToolBar();
+        topPanel = new javax.swing.JPanel();
+        navigationToolbar = new javax.swing.JToolBar();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
-        jSeparator2 = new javax.swing.JSeparator();
+        verticalSeparator1 = new javax.swing.JSeparator();
+        breadcrumbToolbar = new javax.swing.JToolBar();
+        rootButton = new javax.swing.JButton();
+        pathSeparator1 = new javax.swing.JLabel();
+        verticalSeparator2 = new javax.swing.JSeparator();
+        actionToolbar = new javax.swing.JToolBar();
+        newFileButton = new javax.swing.JButton();
+        newFolderButton = new javax.swing.JButton();
+        addBookmarkButton = new javax.swing.JButton();
+        horizontalSeparator1 = new javax.swing.JSeparator();
         jPanel3 = new javax.swing.JPanel();
         jButton7 = new javax.swing.JButton();
         jButton8 = new javax.swing.JButton();
         jButton9 = new javax.swing.JButton();
         jButton10 = new javax.swing.JButton();
         genKey = new javax.swing.JButton();
-        jSeparator4 = new javax.swing.JSeparator();
+        verticalSeparator3 = new javax.swing.JSeparator();
+        jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
+        jSeparator1 = new javax.swing.JSeparator();
         jPanel5 = new javax.swing.JPanel();
         jSeparator5 = new javax.swing.JSeparator();
 
@@ -56,72 +59,13 @@ public class Dashboard extends javax.swing.JFrame {
         setName("hideawayDashboard"); // NOI18N
         setPreferredSize(new java.awt.Dimension(1024, 600));
 
-        jPanel1.setBackground(new java.awt.Color(204, 207, 213));
-        jPanel1.setPreferredSize(new java.awt.Dimension(105, 50));
+        topPanel.setBackground(new java.awt.Color(204, 207, 213));
+        topPanel.setPreferredSize(new java.awt.Dimension(105, 50));
 
-        jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
-        jSeparator1.setToolTipText("");
-
-        jSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
-        jSeparator3.setToolTipText("");
-
-        jToolBar1.setFloatable(false);
-        jToolBar1.setBorderPainted(false);
-        jToolBar1.setDoubleBuffered(true);
-        jToolBar1.setMargin(new java.awt.Insets(3, 10, 3, 10));
-
-        jButton6.setFont(jButton6.getFont().deriveFont(jButton6.getFont().getStyle() | java.awt.Font.BOLD, jButton6.getFont().getSize()+8));
-        jButton6.setText("<html>&#x1f5b4;</html>");
-        jButton6.setToolTipText("Encrypted Drive");
-        jButton6.setBorderPainted(false);
-        jButton6.setFocusPainted(false);
-        jButton6.setFocusable(false);
-        jButton6.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jButton6.setMargin(new java.awt.Insets(3, 3, 3, 3));
-        jButton6.setSelected(true);
-        jButton6.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(jButton6);
-
-        jLabel1.setFont(jLabel1.getFont().deriveFont(jLabel1.getFont().getSize()+10f));
-        jLabel1.setForeground(new java.awt.Color(0, 153, 153));
-        jLabel1.setText("/");
-        jLabel1.setToolTipText("");
-        jToolBar1.add(jLabel1);
-
-        jToolBar2.setFloatable(false);
-        jToolBar2.setRollover(true);
-        jToolBar2.setBorderPainted(false);
-        jToolBar2.setDoubleBuffered(true);
-        jToolBar2.setMargin(new java.awt.Insets(3, 10, 3, 10));
-
-        jButton5.setFont(jButton5.getFont().deriveFont(jButton5.getFont().getSize()+8f));
-        jButton5.setText("<html>&#x1f5b9;</html>");
-        jButton5.setToolTipText("New file");
-        jButton5.setActionCommand("File");
-        jButton5.setFocusPainted(false);
-        jButton5.setMargin(new java.awt.Insets(3, 7, 3, 7));
-        jToolBar2.add(jButton5);
-
-        jButton4.setFont(jButton4.getFont().deriveFont(jButton4.getFont().getSize()+8f));
-        jButton4.setText("<html>&#x1f5bf;</html>");
-        jButton4.setToolTipText("New folder");
-        jButton4.setActionCommand("Folder");
-        jButton4.setFocusPainted(false);
-        jButton4.setMargin(new java.awt.Insets(3, 7, 3, 7));
-        jToolBar2.add(jButton4);
-
-        jButton3.setFont(jButton3.getFont().deriveFont(jButton3.getFont().getSize()+8f));
-        jButton3.setText("<html>&#x2605;</html>");
-        jButton3.setToolTipText("Bookmark folder");
-        jButton3.setActionCommand("Favorite");
-        jButton3.setFocusPainted(false);
-        jButton3.setMargin(new java.awt.Insets(3, 7, 3, 7));
-        jToolBar2.add(jButton3);
-
-        jToolBar3.setFloatable(false);
-        jToolBar3.setRollover(true);
-        jToolBar3.setBorderPainted(false);
-        jToolBar3.setMargin(new java.awt.Insets(3, 10, 3, 10));
+        navigationToolbar.setFloatable(false);
+        navigationToolbar.setRollover(true);
+        navigationToolbar.setBorderPainted(false);
+        navigationToolbar.setMargin(new java.awt.Insets(3, 10, 3, 10));
 
         jButton1.setText("<html>&#10094;</html>");
         jButton1.setToolTipText("Backward");
@@ -132,7 +76,7 @@ public class Dashboard extends javax.swing.JFrame {
                 jButton1ActionPerformed(evt);
             }
         });
-        jToolBar3.add(jButton1);
+        navigationToolbar.add(jButton1);
 
         jButton2.setText("<html>&#10095;</html>");
         jButton2.setToolTipText("Forward");
@@ -143,31 +87,90 @@ public class Dashboard extends javax.swing.JFrame {
                 jButton2ActionPerformed(evt);
             }
         });
-        jToolBar3.add(jButton2);
+        navigationToolbar.add(jButton2);
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(jToolBar3, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+        verticalSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        verticalSeparator1.setToolTipText("");
+
+        breadcrumbToolbar.setFloatable(false);
+        breadcrumbToolbar.setBorderPainted(false);
+        breadcrumbToolbar.setDoubleBuffered(true);
+        breadcrumbToolbar.setMargin(new java.awt.Insets(3, 10, 3, 10));
+
+        rootButton.setFont(rootButton.getFont().deriveFont(rootButton.getFont().getStyle() | java.awt.Font.BOLD, rootButton.getFont().getSize()+8));
+        rootButton.setText("<html>&#x1f5b4;</html>");
+        rootButton.setToolTipText("Root Folder");
+        rootButton.setBorderPainted(false);
+        rootButton.setFocusPainted(false);
+        rootButton.setFocusable(false);
+        rootButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        rootButton.setMargin(new java.awt.Insets(3, 3, 3, 3));
+        rootButton.setSelected(true);
+        rootButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        breadcrumbToolbar.add(rootButton);
+
+        pathSeparator1.setFont(pathSeparator1.getFont().deriveFont(pathSeparator1.getFont().getSize()+10f));
+        pathSeparator1.setForeground(new java.awt.Color(0, 153, 153));
+        pathSeparator1.setText(":");
+        pathSeparator1.setToolTipText("");
+        breadcrumbToolbar.add(pathSeparator1);
+
+        verticalSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        verticalSeparator2.setToolTipText("");
+
+        actionToolbar.setFloatable(false);
+        actionToolbar.setRollover(true);
+        actionToolbar.setBorderPainted(false);
+        actionToolbar.setDoubleBuffered(true);
+        actionToolbar.setMargin(new java.awt.Insets(3, 10, 3, 10));
+
+        newFileButton.setFont(newFileButton.getFont().deriveFont(newFileButton.getFont().getSize()+12f));
+        newFileButton.setText("<html>&#x1f5ba;</html>");
+        newFileButton.setToolTipText("New file");
+        newFileButton.setActionCommand("File");
+        newFileButton.setFocusPainted(false);
+        newFileButton.setMargin(new java.awt.Insets(3, 7, 3, 7));
+        actionToolbar.add(newFileButton);
+
+        newFolderButton.setFont(newFolderButton.getFont().deriveFont(newFolderButton.getFont().getSize()+12f));
+        newFolderButton.setText("<html>&#x1f5bf;</html>");
+        newFolderButton.setToolTipText("New folder");
+        newFolderButton.setActionCommand("Folder");
+        newFolderButton.setFocusPainted(false);
+        newFolderButton.setMargin(new java.awt.Insets(3, 7, 3, 7));
+        actionToolbar.add(newFolderButton);
+
+        addBookmarkButton.setFont(addBookmarkButton.getFont().deriveFont(addBookmarkButton.getFont().getSize()+12f));
+        addBookmarkButton.setText("<html>&#x2605;</html>");
+        addBookmarkButton.setToolTipText("Bookmark folder");
+        addBookmarkButton.setActionCommand("Favorite");
+        addBookmarkButton.setFocusPainted(false);
+        addBookmarkButton.setMargin(new java.awt.Insets(3, 7, 3, 7));
+        actionToolbar.add(addBookmarkButton);
+
+        javax.swing.GroupLayout topPanelLayout = new javax.swing.GroupLayout(topPanel);
+        topPanel.setLayout(topPanelLayout);
+        topPanelLayout.setHorizontalGroup(
+            topPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(topPanelLayout.createSequentialGroup()
+                .addComponent(navigationToolbar, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(verticalSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 780, Short.MAX_VALUE)
+                .addComponent(breadcrumbToolbar, javax.swing.GroupLayout.DEFAULT_SIZE, 769, Short.MAX_VALUE)
                 .addGap(0, 0, 0)
-                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(verticalSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(actionToolbar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0))
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSeparator3)
-            .addComponent(jSeparator1)
-            .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jToolBar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jToolBar3, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+        topPanelLayout.setVerticalGroup(
+            topPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(verticalSeparator2)
+            .addComponent(verticalSeparator1)
+            .addComponent(breadcrumbToolbar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(actionToolbar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(navigationToolbar, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
         );
 
         jPanel3.setBackground(new java.awt.Color(224, 227, 233));
@@ -177,7 +180,7 @@ public class Dashboard extends javax.swing.JFrame {
         jButton7.setBorderPainted(false);
 
         jButton8.setFont(jButton8.getFont().deriveFont(jButton8.getFont().getSize()+5f));
-        jButton8.setText("<html>&#x1f3e0; Home</html>");
+        jButton8.setText("<html>&#x1f5b4; Home</html>");
         jButton8.setBorderPainted(false);
 
         jButton9.setFont(jButton9.getFont().deriveFont(jButton9.getFont().getSize()+5f));
@@ -188,6 +191,7 @@ public class Dashboard extends javax.swing.JFrame {
         jButton10.setText("<html>&#x23f2; Recents</html>");
         jButton10.setBorderPainted(false);
 
+        genKey.setBackground(new java.awt.Color(186, 182, 180));
         genKey.setText("Generate Key Pair");
         genKey.setToolTipText("");
         genKey.addActionListener(new java.awt.event.ActionListener() {
@@ -196,23 +200,31 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        jButton3.setBackground(new java.awt.Color(192, 190, 196));
+        jButton3.setFont(jButton3.getFont().deriveFont(jButton3.getFont().getSize()+3f));
+        jButton3.setText("<html>&#x21a7; Import File</html>");
+
+        jButton4.setBackground(new java.awt.Color(192, 190, 196));
+        jButton4.setFont(jButton4.getFont().deriveFont(jButton4.getFont().getSize()+3f));
+        jButton4.setText("<html>&#x21ca; Import Folder</html>");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton7)
-                    .addComponent(jButton8, javax.swing.GroupLayout.DEFAULT_SIZE, 187, Short.MAX_VALUE)
-                    .addComponent(jButton9, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 187, Short.MAX_VALUE)
-                    .addComponent(jButton10, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(genKey, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(0, 0, 0)
-                .addComponent(jSeparator4, javax.swing.GroupLayout.DEFAULT_SIZE, 0, Short.MAX_VALUE)
-                .addGap(0, 0, 0))
+            .addComponent(verticalSeparator3)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jButton3)
+                    .addComponent(jButton7, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 187, Short.MAX_VALUE)
+                    .addComponent(jButton9, javax.swing.GroupLayout.DEFAULT_SIZE, 187, Short.MAX_VALUE)
+                    .addComponent(jButton10)
+                    .addComponent(genKey, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton4, javax.swing.GroupLayout.Alignment.LEADING))
+                .addGap(10, 10, 10))
+            .addComponent(jSeparator1)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -224,8 +236,14 @@ public class Dashboard extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 263, Short.MAX_VALUE)
+                .addComponent(verticalSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 167, Short.MAX_VALUE)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(genKey, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton9, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -258,15 +276,15 @@ public class Dashboard extends javax.swing.JFrame {
                 .addComponent(jSeparator5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
                 .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 1024, Short.MAX_VALUE)
-            .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addComponent(topPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 1024, Short.MAX_VALUE)
+            .addComponent(horizontalSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(topPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(horizontalSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -297,28 +315,31 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JToolBar actionToolbar;
+    private javax.swing.JButton addBookmarkButton;
+    private javax.swing.JToolBar breadcrumbToolbar;
     private javax.swing.JButton genKey;
+    private javax.swing.JSeparator horizontalSeparator1;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton10;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
     private javax.swing.JButton jButton8;
     private javax.swing.JButton jButton9;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JSeparator jSeparator3;
-    private javax.swing.JSeparator jSeparator4;
     private javax.swing.JSeparator jSeparator5;
-    private javax.swing.JToolBar jToolBar1;
-    private javax.swing.JToolBar jToolBar2;
-    private javax.swing.JToolBar jToolBar3;
+    private javax.swing.JToolBar navigationToolbar;
+    private javax.swing.JButton newFileButton;
+    private javax.swing.JButton newFolderButton;
+    private javax.swing.JLabel pathSeparator1;
+    private javax.swing.JButton rootButton;
+    private javax.swing.JPanel topPanel;
+    private javax.swing.JSeparator verticalSeparator1;
+    private javax.swing.JSeparator verticalSeparator2;
+    private javax.swing.JSeparator verticalSeparator3;
     // End of variables declaration//GEN-END:variables
 }
