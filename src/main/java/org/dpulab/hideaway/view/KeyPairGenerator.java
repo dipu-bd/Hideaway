@@ -60,7 +60,23 @@ public class KeyPairGenerator extends javax.swing.JDialog {
                 this.emailInput.getText(),
                 this.orgUnitInput.getText(),
                 this.organizationInput.getText(),
-                (String) this.countrySelector.getSelectedItem());
+                this.getCountryCode());
+    }
+    
+    private void loadCountryList() {
+        String[] locales = Locale.getISOCountries();
+        for (int i = 0; i < locales.length; ++i) {
+            Locale obj = new Locale("", locales[i]);
+            locales[i] = String.format("%s - %s", obj.getDisplayCountry(), obj.getCountry());
+        }
+        Arrays.sort(locales);
+        this.countrySelector.setModel(new DefaultComboBoxModel<>(locales));
+    }
+
+    private String getCountryCode() {
+        String code = (String) this.countrySelector.getSelectedItem();
+        String[] parts = code.split(" ");
+        return parts[parts.length - 1];
     }
 
     private void generateAndSave() {
@@ -104,15 +120,6 @@ public class KeyPairGenerator extends javax.swing.JDialog {
         this.countrySelector.setSelectedIndex(-1);
     }
 
-    private void loadCountryList() {
-        String[] locales = Locale.getISOCountries();
-        for (int i = 0; i < locales.length; ++i) {
-            Locale obj = new Locale("", locales[i]);
-            locales[i] = String.format("%s - %s", obj.getDisplayCountry(), obj.getCountry());
-        }
-        Arrays.sort(locales);
-        this.countrySelector.setModel(new DefaultComboBoxModel<>(locales));
-    }
 
     /**
      * This method is called from within the constructor to initialize the form.

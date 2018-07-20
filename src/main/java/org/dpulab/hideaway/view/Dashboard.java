@@ -17,7 +17,7 @@ public class Dashboard extends javax.swing.JFrame {
     public Dashboard() {
         initComponents();
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -34,7 +34,6 @@ public class Dashboard extends javax.swing.JFrame {
         verticalSeparator1 = new javax.swing.JSeparator();
         breadcrumbToolbar = new javax.swing.JToolBar();
         rootButton = new javax.swing.JButton();
-        pathSeparator1 = new javax.swing.JLabel();
         verticalSeparator2 = new javax.swing.JSeparator();
         actionToolbar = new javax.swing.JToolBar();
         newFileButton = new javax.swing.JButton();
@@ -106,16 +105,9 @@ public class Dashboard extends javax.swing.JFrame {
         rootButton.setFocusPainted(false);
         rootButton.setFocusable(false);
         rootButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        rootButton.setMargin(new java.awt.Insets(3, 3, 3, 3));
         rootButton.setSelected(true);
         rootButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         breadcrumbToolbar.add(rootButton);
-
-        pathSeparator1.setFont(pathSeparator1.getFont().deriveFont(pathSeparator1.getFont().getSize()+10f));
-        pathSeparator1.setForeground(new java.awt.Color(0, 153, 153));
-        pathSeparator1.setText(":");
-        pathSeparator1.setToolTipText("");
-        breadcrumbToolbar.add(pathSeparator1);
 
         verticalSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
         verticalSeparator2.setToolTipText("");
@@ -190,7 +182,8 @@ public class Dashboard extends javax.swing.JFrame {
         favoriteButton.setBorderPainted(false);
 
         generateKeyPairButton.setBackground(new java.awt.Color(186, 182, 180));
-        generateKeyPairButton.setText("Generate Key Pair");
+        generateKeyPairButton.setFont(generateKeyPairButton.getFont().deriveFont(generateKeyPairButton.getFont().getSize()+2f));
+        generateKeyPairButton.setText("<html>&#x26cf; Generate Key Pair</html>");
         generateKeyPairButton.setToolTipText("");
         generateKeyPairButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -199,12 +192,12 @@ public class Dashboard extends javax.swing.JFrame {
         });
 
         jButton3.setBackground(new java.awt.Color(192, 190, 196));
-        jButton3.setFont(jButton3.getFont().deriveFont(jButton3.getFont().getSize()+3f));
-        jButton3.setText("<html>&#x21a7; Import File</html>");
+        jButton3.setFont(jButton3.getFont().deriveFont(jButton3.getFont().getSize()+2f));
+        jButton3.setText("<html>&#x21b4; Import File</html>");
 
         jButton4.setBackground(new java.awt.Color(192, 190, 196));
-        jButton4.setFont(jButton4.getFont().deriveFont(jButton4.getFont().getSize()+3f));
-        jButton4.setText("<html>&#x21ca; Import Folder</html>");
+        jButton4.setFont(jButton4.getFont().deriveFont(jButton4.getFont().getSize()+2f));
+        jButton4.setText("<html>&#x2bb7; Import Folder</html>");
 
         keystoreButton.setFont(keystoreButton.getFont().deriveFont(keystoreButton.getFont().getSize()+5f));
         keystoreButton.setText("<html>&#x1f5dd; Keystore</html>");
@@ -223,7 +216,7 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(homeButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 187, Short.MAX_VALUE)
                     .addComponent(keystoreButton, javax.swing.GroupLayout.DEFAULT_SIZE, 187, Short.MAX_VALUE)
                     .addComponent(recentsButton)
-                    .addComponent(generateKeyPairButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(generateKeyPairButton, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton4, javax.swing.GroupLayout.Alignment.LEADING))
                 .addGap(10, 10, 10))
             .addComponent(horizontalSeparator3)
@@ -357,7 +350,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JToolBar navigationToolbar;
     private javax.swing.JButton newFileButton;
     private javax.swing.JButton newFolderButton;
-    private javax.swing.JLabel pathSeparator1;
     private javax.swing.JButton recentsButton;
     private javax.swing.JButton rootButton;
     private javax.swing.JPanel sidePanel;
