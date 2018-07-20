@@ -36,10 +36,13 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Properties;
 import org.apache.commons.crypto.stream.CryptoInputStream;
 import org.apache.commons.crypto.stream.CryptoOutputStream;
+import org.apache.commons.text.WordUtils;
 import org.dpulab.hideaway.models.IndexEntry;
 import org.dpulab.hideaway.view.PasswordInput;
 
@@ -93,7 +96,7 @@ public class CipherIO {
     }
     
     public File getKeyStoreFile() {
-        return this.workDir.resolve(this.passwordHash + ".ks").toFile();
+        return this.workDir.resolve(this.passwordHash + ".jks").toFile();
     }
 
     public File getIndexFile() {
@@ -246,6 +249,12 @@ public class CipherIO {
             this.keyStore.load(fis, this.getKeystorePass());
         }
         Reporter.format("Keystore loaded with %d keys.", this.keyStore.size());
+        
+        for(String alias : Collections.list(this.keyStore.aliases())) {
+            Key key = this.keyStore.getKey(alias, this.getKeystorePass());
+            System.out.printf("%s %s %s\n", alias, key.getAlgorithm(), key.getFormat());
+            System.out.println(WordUtils.wrap(Base64.getEncoder().encodeToString(key.getEncoded()), 64, "\n", true));
+        }
     }
 
     /**
