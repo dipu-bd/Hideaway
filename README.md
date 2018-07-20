@@ -8,16 +8,6 @@ Store files hidden away from others with the help of latest cryptographic algori
 ### Models
 
 - CipherFile: `[created at][modified at][content digest length][content digest][file length][file content]`
-- CipherFolder
-
-Operations of Index:
-
-- loadIndexTree
-- saveIndexTree
-- addEntry(IndexEntry)
-- deleteEntry(IndexEntry)
-- getEntry(checksum / file path)
-- allEntries
 
 Operations of IndexEntry:
 - isExists

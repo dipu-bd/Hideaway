@@ -64,6 +64,7 @@ public class Dashboard extends javax.swing.JFrame {
         importFolderButton = new javax.swing.JButton();
         horizontalSeparator3 = new javax.swing.JSeparator();
         keystoreButton = new javax.swing.JButton();
+        changePasswordButton = new javax.swing.JButton();
         verticalSeparator3 = new javax.swing.JSeparator();
         mainPanel = new javax.swing.JPanel();
         dataViewerScrollPane = new javax.swing.JScrollPane();
@@ -110,8 +111,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         pathSelectorPanel.setOpaque(false);
 
-        rootButton.setFont(rootButton.getFont().deriveFont(rootButton.getFont().getStyle() | java.awt.Font.BOLD, rootButton.getFont().getSize()+12));
-        rootButton.setText("<html>&#x1f5dd;</html>");
+        rootButton.setFont(rootButton.getFont().deriveFont(rootButton.getFont().getStyle() | java.awt.Font.BOLD, rootButton.getFont().getSize()+16));
+        rootButton.setForeground(new java.awt.Color(102, 0, 51));
+        rootButton.setText("<html>&#x26d3;</html>");
         rootButton.setToolTipText("Root Folder");
         rootButton.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(192, 197, 203)));
         rootButton.setContentAreaFilled(false);
@@ -310,11 +312,21 @@ public class Dashboard extends javax.swing.JFrame {
         importFolderButton.setText("<html>&#x27f4; Import Folder</html>");
 
         keystoreButton.setFont(keystoreButton.getFont().deriveFont(keystoreButton.getFont().getSize()+5f));
-        keystoreButton.setText("<html>&#x1f5dd; Keystore</html>");
+        keystoreButton.setText("<html>&#x26d3; Keystore</html>");
         keystoreButton.setBorderPainted(false);
         keystoreButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 keystoreButtonActionPerformed(evt);
+            }
+        });
+
+        changePasswordButton.setBackground(new java.awt.Color(186, 182, 180));
+        changePasswordButton.setFont(changePasswordButton.getFont().deriveFont(changePasswordButton.getFont().getSize()+2f));
+        changePasswordButton.setText("<html>&#x1f5dd; Change Password</html>");
+        changePasswordButton.setToolTipText("");
+        changePasswordButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                changePasswordButtonActionPerformed(evt);
             }
         });
 
@@ -333,7 +345,8 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(keystoreButton)
                     .addComponent(recentsButton)
                     .addComponent(generateKeyPairButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
-                    .addComponent(importFolderButton, javax.swing.GroupLayout.Alignment.LEADING))
+                    .addComponent(importFolderButton, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(changePasswordButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE))
                 .addGap(10, 10, 10))
         );
         sidePanelLayout.setVerticalGroup(
@@ -351,8 +364,10 @@ public class Dashboard extends javax.swing.JFrame {
                 .addComponent(importFileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(importFolderButton, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 120, Short.MAX_VALUE)
                 .addComponent(horizontalSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(changePasswordButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(generateKeyPairButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -495,9 +510,14 @@ public class Dashboard extends javax.swing.JFrame {
         SwingUtilities.invokeLater(Program::start);
     }//GEN-LAST:event_logoutButtonActionPerformed
 
+    private void changePasswordButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changePasswordButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_changePasswordButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToolBar actionToolbar;
     private javax.swing.JButton addBookmarkButton;
+    private javax.swing.JButton changePasswordButton;
     private javax.swing.JTable dataViewer;
     private javax.swing.JScrollPane dataViewerScrollPane;
     private javax.swing.JButton favoriteButton;
