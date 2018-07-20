@@ -98,7 +98,7 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel1.setOpaque(false);
 
         rootButton.setFont(rootButton.getFont().deriveFont(rootButton.getFont().getStyle() | java.awt.Font.BOLD, rootButton.getFont().getSize()+12));
-        rootButton.setText("<html>&#x1f5b4;</html>");
+        rootButton.setText("<html>&#x1f5dd;</html>");
         rootButton.setToolTipText("Root Folder");
         rootButton.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(192, 197, 203)));
         rootButton.setContentAreaFilled(false);
@@ -113,7 +113,7 @@ public class Dashboard extends javax.swing.JFrame {
         jTextField1.setBackground(new java.awt.Color(214, 217, 223));
         jTextField1.setFont(new java.awt.Font("Monospaced", 1, 16)); // NOI18N
         jTextField1.setForeground(new java.awt.Color(32, 78, 78));
-        jTextField1.setText("Keystore/secret");
+        jTextField1.setText("Keystore");
         jTextField1.setToolTipText("");
         jTextField1.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(182, 187, 193)), javax.swing.BorderFactory.createEmptyBorder(3, 8, 3, 8)));
         jTextField1.setMargin(new java.awt.Insets(5, 10, 5, 10));
@@ -132,14 +132,11 @@ public class Dashboard extends javax.swing.JFrame {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(5, 5, 5)
-                        .addComponent(rootButton, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jTextField1)))
+                    .addComponent(jTextField1)
+                    .addComponent(rootButton))
                 .addGap(5, 5, 5))
         );
 
