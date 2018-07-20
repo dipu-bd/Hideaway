@@ -65,7 +65,7 @@ public class Program {
          // new Playground().play();
         
         /* Create and display the form */
-        SwingUtilities.invokeLater(() -> { start(); });                
+        SwingUtilities.invokeLater(Program::start);                
     }
     
     public static void start() {

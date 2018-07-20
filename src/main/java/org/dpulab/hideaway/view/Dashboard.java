@@ -5,6 +5,10 @@
  */
 package org.dpulab.hideaway.view;
 
+import java.awt.Color;
+import javax.swing.SwingUtilities;
+import org.dpulab.hideaway.Program;
+import static org.dpulab.hideaway.Program.start;
 import org.dpulab.hideaway.models.DashboardPage;
 
 /**
@@ -48,6 +52,7 @@ public class Dashboard extends javax.swing.JFrame {
         newFileButton = new javax.swing.JButton();
         newFolderButton = new javax.swing.JButton();
         addBookmarkButton = new javax.swing.JButton();
+        logoutButton = new javax.swing.JButton();
         horizontalSeparator1 = new javax.swing.JSeparator();
         sidePanel = new javax.swing.JPanel();
         homeButton = new javax.swing.JButton();
@@ -136,7 +141,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGap(10, 10, 10)
                 .addComponent(rootButton, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(3, 3, 3)
-                .addComponent(pathInput)
+                .addComponent(pathInput, javax.swing.GroupLayout.DEFAULT_SIZE, 623, Short.MAX_VALUE)
                 .addGap(10, 10, 10))
         );
         pathSelectorPanelLayout.setVerticalGroup(
@@ -164,8 +169,10 @@ public class Dashboard extends javax.swing.JFrame {
         newFileButton.setActionCommand("File");
         newFileButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(3, 10, 3, 10)));
         newFileButton.setFocusPainted(false);
+        newFileButton.setFocusable(false);
         newFileButton.setMaximumSize(new java.awt.Dimension(2147483647, 40));
         newFileButton.setMinimumSize(new java.awt.Dimension(46, 40));
+        newFileButton.setOpaque(true);
         newFileButton.setPreferredSize(new java.awt.Dimension(46, 40));
         actionToolbar.add(newFileButton);
 
@@ -175,8 +182,10 @@ public class Dashboard extends javax.swing.JFrame {
         newFolderButton.setActionCommand("Folder");
         newFolderButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(3, 10, 3, 10)));
         newFolderButton.setFocusPainted(false);
+        newFolderButton.setFocusable(false);
         newFolderButton.setMaximumSize(new java.awt.Dimension(2147483647, 40));
         newFolderButton.setMinimumSize(new java.awt.Dimension(46, 40));
+        newFolderButton.setOpaque(true);
         newFolderButton.setPreferredSize(new java.awt.Dimension(46, 40));
         actionToolbar.add(newFolderButton);
 
@@ -186,10 +195,46 @@ public class Dashboard extends javax.swing.JFrame {
         addBookmarkButton.setActionCommand("Favorite");
         addBookmarkButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(3, 10, 3, 10)));
         addBookmarkButton.setFocusPainted(false);
+        addBookmarkButton.setFocusable(false);
         addBookmarkButton.setMaximumSize(new java.awt.Dimension(2147483647, 40));
         addBookmarkButton.setMinimumSize(new java.awt.Dimension(46, 40));
+        addBookmarkButton.setOpaque(true);
         addBookmarkButton.setPreferredSize(new java.awt.Dimension(46, 40));
         actionToolbar.add(addBookmarkButton);
+
+        logoutButton.setBackground(new java.awt.Color(255, 195, 195));
+        logoutButton.setFont(logoutButton.getFont().deriveFont(logoutButton.getFont().getStyle() | java.awt.Font.BOLD, logoutButton.getFont().getSize()+12));
+        logoutButton.setForeground(new java.awt.Color(153, 51, 0));
+        logoutButton.setText("<html>&#x2b93;</html>");
+        logoutButton.setToolTipText("Bookmark folder");
+        logoutButton.setActionCommand("Favorite");
+        logoutButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(3, 10, 3, 10)));
+        logoutButton.setContentAreaFilled(false);
+        logoutButton.setFocusPainted(false);
+        logoutButton.setMaximumSize(new java.awt.Dimension(2147483647, 40));
+        logoutButton.setMinimumSize(new java.awt.Dimension(46, 40));
+        logoutButton.setOpaque(true);
+        logoutButton.setPreferredSize(new java.awt.Dimension(46, 40));
+        logoutButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                logoutButtonMousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                logoutButtonMouseReleased(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                logoutButtonMouseExited(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                logoutButtonMouseEntered(evt);
+            }
+        });
+        logoutButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                logoutButtonActionPerformed(evt);
+            }
+        });
+        actionToolbar.add(logoutButton);
 
         javax.swing.GroupLayout topPanelLayout = new javax.swing.GroupLayout(topPanel);
         topPanel.setLayout(topPanelLayout);
@@ -204,7 +249,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGap(0, 0, 0)
                 .addComponent(verticalSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(actionToolbar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(actionToolbar, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0))
         );
         topPanelLayout.setVerticalGroup(
@@ -258,11 +303,11 @@ public class Dashboard extends javax.swing.JFrame {
 
         importFileButton.setBackground(new java.awt.Color(192, 190, 196));
         importFileButton.setFont(importFileButton.getFont().deriveFont(importFileButton.getFont().getSize()+2f));
-        importFileButton.setText("<html>&#x21b4; Import File</html>");
+        importFileButton.setText("<html>&#x271c; Import File</html>");
 
         importFolderButton.setBackground(new java.awt.Color(192, 190, 196));
         importFolderButton.setFont(importFolderButton.getFont().deriveFont(importFolderButton.getFont().getSize()+2f));
-        importFolderButton.setText("<html>&#x2bb7; Import Folder</html>");
+        importFolderButton.setText("<html>&#x27f4; Import Folder</html>");
 
         keystoreButton.setFont(keystoreButton.getFont().deriveFont(keystoreButton.getFont().getSize()+5f));
         keystoreButton.setText("<html>&#x1f5dd; Keystore</html>");
@@ -353,7 +398,7 @@ public class Dashboard extends javax.swing.JFrame {
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addGap(0, 0, 0)
-                .addComponent(dataViewerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 547, Short.MAX_VALUE)
+                .addComponent(dataViewerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 522, Short.MAX_VALUE)
                 .addGap(0, 0, 0))
         );
 
@@ -381,7 +426,7 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(1, 1, 1)
-                        .addComponent(sidePanel, javax.swing.GroupLayout.DEFAULT_SIZE, 546, Short.MAX_VALUE))
+                        .addComponent(sidePanel, javax.swing.GroupLayout.DEFAULT_SIZE, 521, Short.MAX_VALUE))
                     .addComponent(verticalSeparator3)))
         );
 
@@ -425,6 +470,31 @@ public class Dashboard extends javax.swing.JFrame {
         this.selectPage(DashboardPage.FAVORITES);
     }//GEN-LAST:event_favoriteButtonActionPerformed
 
+    private void logoutButtonMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logoutButtonMouseEntered
+        this.logoutButton.setBackground(new Color(255, 51, 51));
+        this.logoutButton.setForeground(Color.white);
+    }//GEN-LAST:event_logoutButtonMouseEntered
+
+    private void logoutButtonMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logoutButtonMouseExited
+        this.logoutButton.setBackground(new Color(255, 195, 195));
+        this.logoutButton.setForeground(new Color(153, 51, 0));
+    }//GEN-LAST:event_logoutButtonMouseExited
+
+    private void logoutButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logoutButtonMousePressed
+        this.logoutButton.setBackground(new Color(211, 51, 51));
+        this.logoutButton.setForeground(Color.white);
+    }//GEN-LAST:event_logoutButtonMousePressed
+
+    private void logoutButtonMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logoutButtonMouseReleased
+        this.logoutButton.setBackground(new Color(255, 51, 51));
+        this.logoutButton.setForeground(Color.white);
+    }//GEN-LAST:event_logoutButtonMouseReleased
+
+    private void logoutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutButtonActionPerformed
+        this.dispose();
+        SwingUtilities.invokeLater(Program::start);
+    }//GEN-LAST:event_logoutButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToolBar actionToolbar;
     private javax.swing.JButton addBookmarkButton;
@@ -441,6 +511,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton importFileButton;
     private javax.swing.JButton importFolderButton;
     private javax.swing.JButton keystoreButton;
+    private javax.swing.JButton logoutButton;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JToolBar navigationToolbar;
     private javax.swing.JButton newFileButton;
