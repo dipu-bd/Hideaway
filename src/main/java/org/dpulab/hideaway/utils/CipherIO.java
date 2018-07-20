@@ -62,7 +62,8 @@ public class CipherIO {
     //<editor-fold defaultstate="collapsed" desc=" Get instance methods ">
     private static final HashMap<String, CipherIO> STORAGE = new HashMap<>();
 
-    public static CipherIO getFor(String folder) throws KeyStoreException, PasswordException {
+    public static CipherIO getFor(String folder)
+            throws KeyStoreException, PasswordException, NoSuchAlgorithmException, UnsupportedEncodingException {
         if (!CipherIO.STORAGE.containsKey(folder)) {
             // attach a new storage class with the folder
             CipherIO.STORAGE.put(folder, new CipherIO(folder));
@@ -70,7 +71,8 @@ public class CipherIO {
         return CipherIO.STORAGE.get(folder);
     }
 
-    public static CipherIO getDefault() throws KeyStoreException, PasswordException {
+    public static CipherIO getDefault()
+            throws KeyStoreException, PasswordException, NoSuchAlgorithmException, UnsupportedEncodingException {
         String folder = Settings.getDefault().get(Settings.WORK_DIR);
         return CipherIO.getFor(folder);
     }
@@ -83,14 +85,15 @@ public class CipherIO {
     private final String password;
     private final String passwordHash;
 
-    private CipherIO(String folder) throws KeyStoreException, PasswordException {
+    private CipherIO(String folder)
+            throws KeyStoreException, PasswordException, NoSuchAlgorithmException, UnsupportedEncodingException {
         this.workDir = new File(folder).toPath();
         this.keyStore = KeyStore.getInstance(Settings.STORE_TYPE);
         this.rootEntry = IndexEntry.getRoot();
 
         this.password = Settings.getDefault().getSession(Settings.PASSWORD);
         this.passwordHash = CryptoService.getDefault().getHash(this.password);
-        
+
         if (StringUtils.isEmpty(this.password) || StringUtils.isEmpty(this.passwordHash)) {
             throw new PasswordException("No password was found");
         }
@@ -197,8 +200,8 @@ public class CipherIO {
     }
 
     /**
-     * Stores a secret key of PKCS algorithm.
-     * 
+     * Stores a secret symmetric key.
+     *
      * @param alias
      * @param secret
      * @throws IOException
@@ -223,11 +226,11 @@ public class CipherIO {
      */
     public KeyPair getKeyPair(String alias)
             throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
-        Key publicKey = this.keyStore.getKey(alias + "_public", this.getKeystorePass());
-        Key privateKey = this.keyStore.getKey(alias + "_private", this.getKeystorePass());
-        return new KeyPair((PublicKey) publicKey, (PrivateKey) privateKey);
+        PublicKey publicKey = this.keyStore.getCertificate(alias + "_cert").getPublicKey();
+        PrivateKey privateKey = (PrivateKey) this.keyStore.getKey(alias + "_key", this.getKeystorePass());
+        return new KeyPair(publicKey, privateKey);
     }
-
+        
     /**
      * Sets a secret key by its alias. Certificate chain can be null unless it
      * is a RSA Key pair.
@@ -240,11 +243,11 @@ public class CipherIO {
      * @throws NoSuchAlgorithmException
      * @throws CertificateException
      */
-    public void storeKeyPair(String alias, KeyPair keyPair, Certificate certificate) 
+    public void storeKeyPair(String alias, KeyPair keyPair, Certificate certificate)
             throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
         Certificate[] certChain = {certificate};
-        this.keyStore.setKeyEntry(alias + "_public", keyPair.getPublic(), this.getKeystorePass(), certChain);
-        this.keyStore.setKeyEntry(alias + "_private", keyPair.getPrivate(), this.getKeystorePass(), certChain);
+        this.keyStore.setCertificateEntry(alias + "_cert", certificate);
+        this.keyStore.setKeyEntry(alias + "_key", keyPair.getPrivate(), this.getKeystorePass(), certChain);
         this.saveKeystore();
     }
 
@@ -289,9 +292,15 @@ public class CipherIO {
         Reporter.format("Keystore loaded with %d keys.", this.keyStore.size());
 
         for (String alias : Collections.list(this.keyStore.aliases())) {
-            Key key = this.keyStore.getKey(alias, this.getKeystorePass());
-            System.out.printf("%s %s %s\n", alias, key.getAlgorithm(), key.getFormat());
-            System.out.println(WordUtils.wrap(Base64.getEncoder().encodeToString(key.getEncoded()), 64, "\n", true));
+            if (this.keyStore.isKeyEntry(alias)) {
+                Key key = this.keyStore.getKey(alias, this.getKeystorePass());
+                System.out.printf("%s %s %s\n", alias, key.getAlgorithm(), key.getFormat());
+                System.out.println(WordUtils.wrap(Base64.getEncoder().encodeToString(key.getEncoded()), 64, "\n", true));
+            } else if (this.keyStore.isCertificateEntry(alias)) {
+                Certificate cert = this.keyStore.getCertificate(alias);
+                System.out.printf("%s %s\n", alias, cert.getType());
+                System.out.println(WordUtils.wrap(Base64.getEncoder().encodeToString(cert.getPublicKey().getEncoded()), 64, "\n", true));
+            }
         }
     }
 

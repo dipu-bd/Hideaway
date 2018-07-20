@@ -23,8 +23,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
@@ -65,23 +63,21 @@ public final class CryptoService {
      *
      * @param text The input text.
      * @return The hash of the text.
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws java.io.UnsupportedEncodingException
      */
-    public String getHash(String text) {
-        String hash = text;
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-1");
-            digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
-            text = StringUtils.swapCase(text);
-            digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
-            text = StringUtils.rotate(text, text.length() / 3);
-            digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
-            text = StringUtils.reverse(text);
-            digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
-            hash = Base64.getEncoder().encodeToString(digest.digest());
-            hash = hash.replace('/', '-');
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
-            Reporter.put(CryptoService.class.getName(), ex);
-        }
+    public String getHash(String text) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        if (StringUtils.isEmpty(text)) return null;
+        MessageDigest digest = MessageDigest.getInstance("SHA-1");
+        digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
+        text = StringUtils.swapCase(text);
+        digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
+        text = StringUtils.rotate(text, text.length() / 3);
+        digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
+        text = StringUtils.reverse(text);
+        digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
+        String hash = Base64.getEncoder().encodeToString(digest.digest());
+        hash = hash.replace('/', '-');
         return hash;
     }
 
@@ -203,19 +199,19 @@ public final class CryptoService {
         }
         X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
         builder.addRDN(BCStyle.CN, alias);
-        if (StringUtils.isEmpty(clientName)) {
+        if (!StringUtils.isEmpty(clientName)) {
             builder.addRDN(BCStyle.NAME, clientName);
         }
-        if (StringUtils.isEmpty(clientEmail)) {
+        if (!StringUtils.isEmpty(clientEmail)) {
             builder.addRDN(BCStyle.E, clientEmail);
         }
-        if (StringUtils.isEmpty(countryCode)) {
+        if (!StringUtils.isEmpty(countryCode)) {
             builder.addRDN(BCStyle.C, countryCode);
         }
-        if (StringUtils.isEmpty(organization)) {
+        if (!StringUtils.isEmpty(organization)) {
             builder.addRDN(BCStyle.O, organization);
         }
-        if (StringUtils.isEmpty(organizationalUnit)) {
+        if (!StringUtils.isEmpty(organizationalUnit)) {
             builder.addRDN(BCStyle.OU, organizationalUnit);
         }
         return builder.build();
