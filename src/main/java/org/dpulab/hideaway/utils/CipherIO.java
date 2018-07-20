@@ -230,7 +230,7 @@ public class CipherIO {
         PrivateKey privateKey = (PrivateKey) this.keyStore.getKey(alias + "_key", this.getKeystorePass());
         return new KeyPair(publicKey, privateKey);
     }
-        
+
     /**
      * Sets a secret key by its alias. Certificate chain can be null unless it
      * is a RSA Key pair.
@@ -252,12 +252,25 @@ public class CipherIO {
     }
 
     /**
+     * Checks if a RSA KeyPair exists in current KeyStore by its alias.
+     *
+     * @param alias the alias of the key pair
+     * @return
+     * @throws KeyStoreException
+     */
+    public boolean containsKeyPair(String alias) throws KeyStoreException {
+        return this.keyStore.containsAlias(alias + "_cert")
+                && this.keyStore.containsAlias(alias + "_key");
+    }
+
+    /**
      * Gets a collection of default system properties.
      *
      * @return
      */
     public Properties defaultProperties() {
-        return org.apache.commons.crypto.utils.Utils.getDefaultProperties();
+        return new Properties();
+        // org.apache.commons.crypto.utils.Utils.getDefaultProperties();
     }
 
     /**
@@ -331,7 +344,7 @@ public class CipherIO {
     public void loadIndex() throws IOException, GeneralSecurityException, UnsupportedClassVersionError {
         File indexFile = this.getIndexFile();
         Key key = this.getIndexSecret();
-        Properties props = new Properties();
+        Properties props = this.defaultProperties();
         AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
 
         try (FileInputStream fis = new FileInputStream(indexFile);
@@ -351,7 +364,7 @@ public class CipherIO {
     public void saveIndex() throws IOException, GeneralSecurityException {
         File indexFile = this.getIndexFile();
         Key key = this.getIndexSecret();
-        Properties props = new Properties();
+        Properties props = this.defaultProperties();
         AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
 
         try (FileOutputStream fos = new FileOutputStream(indexFile);

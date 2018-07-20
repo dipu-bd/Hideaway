@@ -16,16 +16,22 @@
  */
 package org.dpulab.hideaway.view;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.util.Arrays;
-import java.util.Base64;
+import java.util.InputMismatchException;
 import java.util.Locale;
 import java.util.logging.Level;
 import javax.swing.DefaultComboBoxModel;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.WordUtils;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.dpulab.hideaway.utils.CipherIO;
 import org.dpulab.hideaway.utils.CryptoService;
 import org.dpulab.hideaway.utils.Reporter;
@@ -45,6 +51,7 @@ public class KeyPairGenerator extends javax.swing.JDialog {
         super(parent, true);
         initComponents();
         loadCountryList();
+        clearInputs();
     }
 
     public X500Name getSubject() {
@@ -62,35 +69,38 @@ public class KeyPairGenerator extends javax.swing.JDialog {
     }
 
     private void generateAndSave() {
-        System.out.println("--------");
         try {
+            this.errorLabel.setText("");
             // check the alias name
             String alias = this.aliasInput.getText();
             if (StringUtils.isEmpty(alias)) {
-                throw new Exception("Can not create key without an alias");
+                throw new InputMismatchException("Can not create key without an alias");
+            }
+            // check if alias exists
+            if (CipherIO.getDefault().containsKeyPair(alias)) {
+                throw new InputMismatchException("Alias <b>" + alias + "</b> already exists in the key store.");
             }
             // get the subjects data
             X500Name subject = this.getSubject();
-            System.out.println(subject.toString());
             // generate RSA key pair
             KeyPair keyPair = CryptoService.getDefault().generateKeyPair(4096);
-            System.out.println("Public Key " + keyPair.getPublic().getAlgorithm() + " - " + keyPair.getPublic().getFormat());
-            System.out.println(WordUtils.wrap(Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded()), 64, "\n", true));
-            System.out.println("Private Key " + keyPair.getPrivate().getAlgorithm() + " - " + keyPair.getPrivate().getFormat());
-            System.out.println(WordUtils.wrap(Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded()), 64, "\n", true));
             // self sign the key
             Certificate certificate = CryptoService.getDefault().generateSelfSignedX509Certificate(keyPair, subject);
-            System.out.println("Certificate " + certificate.getType());
-            System.out.println(WordUtils.wrap(Base64.getEncoder().encodeToString(certificate.getEncoded()), 64, "\n", true));
             // save to keystore
             CipherIO.getDefault().storeKeyPair(alias, keyPair, certificate);
-        } catch (Exception ex) {
+            // clear and exit
+            this.clearInputs();
+            this.setVisible(false);
+        } catch (InputMismatchException ex) {
+            this.errorLabel.setText(String.format("<html>Error: %s</html>", ex.getMessage()));
+        } catch (IOException | GeneralSecurityException | OperatorCreationException ex) {
             Reporter.put(this.getClass(), ex);
-            Reporter.dialog(this, Level.SEVERE, "Error: %s", ex.toString());
+            this.errorLabel.setText(String.format("<html>%s</html>", ex.toString()));
         }
     }
 
     private void clearInputs() {
+        this.errorLabel.setText("");
         this.aliasInput.setText("");
         this.nameInput.setText("");
         this.emailInput.setText("");
@@ -139,11 +149,12 @@ public class KeyPairGenerator extends javax.swing.JDialog {
         orgUnitHintLabel = new javax.swing.JLabel();
         countryLabel = new javax.swing.JLabel();
         countrySelector = new javax.swing.JComboBox<>();
+        errorLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Generate RSA pair");
-        setMinimumSize(new java.awt.Dimension(550, 520));
-        setPreferredSize(new java.awt.Dimension(550, 550));
+        setMinimumSize(new java.awt.Dimension(550, 540));
+        setPreferredSize(new java.awt.Dimension(550, 600));
 
         frameHeaderPanel.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(0, 204, 204)));
 
@@ -209,6 +220,7 @@ public class KeyPairGenerator extends javax.swing.JDialog {
 
         aliasLabel.setFont(aliasLabel.getFont().deriveFont(aliasLabel.getFont().getSize()+2f));
         aliasLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        aliasLabel.setLabelFor(aliasInput);
         aliasLabel.setText("Key Alias:");
 
         aliasInput.setFont(aliasInput.getFont());
@@ -218,18 +230,21 @@ public class KeyPairGenerator extends javax.swing.JDialog {
 
         nameLabel.setFont(nameLabel.getFont().deriveFont(nameLabel.getFont().getSize()+2f));
         nameLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        nameLabel.setLabelFor(nameInput);
         nameLabel.setText("Name:");
 
         nameInput.setFont(nameInput.getFont());
 
         emailLabel.setFont(emailLabel.getFont().deriveFont(emailLabel.getFont().getSize()+2f));
         emailLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        emailLabel.setLabelFor(emailInput);
         emailLabel.setText("Email:");
 
         emailInput.setFont(emailInput.getFont());
 
         organizationLabel.setFont(organizationLabel.getFont().deriveFont(organizationLabel.getFont().getSize()+2f));
         organizationLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        organizationLabel.setLabelFor(organizationInput);
         organizationLabel.setText("Organization:");
 
         organizationInput.setFont(organizationInput.getFont());
@@ -239,6 +254,7 @@ public class KeyPairGenerator extends javax.swing.JDialog {
 
         orgUnitLabel.setFont(orgUnitLabel.getFont().deriveFont(orgUnitLabel.getFont().getSize()+2f));
         orgUnitLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        orgUnitLabel.setLabelFor(orgUnitInput);
         orgUnitLabel.setText("Org. Unit:");
 
         orgUnitInput.setFont(orgUnitInput.getFont());
@@ -248,9 +264,14 @@ public class KeyPairGenerator extends javax.swing.JDialog {
 
         countryLabel.setFont(countryLabel.getFont().deriveFont(countryLabel.getFont().getSize()+2f));
         countryLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        countryLabel.setLabelFor(countrySelector);
         countryLabel.setText("Country:");
 
         countrySelector.setToolTipText("Select your country");
+
+        errorLabel.setFont(new java.awt.Font("Monospaced", 0, 14)); // NOI18N
+        errorLabel.setForeground(new java.awt.Color(153, 102, 0));
+        errorLabel.setVerticalAlignment(javax.swing.SwingConstants.TOP);
 
         javax.swing.GroupLayout frameBodyPanelLayout = new javax.swing.GroupLayout(frameBodyPanel);
         frameBodyPanel.setLayout(frameBodyPanelLayout);
@@ -271,15 +292,19 @@ public class KeyPairGenerator extends javax.swing.JDialog {
                         .addComponent(organizationHintLabel)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(frameBodyPanelLayout.createSequentialGroup()
-                        .addGroup(frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(emailInput)
-                            .addComponent(organizationInput, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(orgUnitInput, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(nameInput)
-                            .addComponent(aliasInput)
-                            .addComponent(orgUnitHintLabel)
-                            .addComponent(aliasHintLabel)
-                            .addComponent(countrySelector, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(emailInput, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(organizationInput)
+                            .addComponent(orgUnitInput)
+                            .addComponent(nameInput, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(aliasInput, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(countrySelector, javax.swing.GroupLayout.Alignment.LEADING, 0, 402, Short.MAX_VALUE)
+                            .addComponent(errorLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, frameBodyPanelLayout.createSequentialGroup()
+                                .addGroup(frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(orgUnitHintLabel, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(aliasHintLabel, javax.swing.GroupLayout.Alignment.LEADING))
+                                .addGap(0, 0, Short.MAX_VALUE)))
                         .addGap(25, 25, 25))))
         );
         frameBodyPanelLayout.setVerticalGroup(
@@ -315,7 +340,9 @@ public class KeyPairGenerator extends javax.swing.JDialog {
                 .addGroup(frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(countryLabel)
                     .addComponent(countrySelector, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(25, 25, 25))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(errorLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -358,6 +385,7 @@ public class KeyPairGenerator extends javax.swing.JDialog {
     private javax.swing.JComboBox<String> countrySelector;
     private javax.swing.JTextField emailInput;
     private javax.swing.JLabel emailLabel;
+    private javax.swing.JLabel errorLabel;
     private javax.swing.JPanel frameActionPanel;
     private javax.swing.JPanel frameBodyPanel;
     private javax.swing.JPanel frameHeaderPanel;

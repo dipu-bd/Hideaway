@@ -105,7 +105,7 @@ public class Dashboard extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void genKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_genKeyActionPerformed
-        KeyPairGenerator kpGen = new KeyPairGenerator(null);
+        KeyPairGenerator kpGen = new KeyPairGenerator(this);
         kpGen.setVisible(true);
         kpGen.dispose();
     }//GEN-LAST:event_genKeyActionPerformed
