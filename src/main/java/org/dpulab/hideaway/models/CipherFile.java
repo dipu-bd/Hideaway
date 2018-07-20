@@ -17,11 +17,9 @@
 package org.dpulab.hideaway.models;
 
 import java.io.File;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import org.bouncycastle.openssl.PasswordException;
 import org.dpulab.hideaway.utils.CipherIO;
 
 /**
@@ -37,8 +35,7 @@ public class CipherFile extends IndexEntry {
     private final File cipherFile;
     private final KeyPair rsaKeyPair;
     
-    public CipherFile(IndexEntry entry)
-            throws KeyStoreException, PasswordException, NoSuchAlgorithmException, UnrecoverableKeyException {
+    public CipherFile(IndexEntry entry) throws GeneralSecurityException, IOException {
         super(entry);
         this.cipherFile = CipherIO.getDefault().getDataFile(this.getChecksum());
         this.rsaKeyPair = CipherIO.getDefault().getKeyPair(this.getKeyAlias());
