@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
+import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
@@ -250,13 +251,10 @@ public class IndexEntry implements Serializable {
      * Gets the CipherFile that this entry represents.
      *
      * @return a CipherFile instance
-     * @throws java.security.KeyStoreException
-     * @throws org.bouncycastle.openssl.PasswordException
-     * @throws java.security.NoSuchAlgorithmException
-     * @throws java.security.UnrecoverableKeyException
+     * @throws java.io.IOException
+     * @throws java.security.GeneralSecurityException
      */
-    public final CipherFile getCipherFile()
-            throws KeyStoreException, PasswordException, NoSuchAlgorithmException, UnrecoverableKeyException {
+    public final CipherFile getCipherFile() throws IOException, GeneralSecurityException {
         if (this.isFile()) {
             return new CipherFile(this);
         }
