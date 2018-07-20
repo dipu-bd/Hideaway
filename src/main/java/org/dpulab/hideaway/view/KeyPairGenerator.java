@@ -19,10 +19,12 @@ package org.dpulab.hideaway.view;
 import java.security.KeyPair;
 import java.security.cert.Certificate;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Locale;
 import java.util.logging.Level;
 import javax.swing.DefaultComboBoxModel;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.dpulab.hideaway.utils.CipherIO;
 import org.dpulab.hideaway.utils.CryptoService;
@@ -60,6 +62,7 @@ public class KeyPairGenerator extends javax.swing.JDialog {
     }
 
     private void generateAndSave() {
+        System.out.println("--------");
         try {
             // check the alias name
             String alias = this.aliasInput.getText();
@@ -68,14 +71,21 @@ public class KeyPairGenerator extends javax.swing.JDialog {
             }
             // get the subjects data
             X500Name subject = this.getSubject();
+            System.out.println(subject.toString());
             // generate RSA key pair
             KeyPair keyPair = CryptoService.getDefault().generateKeyPair(4096);
+            System.out.println("Public Key " + keyPair.getPublic().getAlgorithm() + " - " + keyPair.getPublic().getFormat());
+            System.out.println(WordUtils.wrap(Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded()), 64, "\n", true));
+            System.out.println("Private Key " + keyPair.getPrivate().getAlgorithm() + " - " + keyPair.getPrivate().getFormat());
+            System.out.println(WordUtils.wrap(Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded()), 64, "\n", true));
             // self sign the key
             Certificate certificate = CryptoService.getDefault().generateSelfSignedX509Certificate(keyPair, subject);
+            System.out.println("Certificate " + certificate.getType());
+            System.out.println(WordUtils.wrap(Base64.getEncoder().encodeToString(certificate.getEncoded()), 64, "\n", true));
             // save to keystore
-            CipherIO.getDefault().setSecretKey(alias, keyPair.getPrivate(), new Certificate[]{certificate});
+            CipherIO.getDefault().storeKeyPair(alias, keyPair, certificate);
         } catch (Exception ex) {
-            Reporter.dialog(this, Level.SEVERE, ex.getMessage());
+            Reporter.dialog(this, Level.SEVERE, "Error: %s", ex.toString());
         }
     }
 

@@ -16,19 +16,19 @@
  */
 package org.dpulab.hideaway.models;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
-import java.security.GeneralSecurityException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.logging.Level;
 import org.apache.commons.lang3.StringUtils;
-import org.dpulab.hideaway.utils.Reporter;
+import org.bouncycastle.openssl.PasswordException;
 
 /**
  *
@@ -39,11 +39,11 @@ public class IndexEntry implements Serializable {
     public static final String SEPARATOR = "/";
 
     private static final int VERSION = 1;
-    
+
     public static IndexEntry getRoot() {
         return new IndexEntry();
     }
-    
+
     /*------------------------------------------------------------------------*\
     |                          MAIN FILE CONTENT                               |   
     \*------------------------------------------------------------------------*/
@@ -51,7 +51,7 @@ public class IndexEntry implements Serializable {
     private String fileName = "";
     private long fileSize = 0;
     private String checksum = null;
-    private String privateKeyAlias = null;
+    private String keyAlias = null;
     private final HashMap<String, IndexEntry> children = new HashMap<>();
 
     // hide access to new IndexEntry
@@ -67,7 +67,7 @@ public class IndexEntry implements Serializable {
         this.setFileName(other.getFileName());
         this.setFileSize(other.getFileSize());
         this.setChecksum(other.getChecksum());
-        this.setPrivateKeyAlias(other.getPrivateKeyAlias());
+        this.setKeyAlias(other.getKeyAlias());
         this.setParentEntry(other.getParentEntry());
         this.children.putAll(other.children);
     }
@@ -79,7 +79,7 @@ public class IndexEntry implements Serializable {
         if (this.isFile()) {
             out.writeLong(this.fileSize);
             out.writeUTF(this.checksum);
-            out.writeUTF(this.privateKeyAlias);
+            out.writeUTF(this.keyAlias);
         } else {
             out.writeInt(this.children.size());
             for (IndexEntry entry : this.children.values()) {
@@ -97,7 +97,7 @@ public class IndexEntry implements Serializable {
             if (file) {
                 entry.setFileSize(in.readLong());
                 entry.setChecksum(in.readUTF());
-                entry.setPrivateKeyAlias(in.readUTF());
+                entry.setKeyAlias(in.readUTF());
             } else {
                 long totalFileSize = 0;
                 int childrenCount = in.readInt();
@@ -118,7 +118,6 @@ public class IndexEntry implements Serializable {
     /*------------------------------------------------------------------------*\
     |                               GETTERS                                    |   
     \*------------------------------------------------------------------------*/
-
     /**
      * @return true if the top folder
      */
@@ -186,10 +185,10 @@ public class IndexEntry implements Serializable {
     }
 
     /**
-     * @return the privateKeyAlias
+     * @return the keyAlias
      */
-    public final String getPrivateKeyAlias() {
-        return this.privateKeyAlias;
+    public final String getKeyAlias() {
+        return this.keyAlias;
     }
 
     /**
@@ -205,7 +204,7 @@ public class IndexEntry implements Serializable {
     public final Collection<IndexEntry> getChildren() {
         return this.children.values();
     }
-    
+
     /*------------------------------------------------------------------------*\
     |                               SETTERS                                    |   
     \*------------------------------------------------------------------------*/
@@ -231,10 +230,10 @@ public class IndexEntry implements Serializable {
     }
 
     /**
-     * @param privateKeyAlias the privateKeyAlias to set
+     * @param keyAlias the keyAlias to set
      */
-    protected final void setPrivateKeyAlias(String privateKeyAlias) {
-        this.privateKeyAlias = privateKeyAlias;
+    protected final void setKeyAlias(String keyAlias) {
+        this.keyAlias = keyAlias;
     }
 
     /**
@@ -249,10 +248,15 @@ public class IndexEntry implements Serializable {
     \*------------------------------------------------------------------------*/
     /**
      * Gets the CipherFile that this entry represents.
+     *
      * @return a CipherFile instance
-     * @throws java.security.GeneralSecurityException
+     * @throws java.security.KeyStoreException
+     * @throws org.bouncycastle.openssl.PasswordException
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws java.security.UnrecoverableKeyException
      */
-    public final CipherFile getCipherFile() throws GeneralSecurityException {
+    public final CipherFile getCipherFile()
+            throws KeyStoreException, PasswordException, NoSuchAlgorithmException, UnrecoverableKeyException {
         if (this.isFile()) {
             return new CipherFile(this);
         }
@@ -279,7 +283,7 @@ public class IndexEntry implements Serializable {
 
     /**
      * Resolve an index entry by given path. Each of the path value can be
- either a valid fileName, or a path separated by the default separator.
+     * either a valid fileName, or a path separated by the default separator.
      *
      * @param path A single path or list of path parts.
      * @return

@@ -80,7 +80,7 @@ public final class CryptoService {
             hash = Base64.getEncoder().encodeToString(digest.digest());
             hash = hash.replace('/', '-');
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
-            Logger.getLogger(CryptoService.class.getName()).log(Level.SEVERE, null, ex);
+            Reporter.put(CryptoService.class.getName(), ex);
         }
         return hash;
     }

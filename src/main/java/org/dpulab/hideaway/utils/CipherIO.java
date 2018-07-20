@@ -45,7 +45,9 @@ import java.util.HashMap;
 import java.util.Properties;
 import org.apache.commons.crypto.stream.CryptoInputStream;
 import org.apache.commons.crypto.stream.CryptoOutputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
+import org.bouncycastle.openssl.PasswordException;
 import org.dpulab.hideaway.models.IndexEntry;
 import org.dpulab.hideaway.view.PasswordInput;
 
@@ -60,7 +62,7 @@ public class CipherIO {
     //<editor-fold defaultstate="collapsed" desc=" Get instance methods ">
     private static final HashMap<String, CipherIO> STORAGE = new HashMap<>();
 
-    public static CipherIO getFor(String folder) throws KeyStoreException {
+    public static CipherIO getFor(String folder) throws KeyStoreException, PasswordException {
         if (!CipherIO.STORAGE.containsKey(folder)) {
             // attach a new storage class with the folder
             CipherIO.STORAGE.put(folder, new CipherIO(folder));
@@ -68,7 +70,7 @@ public class CipherIO {
         return CipherIO.STORAGE.get(folder);
     }
 
-    public static CipherIO getDefault() throws KeyStoreException {
+    public static CipherIO getDefault() throws KeyStoreException, PasswordException {
         String folder = Settings.getDefault().get(Settings.WORK_DIR);
         return CipherIO.getFor(folder);
     }
@@ -81,13 +83,17 @@ public class CipherIO {
     private final String password;
     private final String passwordHash;
 
-    private CipherIO(String folder) throws KeyStoreException {
+    private CipherIO(String folder) throws KeyStoreException, PasswordException {
         this.workDir = new File(folder).toPath();
         this.keyStore = KeyStore.getInstance(Settings.STORE_TYPE);
         this.rootEntry = IndexEntry.getRoot();
 
         this.password = Settings.getDefault().getSession(Settings.PASSWORD);
         this.passwordHash = CryptoService.getDefault().getHash(this.password);
+        
+        if (StringUtils.isEmpty(this.password) || StringUtils.isEmpty(this.passwordHash)) {
+            throw new PasswordException("No password was found");
+        }
     }
 
     public File getDataFolder() {
