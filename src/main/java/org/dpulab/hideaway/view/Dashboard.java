@@ -72,7 +72,8 @@ public class Dashboard extends javax.swing.JFrame {
     void loadKeyStore() throws Exception {
         // Create new table model builder
         TableModelBuilder builder = new TableModelBuilder();
-        builder.addColumn("Alias", 120, false, "<b>%s</b>")
+        builder.addColumn("#", 10, false, "<b style=\"color: #6e6e6e\">%s</b>")
+                .addColumn("Alias", 120, false, "<b>%s</b>")
                 .addColumn("Key Type", 60, false, "<span style=\"color: blue\">%s</span>")
                 .addColumn("Algorithm", 60, false, "<span style=\"color: red\">%s</span>")
                 .addColumn("Key Format", 80, false, "<code>%s</code>")
@@ -80,6 +81,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addColumn("First few bytes of the key", 350, false, "<code style=\"color: #666\">%s</code>");
 
         // Load data to builder
+        int index = 1;
         KeyStore store = CipherIO.getDefault().getKeyStore();
         for (String alias : Collections.list(store.aliases())) {
             Key key = null;
@@ -94,6 +96,7 @@ public class Dashboard extends javax.swing.JFrame {
             }
             if (key != null) {
                 builder.addData(
+                        index++,
                         alias,
                         keyType,
                         key.getAlgorithm(),
@@ -504,11 +507,13 @@ public class Dashboard extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        dataViewer.setCellSelectionEnabled(true);
         dataViewer.setDoubleBuffered(true);
         dataViewer.setFillsViewportHeight(true);
-        dataViewer.setRowHeight(24);
+        dataViewer.setGridColor(new java.awt.Color(225, 231, 240));
+        dataViewer.setInheritsPopupMenu(true);
+        dataViewer.setRowHeight(28);
         dataViewer.setRowMargin(3);
+        dataViewer.setShowHorizontalLines(true);
         dataViewer.getTableHeader().setReorderingAllowed(false);
         dataViewerScrollPane.setViewportView(dataViewer);
 
@@ -518,7 +523,7 @@ public class Dashboard extends javax.swing.JFrame {
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addGap(0, 0, 0)
-                .addComponent(dataViewerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 798, Short.MAX_VALUE)
+                .addComponent(dataViewerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 822, Short.MAX_VALUE)
                 .addGap(0, 0, 0))
         );
         mainPanelLayout.setVerticalGroup(

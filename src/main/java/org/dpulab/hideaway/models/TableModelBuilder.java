@@ -17,7 +17,10 @@
 package org.dpulab.hideaway.models;
 
 import java.util.ArrayList;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import org.apache.commons.lang3.StringUtils;
@@ -60,7 +63,7 @@ public class TableModelBuilder {
         DefaultTableModel model = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return columnEditable.get(columnIndex);
+                return false; //columnEditable.get(columnIndex);
             }
         };
         table.setModel(model);
@@ -87,5 +90,6 @@ public class TableModelBuilder {
             }
             model.addRow(item);
         });
+
     }
 }
