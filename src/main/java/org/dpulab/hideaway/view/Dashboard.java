@@ -11,14 +11,12 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
-import org.apache.commons.text.WordUtils;
 import org.dpulab.hideaway.Program;
 import org.dpulab.hideaway.models.DashboardPage;
 import org.dpulab.hideaway.models.TableModelBuilder;
@@ -216,6 +214,9 @@ public class Dashboard extends javax.swing.JFrame {
         removeKeyMenu = new javax.swing.JMenuItem();
         keystorePopupSeparator1 = new javax.swing.JPopupMenu.Separator();
         exportKeyButton = new javax.swing.JMenuItem();
+        importKeyButton = new javax.swing.JMenuItem();
+        keystorePopupSeparator2 = new javax.swing.JPopupMenu.Separator();
+        refreshButton = new javax.swing.JMenuItem();
         browserPopup = new javax.swing.JPopupMenu();
         favoritesPopup = new javax.swing.JPopupMenu();
         recentItemsPopup = new javax.swing.JPopupMenu();
@@ -274,6 +275,18 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
         keystorePopup.add(exportKeyButton);
+
+        importKeyButton.setText("Import Key");
+        keystorePopup.add(importKeyButton);
+        keystorePopup.add(keystorePopupSeparator2);
+
+        refreshButton.setText("Refresh");
+        refreshButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                refreshButtonActionPerformed(evt);
+            }
+        });
+        keystorePopup.add(refreshButton);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Hideaway");
@@ -762,6 +775,15 @@ public class Dashboard extends javax.swing.JFrame {
         this.exportSelectedKey();
     }//GEN-LAST:event_exportKeyButtonActionPerformed
 
+    private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshButtonActionPerformed
+        try {
+            CipherIO.getDefault().loadKeystore();
+            this.selectPage(DashboardPage.KEY_STORE);
+        } catch (IOException | GeneralSecurityException ex) {
+            Reporter.put(getClass(), ex);
+        }
+    }//GEN-LAST:event_refreshButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToolBar actionToolbar;
     private javax.swing.JButton addBookmarkButton;
@@ -782,9 +804,11 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JSeparator horizontalSeparator3;
     private javax.swing.JButton importFileButton;
     private javax.swing.JButton importFolderButton;
+    private javax.swing.JMenuItem importKeyButton;
     private javax.swing.JButton keystoreButton;
     private javax.swing.JPopupMenu keystorePopup;
     private javax.swing.JPopupMenu.Separator keystorePopupSeparator1;
+    private javax.swing.JPopupMenu.Separator keystorePopupSeparator2;
     private javax.swing.JButton logoutButton;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JToolBar navigationToolbar;
@@ -794,6 +818,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel pathSelectorPanel;
     private javax.swing.JPopupMenu recentItemsPopup;
     private javax.swing.JButton recentsButton;
+    private javax.swing.JMenuItem refreshButton;
     private javax.swing.JMenuItem removeKeyMenu;
     private javax.swing.JButton rootButton;
     private javax.swing.JPanel sidePanel;
