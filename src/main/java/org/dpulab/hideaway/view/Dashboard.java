@@ -6,13 +6,17 @@
 package org.dpulab.hideaway.view;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.util.Collections;
+import java.util.logging.Level;
+import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
 import org.dpulab.hideaway.Program;
 import org.dpulab.hideaway.models.DashboardPage;
 import org.dpulab.hideaway.models.TableModelBuilder;
@@ -47,19 +51,23 @@ public class Dashboard extends javax.swing.JFrame {
                 case BROWSER:
                     this.loadBrowser();
                     icon = this.homeButton.getText();
+                    this.dataViewer.setComponentPopupMenu(this.browserPopup);
                     break;
                 case FAVORITES:
                     this.loadFavorites();
                     icon = this.favoriteButton.getText();
+                    this.dataViewer.setComponentPopupMenu(this.favoritesPopup);
                     break;
                 case RECENT_ITEMS:
                     this.loadRecentItems();
                     icon = this.recentsButton.getText();
+                    this.dataViewer.setComponentPopupMenu(this.recentItemsPopup);
                     break;
                 case KEY_STORE:
                 case UNDEFINED:
                     this.loadKeyStore();
                     icon = this.keystoreButton.getText();
+                    this.dataViewer.setComponentPopupMenu(this.keystorePopup);
                     break;
             }
             icon = icon.split(" ")[0] + "</html>";
@@ -107,13 +115,15 @@ public class Dashboard extends javax.swing.JFrame {
             }
         }
 
-        // Set data to viewer
-        builder.build(this.dataViewer);
+        SwingUtilities.invokeLater(() -> {
+            // Set data to viewer
+            builder.build(this.dataViewer);
 
-        // Customize the UI
-        this.dataViewer.setRowSelectionAllowed(true);
-        this.dataViewer.setCellSelectionEnabled(false);
-        this.pathInput.setText("Keystore");
+            // Customize the UI
+            this.dataViewer.setRowSelectionAllowed(true);
+            this.dataViewer.setCellSelectionEnabled(false);
+            this.pathInput.setText("Keystore");
+        });
     }
 
     void loadFavorites() {
@@ -128,6 +138,49 @@ public class Dashboard extends javax.swing.JFrame {
 
     }
 
+    private void displayKeyGen() {
+        SwingUtilities.invokeLater(() -> {
+            KeyPairGenerator kpGen = new KeyPairGenerator(this);
+            kpGen.setVisible(true);
+            kpGen.dispose();
+            this.selectPage(DashboardPage.KEY_STORE);
+        });
+    }
+
+    private void removeSelectedKey(Object target) {
+        int row = this.dataViewer.getSelectedRow();
+        if (row == -1) {
+            return;
+        }
+        String alias = (String) this.dataViewer.getModel().getValueAt(row, 1);
+        alias = alias.replaceAll("<[^>]+>", "");
+
+        if (alias.endsWith("_cert") || alias.endsWith("_key")) {
+            alias = alias.substring(0, alias.lastIndexOf("_"));
+        } else {
+            Reporter.dialog(Level.SEVERE, "You are only allowed to delete RSA key pairs");
+            return;
+        }
+
+        int result = JOptionPane.showConfirmDialog(
+                this,
+                String.format("Are you sure to remove these keys: %s_cert, %s_key?", alias, alias),
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+
+        if (result == JOptionPane.YES_OPTION) {
+            try {
+                CipherIO.getDefault().deleteKeyEntry(alias);
+                Reporter.dialog("Deleted keys: %s_cert and %s_key", alias, alias);
+                this.selectPage(DashboardPage.KEY_STORE);
+            } catch (IOException | GeneralSecurityException ex) {
+                Reporter.put(getClass(), ex);
+                Reporter.dialog(Level.SEVERE, "Failed to delete keypair: %s", alias);
+            }
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -137,6 +190,14 @@ public class Dashboard extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        keystorePopup = new javax.swing.JPopupMenu();
+        createKeyMenu = new javax.swing.JMenuItem();
+        removeKeyMenu = new javax.swing.JMenuItem();
+        keystorePopupSeparator1 = new javax.swing.JPopupMenu.Separator();
+        exportKeyButton = new javax.swing.JMenuItem();
+        browserPopup = new javax.swing.JPopupMenu();
+        favoritesPopup = new javax.swing.JPopupMenu();
+        recentItemsPopup = new javax.swing.JPopupMenu();
         topPanel = new javax.swing.JPanel();
         navigationToolbar = new javax.swing.JToolBar();
         goBackButton = new javax.swing.JButton();
@@ -167,6 +228,26 @@ public class Dashboard extends javax.swing.JFrame {
         mainPanel = new javax.swing.JPanel();
         dataViewerScrollPane = new javax.swing.JScrollPane();
         dataViewer = new javax.swing.JTable();
+
+        createKeyMenu.setText("Create New");
+        createKeyMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                createKeyMenuActionPerformed(evt);
+            }
+        });
+        keystorePopup.add(createKeyMenu);
+
+        removeKeyMenu.setText("Remove");
+        removeKeyMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeKeyMenuActionPerformed(evt);
+            }
+        });
+        keystorePopup.add(removeKeyMenu);
+        keystorePopup.add(keystorePopupSeparator1);
+
+        exportKeyButton.setText("Export Key");
+        keystorePopup.add(exportKeyButton);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Hideaway");
@@ -228,7 +309,6 @@ public class Dashboard extends javax.swing.JFrame {
         pathInput.setFont(new java.awt.Font("Monospaced", 1, 16)); // NOI18N
         pathInput.setForeground(new java.awt.Color(32, 78, 78));
         pathInput.setText("Keystore");
-        pathInput.setToolTipText("");
         pathInput.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(182, 187, 193)), javax.swing.BorderFactory.createEmptyBorder(3, 8, 3, 8)));
         pathInput.setMargin(new java.awt.Insets(5, 10, 5, 10));
         pathInput.setOpaque(true);
@@ -510,11 +590,15 @@ public class Dashboard extends javax.swing.JFrame {
         dataViewer.setDoubleBuffered(true);
         dataViewer.setFillsViewportHeight(true);
         dataViewer.setGridColor(new java.awt.Color(225, 231, 240));
-        dataViewer.setInheritsPopupMenu(true);
         dataViewer.setRowHeight(28);
         dataViewer.setRowMargin(3);
         dataViewer.setShowHorizontalLines(true);
         dataViewer.getTableHeader().setReorderingAllowed(false);
+        dataViewer.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                dataViewerMouseReleased(evt);
+            }
+        });
         dataViewerScrollPane.setViewportView(dataViewer);
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
@@ -569,9 +653,7 @@ public class Dashboard extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void generateKeyPairButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generateKeyPairButtonActionPerformed
-        KeyPairGenerator kpGen = new KeyPairGenerator(this);
-        kpGen.setVisible(true);
-        kpGen.dispose();
+        this.displayKeyGen();
     }//GEN-LAST:event_generateKeyPairButtonActionPerformed
 
     private void goBackButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goBackButtonActionPerformed
@@ -632,13 +714,35 @@ public class Dashboard extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_changePasswordButtonActionPerformed
 
+    private void createKeyMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createKeyMenuActionPerformed
+        this.displayKeyGen();
+    }//GEN-LAST:event_createKeyMenuActionPerformed
+
+    private void removeKeyMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeKeyMenuActionPerformed
+        this.removeSelectedKey(evt.getSource());
+    }//GEN-LAST:event_removeKeyMenuActionPerformed
+
+    private void dataViewerMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_dataViewerMouseReleased
+        JTable table = (JTable) evt.getSource();
+        int row = table.rowAtPoint(evt.getPoint());
+        if (row >= 0 && row < table.getRowCount()) {
+            table.setRowSelectionInterval(row, row);
+        } else {
+            table.clearSelection();
+        }
+    }//GEN-LAST:event_dataViewerMouseReleased
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToolBar actionToolbar;
     private javax.swing.JButton addBookmarkButton;
+    private javax.swing.JPopupMenu browserPopup;
     private javax.swing.JButton changePasswordButton;
+    private javax.swing.JMenuItem createKeyMenu;
     private javax.swing.JTable dataViewer;
     private javax.swing.JScrollPane dataViewerScrollPane;
+    private javax.swing.JMenuItem exportKeyButton;
     private javax.swing.JButton favoriteButton;
+    private javax.swing.JPopupMenu favoritesPopup;
     private javax.swing.JButton generateKeyPairButton;
     private javax.swing.JButton goBackButton;
     private javax.swing.JButton goForwardButton;
@@ -649,6 +753,8 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton importFileButton;
     private javax.swing.JButton importFolderButton;
     private javax.swing.JButton keystoreButton;
+    private javax.swing.JPopupMenu keystorePopup;
+    private javax.swing.JPopupMenu.Separator keystorePopupSeparator1;
     private javax.swing.JButton logoutButton;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JToolBar navigationToolbar;
@@ -656,7 +762,9 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton newFolderButton;
     private javax.swing.JTextField pathInput;
     private javax.swing.JPanel pathSelectorPanel;
+    private javax.swing.JPopupMenu recentItemsPopup;
     private javax.swing.JButton recentsButton;
+    private javax.swing.JMenuItem removeKeyMenu;
     private javax.swing.JButton rootButton;
     private javax.swing.JPanel sidePanel;
     private javax.swing.JPanel topPanel;

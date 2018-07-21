@@ -39,7 +39,6 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.spec.AlgorithmParameterSpec;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Properties;
 import org.apache.commons.crypto.stream.CryptoInputStream;
@@ -250,6 +249,30 @@ public class CipherIO {
     }
 
     /**
+     * Delete a key entry by its alias.
+     *
+     * @param alias
+     * @throws KeyStoreException
+     * @throws java.io.IOException
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws java.security.cert.CertificateException
+     */
+    public void deleteKeyEntry(String alias)
+            throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+        // delete this alias
+        if (this.keyStore.containsAlias(alias)) {
+            this.keyStore.deleteEntry(alias);
+        }
+        // delete paired alias
+        if (this.containsKeyPair(alias)) {
+            this.keyStore.deleteEntry(alias + "_key");
+            this.keyStore.deleteEntry(alias + "_cert");
+        }
+        // save keystore
+        this.saveKeystore();
+    }
+
+    /**
      * Checks if a RSA KeyPair exists in current KeyStore by its alias.
      *
      * @param alias the alias of the key pair
@@ -260,7 +283,7 @@ public class CipherIO {
         return this.keyStore.containsAlias(alias + "_cert")
                 && this.keyStore.containsAlias(alias + "_key");
     }
-    
+
     public final KeyStore getKeyStore() {
         return this.keyStore;
     }

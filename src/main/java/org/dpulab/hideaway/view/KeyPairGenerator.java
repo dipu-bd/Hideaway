@@ -75,6 +75,7 @@ public class KeyPairGenerator extends javax.swing.JDialog {
 
     private String getCountryCode() {
         String code = (String) this.countrySelector.getSelectedItem();
+        if (code == null) return null;
         String[] parts = code.split(" ");
         return parts[parts.length - 1];
     }

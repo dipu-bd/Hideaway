@@ -79,7 +79,6 @@ public class Reporter {
     }
     //</editor-fold>
         
-
     //<editor-fold defaultstate="collapsed" desc=" Format entry before logging ">
     // C L F *A
     public static void format(Class source, Level level, String fmt, Object... args) {
