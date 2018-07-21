@@ -132,7 +132,13 @@ public final class CryptoService {
     }
 
     public static String getBytePreview(byte[] data, int length) {
-        return Hex.toHexString(data, 0, 16).replaceAll("..", "$0 ").toUpperCase().trim();
+        length = Math.min(length, data.length);
+        String hex = Hex.toHexString(data, 0, length);
+        hex = hex.replaceAll("..", "$0 ").toUpperCase().trim();
+        if (length != data.length) {
+            hex += " ...";
+        }
+        return hex;
     }
 
     public static String getKeyAsString(Key key) {

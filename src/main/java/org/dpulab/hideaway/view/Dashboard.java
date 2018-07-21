@@ -6,17 +6,23 @@
 package org.dpulab.hideaway.view;
 
 import java.awt.Color;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import org.dpulab.hideaway.Program;
 import org.dpulab.hideaway.models.DashboardPage;
 import org.dpulab.hideaway.models.TableModelBuilder;
@@ -81,13 +87,14 @@ public class Dashboard extends javax.swing.JFrame {
     void loadKeyStore() throws Exception {
         // Create new table model builder
         TableModelBuilder builder = new TableModelBuilder();
-        builder.addColumn("#", 10, false, "<b style=\"color: #6e6e6e\">%s</b>")
-                .addColumn("Alias", 120, false, "<b>%s</b>")
-                .addColumn("Key Type", 60, false, "<span style=\"color: blue\">%s</span>")
-                .addColumn("Algorithm", 60, false, "<span style=\"color: red\">%s</span>")
-                .addColumn("Key Format", 80, false, "<code>%s</code>")
-                .addColumn("Length (B)", 70, false, "<code>%s</code>")
-                .addColumn("First few bytes of the key", 350, false, "<code style=\"color: #666\">%s</code>");
+        builder.addColumn("#", "<b style=\"color: #6e6e6e\">%s</b>", 20, 25)
+                .addColumn("Alias", "<b>%s</b>", 130, 250)
+                .addColumn("Key Type", "<span style=\"color: blue\">%s</span>", 85, 90)
+                .addColumn("Algorithm", "<span style=\"color: red\">%s</span>", 85, 90)
+                .addColumn("Key Format", "<code>%s</code>", 85, 90)
+                .addColumn("Length (B)", "<code style=\"color: navy\">%s</code>", 85, 90)
+                .addColumn("Created At", "<span style=\"color: gray\">%s</span>", 135, 145)
+                .addColumn("First few bytes of the key", "<code style=\"color: orange\">%s</code>", 300);
 
         // Load data to builder
         int index = 1;
@@ -95,6 +102,7 @@ public class Dashboard extends javax.swing.JFrame {
         for (String alias : Collections.list(store.aliases())) {
             Key key = null;
             String keyType = "";
+            Date createdAt = store.getCreationDate(alias);
             if (store.isKeyEntry(alias)) {
                 key = store.getKey(alias, CipherIO.getDefault().getKeystorePass());
                 keyType = "Private";
@@ -111,7 +119,8 @@ public class Dashboard extends javax.swing.JFrame {
                         key.getAlgorithm(),
                         key.getFormat(),
                         key.getEncoded().length,
-                        CryptoService.getBytePreview(key.getEncoded(), 16)
+                        new SimpleDateFormat("HH:mm:ss dd/MM/yy").format(createdAt),
+                        CryptoService.getBytePreview(key.getEncoded(), 48)
                 );
             }
         }
@@ -119,6 +128,8 @@ public class Dashboard extends javax.swing.JFrame {
         SwingUtilities.invokeLater(() -> {
             // Set data to viewer
             builder.build(this.dataViewer);
+            this.dataViewer.setRowHeight(22);
+            this.dataViewer.setRowMargin(0);
 
             // Customize the UI
             this.dataViewer.setRowSelectionAllowed(true);
@@ -595,11 +606,8 @@ public class Dashboard extends javax.swing.JFrame {
         verticalSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
         verticalSeparator3.setToolTipText("");
 
-        mainPanel.setBackground(new java.awt.Color(250, 250, 255));
-
         dataViewer.setAutoCreateRowSorter(true);
         dataViewer.setBackground(new java.awt.Color(246, 248, 255));
-        dataViewer.setFont(dataViewer.getFont().deriveFont(dataViewer.getFont().getSize()+1f));
         dataViewer.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -626,12 +634,14 @@ public class Dashboard extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        dataViewer.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_LAST_COLUMN);
         dataViewer.setDoubleBuffered(true);
         dataViewer.setFillsViewportHeight(true);
         dataViewer.setGridColor(new java.awt.Color(225, 231, 240));
-        dataViewer.setRowHeight(28);
-        dataViewer.setRowMargin(3);
-        dataViewer.setShowHorizontalLines(true);
+        dataViewer.setRowHeight(24);
+        dataViewer.setRowSelectionAllowed(true);
+        dataViewer.setSelectionBackground(new java.awt.Color(0, 204, 204));
+        dataViewer.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         dataViewer.getTableHeader().setReorderingAllowed(false);
         dataViewer.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseReleased(java.awt.event.MouseEvent evt) {
@@ -761,16 +771,6 @@ public class Dashboard extends javax.swing.JFrame {
         this.removeSelectedKey();
     }//GEN-LAST:event_removeKeyMenuActionPerformed
 
-    private void dataViewerMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_dataViewerMouseReleased
-        JTable table = (JTable) evt.getSource();
-        int row = table.rowAtPoint(evt.getPoint());
-        if (row >= 0 && row < table.getRowCount()) {
-            table.setRowSelectionInterval(row, row);
-        } else {
-            table.clearSelection();
-        }
-    }//GEN-LAST:event_dataViewerMouseReleased
-
     private void exportKeyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportKeyButtonActionPerformed
         this.exportSelectedKey();
     }//GEN-LAST:event_exportKeyButtonActionPerformed
@@ -783,6 +783,16 @@ public class Dashboard extends javax.swing.JFrame {
             Reporter.put(getClass(), ex);
         }
     }//GEN-LAST:event_refreshButtonActionPerformed
+
+    private void dataViewerMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_dataViewerMouseReleased
+        JTable table = (JTable) evt.getSource();
+        int row = table.rowAtPoint(evt.getPoint());
+        if (row >= 0 && row < table.getRowCount()) {
+            table.setRowSelectionInterval(row, row);
+        } else {
+            table.clearSelection();
+        }
+    }//GEN-LAST:event_dataViewerMouseReleased
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToolBar actionToolbar;
@@ -827,4 +837,5 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JSeparator verticalSeparator2;
     private javax.swing.JSeparator verticalSeparator3;
     // End of variables declaration//GEN-END:variables
+
 }
