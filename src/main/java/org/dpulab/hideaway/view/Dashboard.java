@@ -10,6 +10,7 @@ import javax.swing.SwingUtilities;
 import org.dpulab.hideaway.Program;
 import static org.dpulab.hideaway.Program.start;
 import org.dpulab.hideaway.models.DashboardPage;
+import org.dpulab.hideaway.utils.Settings;
 
 /**
  *
@@ -506,8 +507,9 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_logoutButtonMouseReleased
 
     private void logoutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutButtonActionPerformed
-        this.dispose();
+        Settings.getDefault().setSession(Settings.PASSWORD, null);
         SwingUtilities.invokeLater(Program::start);
+        this.dispose();
     }//GEN-LAST:event_logoutButtonActionPerformed
 
     private void changePasswordButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changePasswordButtonActionPerformed
