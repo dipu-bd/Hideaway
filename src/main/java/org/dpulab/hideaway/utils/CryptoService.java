@@ -27,6 +27,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -68,7 +69,9 @@ public final class CryptoService {
      * @throws java.io.UnsupportedEncodingException
      */
     public String getHash(String text) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        if (StringUtils.isEmpty(text)) return null;
+        if (StringUtils.isEmpty(text)) {
+            return null;
+        }
         MessageDigest digest = MessageDigest.getInstance("SHA-1");
         digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
         text = StringUtils.swapCase(text);
@@ -127,9 +130,21 @@ public final class CryptoService {
                 | ((bytes[2] & 0xFF) << 8)
                 | ((bytes[3] & 0xFF));
     }
-    
+
     public static String getBytePreview(byte[] data, int length) {
         return Hex.toHexString(data, 0, 16).replaceAll("..", "$0 ").toUpperCase().trim();
+    }
+
+    public static String getKeyAsString(Key key) {
+        String output = Base64.getEncoder().encodeToString(key.getEncoded());
+        if ("X.509".equals(key.getFormat())) {
+            output = WordUtils.wrap(output, 64, "\n", true);
+            output = "-----BEGIN PUBLIC KEY-----\n" + output + "\n-----END PUBLIC KEY-----";
+        } else if ("PKCS#8".equals(key.getFormat())) {
+            output = WordUtils.wrap(output, 64, "\n", true);
+            output = "-----BEGIN RSA PRIVATE KEY-----\n" + output + "\n-----END RSA PRIVATE KEY-----";
+        }
+        return output;
     }
 
     /**
@@ -234,6 +249,7 @@ public final class CryptoService {
      * @throws java.security.cert.CertificateException
      */
     public X509Certificate generateSelfSignedX509Certificate(KeyPair keyPair, X500Name subject) throws IOException, OperatorCreationException, CertificateException {
+        X500Name issuer = generateX500Name("dpulab", "Hideaway", "dipu.sudipta@gmail.com", "org", "dpulab", "BD");
         // use 100 year validity between start and end dates
         long now = System.currentTimeMillis();
         Date startDate = new Date(now);
@@ -246,7 +262,7 @@ public final class CryptoService {
         BigInteger serial = new BigInteger(160, random);
         // Gets an instance of builder
         X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
-                subject,
+                issuer,
                 serial,
                 startDate,
                 endDate,

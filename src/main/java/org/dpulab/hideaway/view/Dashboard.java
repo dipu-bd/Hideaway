@@ -11,17 +11,20 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
+import org.apache.commons.text.WordUtils;
 import org.dpulab.hideaway.Program;
 import org.dpulab.hideaway.models.DashboardPage;
 import org.dpulab.hideaway.models.TableModelBuilder;
 import org.dpulab.hideaway.utils.CipherIO;
 import org.dpulab.hideaway.utils.CryptoService;
+import org.dpulab.hideaway.utils.FileIO;
 import org.dpulab.hideaway.utils.Reporter;
 import org.dpulab.hideaway.utils.Settings;
 
@@ -147,7 +150,25 @@ public class Dashboard extends javax.swing.JFrame {
         });
     }
 
-    private void removeSelectedKey(Object target) {
+    private void exportSelectedKey() {
+        int row = this.dataViewer.getSelectedRow();
+        if (row == -1) {
+            return;
+        }
+        String alias = (String) this.dataViewer.getModel().getValueAt(row, 1);
+        alias = alias.replaceAll("<[^>]+>", "");
+
+        try {
+            Key key = CipherIO.getDefault().getKeyEntry(alias);
+            String output = CryptoService.getKeyAsString(key);
+            FileIO.saveToFile(this, output);
+        } catch (IOException | GeneralSecurityException ex) {
+            Reporter.put(getClass(), ex);
+            Reporter.dialog(Level.SEVERE, "Failed to save key: %s", alias);
+        }
+    }
+
+    private void removeSelectedKey() {
         int row = this.dataViewer.getSelectedRow();
         if (row == -1) {
             return;
@@ -247,6 +268,11 @@ public class Dashboard extends javax.swing.JFrame {
         keystorePopup.add(keystorePopupSeparator1);
 
         exportKeyButton.setText("Export Key");
+        exportKeyButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportKeyButtonActionPerformed(evt);
+            }
+        });
         keystorePopup.add(exportKeyButton);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -719,7 +745,7 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_createKeyMenuActionPerformed
 
     private void removeKeyMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeKeyMenuActionPerformed
-        this.removeSelectedKey(evt.getSource());
+        this.removeSelectedKey();
     }//GEN-LAST:event_removeKeyMenuActionPerformed
 
     private void dataViewerMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_dataViewerMouseReleased
@@ -731,6 +757,10 @@ public class Dashboard extends javax.swing.JFrame {
             table.clearSelection();
         }
     }//GEN-LAST:event_dataViewerMouseReleased
+
+    private void exportKeyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportKeyButtonActionPerformed
+        this.exportSelectedKey();
+    }//GEN-LAST:event_exportKeyButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToolBar actionToolbar;

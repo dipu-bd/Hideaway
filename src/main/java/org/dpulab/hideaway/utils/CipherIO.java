@@ -273,6 +273,24 @@ public class CipherIO {
     }
 
     /**
+     * Gets the key by an alias. The key can be of any type: AES, RSA, or
+     * certificate.
+     *
+     * @param alias the alias of the key store.
+     * @return the key
+     * @throws KeyStoreException
+     * @throws NoSuchAlgorithmException
+     * @throws UnrecoverableKeyException
+     */
+    public Key getKeyEntry(String alias)
+            throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
+        if (alias.endsWith("_cert")) {
+            return this.keyStore.getCertificate(alias).getPublicKey();
+        }
+        return this.keyStore.getKey(alias, this.getKeystorePass());
+    }
+
+    /**
      * Checks if a RSA KeyPair exists in current KeyStore by its alias.
      *
      * @param alias the alias of the key pair
@@ -390,4 +408,5 @@ public class CipherIO {
         }
         Reporter.format("Index entry saved. Total file size: %s", rootEntry.getFileSizeReadable());
     }
+
 }

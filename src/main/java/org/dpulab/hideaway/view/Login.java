@@ -34,7 +34,7 @@ public class Login extends javax.swing.JDialog {
     }
     
     private void selectWorkFolder() {
-        String folder = FileIO.getDefault().chooseFolder(this);
+        String folder = FileIO.chooseFolder(this);
         this.selectedFolderInput.setText(folder);
     }
     
