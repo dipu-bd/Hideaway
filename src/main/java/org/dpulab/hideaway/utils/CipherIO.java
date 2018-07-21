@@ -260,6 +260,10 @@ public class CipherIO {
         return this.keyStore.containsAlias(alias + "_cert")
                 && this.keyStore.containsAlias(alias + "_key");
     }
+    
+    public final KeyStore getKeyStore() {
+        return this.keyStore;
+    }
 
     /**
      * Gets a collection of default system properties.
@@ -301,16 +305,6 @@ public class CipherIO {
             this.keyStore.load(fis, this.getKeystorePass());
         }
         Reporter.format("Keystore loaded with %d keys.", this.keyStore.size());
-
-        for (String alias : Collections.list(this.keyStore.aliases())) {
-            if (this.keyStore.isKeyEntry(alias)) {
-                Key key = this.keyStore.getKey(alias, this.getKeystorePass());
-                System.out.printf("  ^ Key: %s {%s}{%s} %d bytes\n", alias, key.getAlgorithm(), key.getFormat(), key.getEncoded().length);
-            } else if (this.keyStore.isCertificateEntry(alias)) {
-                Certificate cert = this.keyStore.getCertificate(alias);
-                System.out.printf("  ^ Certificate: %s {%s} %d bytes\n", alias, cert.getType(), cert.getPublicKey().getEncoded().length);
-            }
-        }
     }
 
     /**

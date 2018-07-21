@@ -6,10 +6,19 @@
 package org.dpulab.hideaway.view;
 
 import java.awt.Color;
+import java.security.Key;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.util.Collections;
 import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
 import org.dpulab.hideaway.Program;
-import static org.dpulab.hideaway.Program.start;
 import org.dpulab.hideaway.models.DashboardPage;
+import org.dpulab.hideaway.models.TableModelBuilder;
+import org.dpulab.hideaway.utils.CipherIO;
+import org.dpulab.hideaway.utils.CryptoService;
+import org.dpulab.hideaway.utils.Reporter;
 import org.dpulab.hideaway.utils.Settings;
 
 /**
@@ -17,7 +26,7 @@ import org.dpulab.hideaway.utils.Settings;
  * @author dipu
  */
 public class Dashboard extends javax.swing.JFrame {
-    
+
     private DashboardPage selectedPage = DashboardPage.KEY_STORE;
 
     /**
@@ -25,12 +34,97 @@ public class Dashboard extends javax.swing.JFrame {
      */
     public Dashboard() {
         initComponents();
+
+        this.selectPage(DashboardPage.KEY_STORE);
     }
-    
-    void selectPage(DashboardPage page) {
+
+    final void selectPage(DashboardPage page) {
         this.selectedPage = page;
+        this.dataViewer.setModel(new DefaultTableModel());
+        try {
+            String icon = "<html> </html>";
+            switch (this.selectedPage) {
+                case BROWSER:
+                    this.loadBrowser();
+                    icon = this.homeButton.getText();
+                    break;
+                case FAVORITES:
+                    this.loadFavorites();
+                    icon = this.favoriteButton.getText();
+                    break;
+                case RECENT_ITEMS:
+                    this.loadRecentItems();
+                    icon = this.recentsButton.getText();
+                    break;
+                case KEY_STORE:
+                case UNDEFINED:
+                    this.loadKeyStore();
+                    icon = this.keystoreButton.getText();
+                    break;
+            }
+            icon = icon.split(" ")[0] + "</html>";
+            this.rootButton.setText(icon);
+        } catch (Exception ex) {
+            Reporter.put(Dashboard.class, ex);
+        }
     }
-    
+
+    void loadKeyStore() throws Exception {
+        // Create new table model builder
+        TableModelBuilder builder = new TableModelBuilder();
+        builder.addColumn("Alias", 120, false, "<b>%s</b>")
+                .addColumn("Key Type", 60, false, "<span style=\"color: blue\">%s</span>")
+                .addColumn("Algorithm", 60, false, "<span style=\"color: red\">%s</span>")
+                .addColumn("Key Format", 80, false, "<code>%s</code>")
+                .addColumn("Length (B)", 70, false, "<code>%s</code>")
+                .addColumn("First few bytes of the key", 350, false, "<code style=\"color: #666\">%s</code>");
+
+        // Load data to builder
+        KeyStore store = CipherIO.getDefault().getKeyStore();
+        for (String alias : Collections.list(store.aliases())) {
+            Key key = null;
+            String keyType = "";
+            if (store.isKeyEntry(alias)) {
+                key = store.getKey(alias, CipherIO.getDefault().getKeystorePass());
+                keyType = "Private";
+            } else if (store.isCertificateEntry(alias)) {
+                Certificate cert = store.getCertificate(alias);
+                key = (Key) cert.getPublicKey();
+                keyType = "Public";
+            }
+            if (key != null) {
+                builder.addData(
+                        alias,
+                        keyType,
+                        key.getAlgorithm(),
+                        key.getFormat(),
+                        key.getEncoded().length,
+                        CryptoService.getBytePreview(key.getEncoded(), 16)
+                );
+            }
+        }
+
+        // Set data to viewer
+        builder.build(this.dataViewer);
+
+        // Customize the UI
+        this.dataViewer.setRowSelectionAllowed(true);
+        this.dataViewer.setCellSelectionEnabled(false);
+        this.pathInput.setText("Keystore");
+    }
+
+    void loadFavorites() {
+
+    }
+
+    void loadBrowser() {
+
+    }
+
+    void loadRecentItems() {
+
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -381,8 +475,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         mainPanel.setBackground(new java.awt.Color(250, 250, 255));
 
+        dataViewer.setAutoCreateRowSorter(true);
         dataViewer.setBackground(new java.awt.Color(246, 248, 255));
-        dataViewer.setFont(dataViewer.getFont().deriveFont(dataViewer.getFont().getSize()+2f));
+        dataViewer.setFont(dataViewer.getFont().deriveFont(dataViewer.getFont().getSize()+1f));
         dataViewer.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -393,12 +488,28 @@ public class Dashboard extends javax.swing.JFrame {
             new String [] {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
+            };
+            boolean[] canEdit = new boolean [] {
+                true, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         dataViewer.setCellSelectionEnabled(true);
         dataViewer.setDoubleBuffered(true);
         dataViewer.setFillsViewportHeight(true);
         dataViewer.setRowHeight(24);
         dataViewer.setRowMargin(3);
+        dataViewer.getTableHeader().setReorderingAllowed(false);
         dataViewerScrollPane.setViewportView(dataViewer);
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
@@ -442,7 +553,7 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(1, 1, 1)
-                        .addComponent(sidePanel, javax.swing.GroupLayout.DEFAULT_SIZE, 521, Short.MAX_VALUE))
+                        .addComponent(sidePanel, javax.swing.GroupLayout.DEFAULT_SIZE, 546, Short.MAX_VALUE))
                     .addComponent(verticalSeparator3)))
         );
 
@@ -467,7 +578,7 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_goForwardButtonActionPerformed
 
     private void rootButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rootButtonActionPerformed
-       this.selectPage(this.selectedPage);
+        this.selectPage(this.selectedPage);
     }//GEN-LAST:event_rootButtonActionPerformed
 
     private void keystoreButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_keystoreButtonActionPerformed

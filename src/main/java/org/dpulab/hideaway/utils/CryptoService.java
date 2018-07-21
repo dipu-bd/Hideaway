@@ -41,6 +41,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.util.encoders.Hex;
 
 /**
  *
@@ -125,6 +126,10 @@ public final class CryptoService {
                 | ((bytes[1] & 0xFF) << 16)
                 | ((bytes[2] & 0xFF) << 8)
                 | ((bytes[3] & 0xFF));
+    }
+    
+    public static String getBytePreview(byte[] data, int length) {
+        return Hex.toHexString(data, 0, 16).replaceAll("..", "$0 ").toUpperCase().trim();
     }
 
     /**

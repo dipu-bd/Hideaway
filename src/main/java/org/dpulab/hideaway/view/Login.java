@@ -6,6 +6,7 @@
 package org.dpulab.hideaway.view;
 
 import java.awt.Color;
+import javax.swing.SwingUtilities;
 import org.dpulab.hideaway.utils.FileIO;
 import org.dpulab.hideaway.utils.Settings;
 
@@ -26,10 +27,10 @@ public class Login extends javax.swing.JDialog {
         this.selectedFolderInput.setText(lastDirectory);
         
         //TODO: for test
-        /*SwingUtilities.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> {
             this.passwordInput.setText("TestPassword123");
             this.initializeApp();
-        });*/
+        });
     }
     
     private void selectWorkFolder() {
