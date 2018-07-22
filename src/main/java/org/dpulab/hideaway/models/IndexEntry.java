@@ -330,4 +330,28 @@ public class IndexEntry implements Serializable {
         this.children.put(name, entry);
         return entry;
     }
+
+    /**
+     * Creates a new file under this entry.
+     *
+     * @param name
+     * @param fileSize
+     * @param checksum
+     * @param alias
+     * @return the created entry
+     */
+    public final IndexEntry createNewFile(String name, int fileSize, String checksum, String alias) {
+        if (name == null || checksum == null) {
+            return null;
+        }
+        IndexEntry entry = new IndexEntry();
+        entry.setFileName(name);
+        entry.setChecksum(checksum);
+        entry.setFileSize(fileSize);
+        entry.setParentEntry(this);
+        entry.setKeyAlias(alias);
+        this.children.put(name, entry);
+        return entry;
+    }
+
 }

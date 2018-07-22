@@ -6,21 +6,29 @@
 package org.dpulab.hideaway.view;
 
 import java.awt.Color;
+import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
+import org.apache.commons.io.FileUtils;
+import org.bouncycastle.openssl.PasswordException;
 import org.dpulab.hideaway.Program;
 import org.dpulab.hideaway.models.DashboardPage;
+import org.dpulab.hideaway.models.IndexEntry;
 import org.dpulab.hideaway.models.TableModelBuilder;
 import org.dpulab.hideaway.utils.CipherIO;
 import org.dpulab.hideaway.utils.CryptoService;
@@ -45,7 +53,7 @@ public class Dashboard extends javax.swing.JFrame {
         this.selectPage(DashboardPage.KEY_STORE);
     }
 
-    final void selectPage(DashboardPage page) {
+    public final void selectPage(DashboardPage page) {
         this.selectedPage = page;
         this.dataViewer.setModel(new DefaultTableModel());
         try {
@@ -80,6 +88,17 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }
 
+    void loadFavorites() {
+
+    }
+
+    void loadRecentItems() {
+
+    }
+
+    /*------------------------------------------------------------------------*\
+                        KEYSTORE Controller Methods
+    \*------------------------------------------------------------------------*/
     void loadKeyStore() throws Exception {
         // Create new table model builder
         TableModelBuilder builder = new TableModelBuilder();
@@ -132,18 +151,6 @@ public class Dashboard extends javax.swing.JFrame {
             this.dataViewer.setCellSelectionEnabled(false);
             this.pathInput.setText("Keystore");
         });
-    }
-
-    void loadFavorites() {
-
-    }
-
-    void loadBrowser() {
-
-    }
-
-    void loadRecentItems() {
-
     }
 
     private void displayKeyGen() {
@@ -207,6 +214,55 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }
 
+    /*------------------------------------------------------------------------*\
+                        BROWSER Controller Methods
+    \*------------------------------------------------------------------------*/
+    private IndexEntry selectedEntry = null;
+
+    void loadBrowser() {
+        try {
+            this.selectedEntry = CipherIO.getDefault().getRootIndex();
+
+            SwingUtilities.invokeLater(() -> {
+                // Customize the UI
+                this.pathInput.setText(CipherIO.SEPARATOR);
+            });
+        } catch (UnsupportedEncodingException | KeyStoreException | NoSuchAlgorithmException | PasswordException ex) {
+            Reporter.put(getClass(), ex);
+        }
+    }
+
+    private void importExternalFile() {
+        if (this.selectedPage != DashboardPage.BROWSER) {
+            Reporter.dialog("You should be in Browser page to import files");
+            return;
+        }
+
+        String filePath = FileIO.chooseOpenFile(this);
+        if (filePath == null) {
+            return;
+        }
+
+        File file = new File(filePath);
+        String keyAlias = "test";
+
+        try {
+            // read data
+            byte[] data = FileUtils.readFileToByteArray(file);
+            String checksum = CryptoService.getDefault().getChecksum(data);
+
+            // create a index entry
+            IndexEntry entry = this.selectedEntry.createNewFile(
+                    file.getName(), data.length, checksum, keyAlias);
+            CipherIO.getDefault().saveIndex();
+
+            // write texts
+            CipherIO.getDefault().writeToCipherFile(entry, data);
+        } catch (IOException | GeneralSecurityException ex) {
+            Logger.getLogger(Dashboard.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -237,8 +293,8 @@ public class Dashboard extends javax.swing.JFrame {
         pathInput = new javax.swing.JTextField();
         verticalSeparator2 = new javax.swing.JSeparator();
         actionToolbar = new javax.swing.JToolBar();
-        newFileButton = new javax.swing.JButton();
-        newFolderButton = new javax.swing.JButton();
+        importFileToolButton = new javax.swing.JButton();
+        importFolderToolButton = new javax.swing.JButton();
         addBookmarkButton = new javax.swing.JButton();
         logoutButton = new javax.swing.JButton();
         horizontalSeparator1 = new javax.swing.JSeparator();
@@ -350,6 +406,7 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        pathInput.setEditable(false);
         pathInput.setBackground(new java.awt.Color(214, 217, 223));
         pathInput.setFont(new java.awt.Font("Monospaced", 1, 16)); // NOI18N
         pathInput.setForeground(new java.awt.Color(32, 78, 78));
@@ -388,31 +445,36 @@ public class Dashboard extends javax.swing.JFrame {
         actionToolbar.setDoubleBuffered(true);
         actionToolbar.setMargin(new java.awt.Insets(3, 10, 3, 10));
 
-        newFileButton.setFont(newFileButton.getFont().deriveFont(newFileButton.getFont().getSize()+12f));
-        newFileButton.setText("<html>&#x1f5ba;</html>");
-        newFileButton.setToolTipText("New file");
-        newFileButton.setActionCommand("File");
-        newFileButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(3, 10, 3, 10)));
-        newFileButton.setFocusPainted(false);
-        newFileButton.setFocusable(false);
-        newFileButton.setMaximumSize(new java.awt.Dimension(2147483647, 40));
-        newFileButton.setMinimumSize(new java.awt.Dimension(46, 40));
-        newFileButton.setOpaque(true);
-        newFileButton.setPreferredSize(new java.awt.Dimension(46, 40));
-        actionToolbar.add(newFileButton);
+        importFileToolButton.setFont(importFileToolButton.getFont().deriveFont(importFileToolButton.getFont().getSize()+12f));
+        importFileToolButton.setText("<html>&#x1f5ba;</html>");
+        importFileToolButton.setToolTipText("New file");
+        importFileToolButton.setActionCommand("File");
+        importFileToolButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(3, 10, 3, 10)));
+        importFileToolButton.setFocusPainted(false);
+        importFileToolButton.setFocusable(false);
+        importFileToolButton.setMaximumSize(new java.awt.Dimension(2147483647, 40));
+        importFileToolButton.setMinimumSize(new java.awt.Dimension(46, 40));
+        importFileToolButton.setOpaque(true);
+        importFileToolButton.setPreferredSize(new java.awt.Dimension(46, 40));
+        importFileToolButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importFileToolButtonActionPerformed(evt);
+            }
+        });
+        actionToolbar.add(importFileToolButton);
 
-        newFolderButton.setFont(newFolderButton.getFont().deriveFont(newFolderButton.getFont().getSize()+12f));
-        newFolderButton.setText("<html>&#x1f5bf;</html>");
-        newFolderButton.setToolTipText("New folder");
-        newFolderButton.setActionCommand("Folder");
-        newFolderButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(3, 10, 3, 10)));
-        newFolderButton.setFocusPainted(false);
-        newFolderButton.setFocusable(false);
-        newFolderButton.setMaximumSize(new java.awt.Dimension(2147483647, 40));
-        newFolderButton.setMinimumSize(new java.awt.Dimension(46, 40));
-        newFolderButton.setOpaque(true);
-        newFolderButton.setPreferredSize(new java.awt.Dimension(46, 40));
-        actionToolbar.add(newFolderButton);
+        importFolderToolButton.setFont(importFolderToolButton.getFont().deriveFont(importFolderToolButton.getFont().getSize()+12f));
+        importFolderToolButton.setText("<html>&#x1f5bf;</html>");
+        importFolderToolButton.setToolTipText("New folder");
+        importFolderToolButton.setActionCommand("Folder");
+        importFolderToolButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(3, 10, 3, 10)));
+        importFolderToolButton.setFocusPainted(false);
+        importFolderToolButton.setFocusable(false);
+        importFolderToolButton.setMaximumSize(new java.awt.Dimension(2147483647, 40));
+        importFolderToolButton.setMinimumSize(new java.awt.Dimension(46, 40));
+        importFolderToolButton.setOpaque(true);
+        importFolderToolButton.setPreferredSize(new java.awt.Dimension(46, 40));
+        actionToolbar.add(importFolderToolButton);
 
         addBookmarkButton.setFont(addBookmarkButton.getFont().deriveFont(addBookmarkButton.getFont().getSize()+12f));
         addBookmarkButton.setText("<html>&#x2605;</html>");
@@ -490,7 +552,7 @@ public class Dashboard extends javax.swing.JFrame {
         sidePanel.setPreferredSize(new java.awt.Dimension(200, 361));
 
         homeButton.setFont(homeButton.getFont().deriveFont(homeButton.getFont().getSize()+5f));
-        homeButton.setText("<html>&#x1f5b4; Home</html>");
+        homeButton.setText("<html>&#x1f5b4; Browser</html>");
         homeButton.setBorderPainted(false);
         homeButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -528,11 +590,16 @@ public class Dashboard extends javax.swing.JFrame {
 
         importFileButton.setBackground(new java.awt.Color(192, 190, 196));
         importFileButton.setFont(importFileButton.getFont().deriveFont(importFileButton.getFont().getSize()+2f));
-        importFileButton.setText("<html>&#x271c; Import File</html>");
+        importFileButton.setText("<html><span style=\"font-size: 1.3em\">&#x1f5ba;</span> Import File</html>");
+        importFileButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importFileButtonActionPerformed(evt);
+            }
+        });
 
         importFolderButton.setBackground(new java.awt.Color(192, 190, 196));
         importFolderButton.setFont(importFolderButton.getFont().deriveFont(importFolderButton.getFont().getSize()+2f));
-        importFolderButton.setText("<html>&#x27f4; Import Folder</html>");
+        importFolderButton.setText("<html><span style=\"font-size: 1.3em\">&#x1f5bf;</span> Import Folder</html>");
 
         keystoreButton.setFont(keystoreButton.getFont().deriveFont(keystoreButton.getFont().getSize()+5f));
         keystoreButton.setText("<html>&#x26d3; Keystore</html>");
@@ -771,6 +838,14 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_dataViewerMouseReleased
 
+    private void importFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importFileButtonActionPerformed
+        this.importExternalFile();
+    }//GEN-LAST:event_importFileButtonActionPerformed
+
+    private void importFileToolButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importFileToolButtonActionPerformed
+        this.importExternalFile();
+    }//GEN-LAST:event_importFileToolButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToolBar actionToolbar;
     private javax.swing.JButton addBookmarkButton;
@@ -789,7 +864,9 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JSeparator horizontalSeparator2;
     private javax.swing.JSeparator horizontalSeparator3;
     private javax.swing.JButton importFileButton;
+    private javax.swing.JButton importFileToolButton;
     private javax.swing.JButton importFolderButton;
+    private javax.swing.JButton importFolderToolButton;
     private javax.swing.JMenuItem importKeyButton;
     private javax.swing.JButton keystoreButton;
     private javax.swing.JPopupMenu keystorePopup;
@@ -798,8 +875,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton logoutButton;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JToolBar navigationToolbar;
-    private javax.swing.JButton newFileButton;
-    private javax.swing.JButton newFolderButton;
     private javax.swing.JTextField pathInput;
     private javax.swing.JPanel pathSelectorPanel;
     private javax.swing.JPopupMenu recentItemsPopup;

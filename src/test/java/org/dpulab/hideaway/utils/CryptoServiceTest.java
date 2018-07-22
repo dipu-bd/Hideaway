@@ -100,7 +100,7 @@ public class CryptoServiceTest {
     }
 
     /**
-     * Test of getKeyBlock method, of class CryptoService.
+     * Test of getPasswordBlock method, of class CryptoService.
      */
     @org.junit.Test
     public void testGetKeyBlock() throws Exception {
@@ -113,7 +113,7 @@ public class CryptoServiceTest {
             "a very long Key with Spaces"
         };
         for (String password : passwords) {
-            byte[] result = CryptoService.getKeyBlock(password, blockSize);
+            byte[] result = CryptoService.getPasswordBlock(password, blockSize);
             System.out.println(">>> " + password + " = " + new String(result));
         }
     }
@@ -199,7 +199,7 @@ public class CryptoServiceTest {
             IvParameterSpec result = (IvParameterSpec) instance.generateParamSpec(seed);
             assertNotNull(result);
             assertEquals(16, result.getIV().length);
-            assertArrayEquals(result.getIV(), CryptoService.getKeyBlock(seed, 16));
+            assertArrayEquals(result.getIV(), CryptoService.getPasswordBlock(seed, 16));
             assertEquals(expResult, Base64.getEncoder().encodeToString(result.getIV()));
         }
     }

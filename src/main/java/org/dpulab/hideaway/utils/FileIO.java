@@ -38,20 +38,45 @@ public final class FileIO {
         int returnVal = fileChooser.showSaveDialog(parent);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File folder = fileChooser.getSelectedFile();
-            Settings.getDefault().set("LAST_DIRECTORY", folder.getParent());
-            return folder.getAbsolutePath();
+            if (folder.mkdirs()) {
+                Settings.getDefault().set("LAST_DIRECTORY", folder.getParent());
+                return folder.getAbsolutePath();
+            }
         }
         return null;
     }
 
     /**
-     * Displays a file chooser dialog to select a file. It keeps the last
-     * visited folder path in memory.
+     * Displays a file chooser dialog to select a file to read data. It keeps
+     * the last visited folder path in memory.
      *
      * @param parent The parent component. Can be <code>null</code>.
      * @return The selected file, or null if nothing is selected.
      */
-    public static String chooseFile(Component parent) {
+    public static String chooseOpenFile(Component parent) {
+        String lastDirectory = Settings.getDefault().get("LAST_DIRECTORY");
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new java.io.File(lastDirectory));
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setFileHidingEnabled(false);
+        fileChooser.setApproveButtonText("Open");
+        int returnVal = fileChooser.showOpenDialog(parent);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            Settings.getDefault().set("LAST_DIRECTORY", file.getParent());
+            return file.getAbsolutePath();
+        }
+        return null;
+    }
+
+    /**
+     * Displays a file chooser dialog to select a file to save data. It keeps
+     * the last visited folder path in memory.
+     *
+     * @param parent The parent component. Can be <code>null</code>.
+     * @return The selected file, or null if nothing is selected.
+     */
+    public static String chooseSaveFile(Component parent) {
         String lastDirectory = Settings.getDefault().get("LAST_DIRECTORY");
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new java.io.File(lastDirectory));
@@ -61,8 +86,10 @@ public final class FileIO {
         int returnVal = fileChooser.showSaveDialog(parent);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
-            Settings.getDefault().set("LAST_DIRECTORY", file.getParent());
-            return file.getAbsolutePath();
+            if (file.getParentFile().mkdirs()) {
+                Settings.getDefault().set("LAST_DIRECTORY", file.getParent());
+                return file.getAbsolutePath();
+            }
         }
         return null;
     }
@@ -75,7 +102,7 @@ public final class FileIO {
      * @throws IOException
      */
     public static void saveToFile(Component parent, String content) throws IOException {
-        String filePath = FileIO.chooseFile(parent);
+        String filePath = FileIO.chooseSaveFile(parent);
         if (filePath != null) {
             File file = new File(filePath);
             Settings.getDefault().set("LAST_DIRECTORY", file.getParent());

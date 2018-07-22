@@ -285,6 +285,7 @@
             </Component>
             <Component class="javax.swing.JTextField" name="pathInput">
               <Properties>
+                <Property name="editable" type="boolean" value="false"/>
                 <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="df" green="d9" red="d6" type="rgb"/>
                 </Property>
@@ -336,11 +337,11 @@
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout"/>
           <SubComponents>
-            <Component class="javax.swing.JButton" name="newFileButton">
+            <Component class="javax.swing.JButton" name="importFileToolButton">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
                   <FontInfo relative="true">
-                    <Font component="newFileButton" property="font" relativeSize="true" size="12"/>
+                    <Font component="importFileToolButton" property="font" relativeSize="true" size="12"/>
                   </FontInfo>
                 </Property>
                 <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#x1f5ba;&lt;/html&gt;"/>
@@ -371,12 +372,15 @@
                   <Dimension value="[46, 40]"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="importFileToolButtonActionPerformed"/>
+              </Events>
             </Component>
-            <Component class="javax.swing.JButton" name="newFolderButton">
+            <Component class="javax.swing.JButton" name="importFolderToolButton">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
                   <FontInfo relative="true">
-                    <Font component="newFolderButton" property="font" relativeSize="true" size="12"/>
+                    <Font component="importFolderToolButton" property="font" relativeSize="true" size="12"/>
                   </FontInfo>
                 </Property>
                 <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#x1f5bf;&lt;/html&gt;"/>
@@ -563,7 +567,7 @@
                 <Font component="homeButton" property="font" relativeSize="true" size="5"/>
               </FontInfo>
             </Property>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#x1f5b4; Home&lt;/html&gt;"/>
+            <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#x1f5b4; Browser&lt;/html&gt;"/>
             <Property name="borderPainted" type="boolean" value="false"/>
           </Properties>
           <Events>
@@ -627,8 +631,11 @@
                 <Font component="importFileButton" property="font" relativeSize="true" size="2"/>
               </FontInfo>
             </Property>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#x271c; Import File&lt;/html&gt;"/>
+            <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;span style=&quot;font-size: 1.3em&quot;&gt;&amp;#x1f5ba;&lt;/span&gt; Import File&lt;/html&gt;"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="importFileButtonActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="importFolderButton">
           <Properties>
@@ -640,7 +647,7 @@
                 <Font component="importFolderButton" property="font" relativeSize="true" size="2"/>
               </FontInfo>
             </Property>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#x27f4; Import Folder&lt;/html&gt;"/>
+            <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;span style=&quot;font-size: 1.3em&quot;&gt;&amp;#x1f5bf;&lt;/span&gt; Import Folder&lt;/html&gt;"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JSeparator" name="horizontalSeparator3">

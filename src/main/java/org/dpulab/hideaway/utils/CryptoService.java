@@ -61,49 +61,6 @@ public final class CryptoService {
     }
 
     /**
-     * Get the hash of given text using SHA-1 algorithm.
-     *
-     * @param text The input text.
-     * @return The hash of the text.
-     * @throws java.security.NoSuchAlgorithmException
-     * @throws java.io.UnsupportedEncodingException
-     */
-    public String getHash(String text) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        if (StringUtils.isEmpty(text)) {
-            return null;
-        }
-        MessageDigest digest = MessageDigest.getInstance("SHA-1");
-        digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
-        text = StringUtils.swapCase(text);
-        digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
-        text = StringUtils.rotate(text, text.length() / 3);
-        digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
-        text = StringUtils.reverse(text);
-        digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
-        String hash = Base64.getEncoder().encodeToString(digest.digest());
-        hash = hash.replace('/', '-');
-        return hash;
-    }
-
-    /**
-     * Generate password key block of given size.
-     *
-     * @param password The password to use (Should be minimum of 8 bytes).
-     * @param blockSize The block size (Supported values: 16, 24, 32).
-     * @return The password block of fixed size.
-     * @throws UnsupportedEncodingException
-     */
-    public static byte[] getKeyBlock(String password, int blockSize) throws UnsupportedEncodingException {
-        StringBuilder sb = new StringBuilder();
-        while (sb.length() < blockSize) {
-            sb.append(password);
-            sb.reverse();
-        }
-        byte[] bytes = sb.toString().getBytes(Settings.DEFAULT_CHARSET);
-        return Arrays.copyOf(bytes, blockSize);
-    }
-
-    /**
      * Converts integer to byte array.
      *
      * @param value
@@ -154,6 +111,66 @@ public final class CryptoService {
     }
 
     /**
+     * Generate password key block of given size.
+     *
+     * @param password The password to use (Should be minimum of 8 bytes).
+     * @param blockSize The block size (Supported values: 16, 24, 32).
+     * @return The password block of fixed size.
+     * @throws UnsupportedEncodingException
+     */
+    public static byte[] getPasswordBlock(String password, int blockSize) throws UnsupportedEncodingException {
+        StringBuilder sb = new StringBuilder();
+        while (sb.length() < blockSize) {
+            sb.append(password);
+            sb.reverse();
+        }
+        byte[] bytes = sb.toString().getBytes(Settings.DEFAULT_CHARSET);
+        return Arrays.copyOf(bytes, blockSize);
+    }
+
+    /**
+     * Get the hash of given text using SHA-1 algorithm.
+     *
+     * @param text The input text.
+     * @return The hash of the text.
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws java.io.UnsupportedEncodingException
+     */
+    public String getHash(String text) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        if (StringUtils.isEmpty(text)) {
+            return null;
+        }
+        MessageDigest digest = MessageDigest.getInstance("SHA-1");
+        digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
+        text = StringUtils.swapCase(text);
+        digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
+        text = StringUtils.rotate(text, text.length() / 3);
+        digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
+        text = StringUtils.reverse(text);
+        digest.update(text.getBytes(Settings.DEFAULT_CHARSET));
+        String hash = Base64.getEncoder().encodeToString(digest.digest());
+        hash = hash.replace('/', '-');
+        return hash;
+    }
+
+    /**
+     * Gets the checksum of the byte array. It calculates the hash of the array
+     * using SHA-512 algorithm.
+     *
+     * @param data
+     * @return the checksum string
+     * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
+     */
+    public String getChecksum(byte[] data) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-512");
+        digest.update(data);
+        String hash = Base64.getEncoder().encodeToString(digest.digest());
+        hash = hash.replace('/', '-');
+        return hash;
+    }
+
+    /**
      * Generates a secret key using given password as a seed to a SecureRandom
      * instance.
      *
@@ -182,7 +199,7 @@ public final class CryptoService {
      * @throws UnsupportedEncodingException
      */
     public AlgorithmParameterSpec generateParamSpec(String seed) throws UnsupportedEncodingException {
-        byte[] block = CryptoService.getKeyBlock(seed, 16);
+        byte[] block = CryptoService.getPasswordBlock(seed, 16);
         return new IvParameterSpec(block);
     }
 

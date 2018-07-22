@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.Properties;
 import org.apache.commons.crypto.stream.CryptoInputStream;
 import org.apache.commons.crypto.stream.CryptoOutputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.openssl.PasswordException;
 import org.dpulab.hideaway.models.IndexEntry;
@@ -115,6 +116,15 @@ public class CipherIO {
     public char[] getKeystorePass() {
         return this.password.toCharArray();
     }
+    
+    public final KeyStore getKeyStore() {
+        return this.keyStore;
+    }
+    
+    public final IndexEntry getRootIndex() {
+        return this.rootEntry;
+    }
+
 
     /**
      * Checks the folder
@@ -213,22 +223,6 @@ public class CipherIO {
     }
 
     /**
-     * Gets a RSA key pair key by its alias.
-     *
-     * @param alias
-     * @return
-     * @throws java.security.KeyStoreException
-     * @throws java.security.NoSuchAlgorithmException
-     * @throws java.security.UnrecoverableKeyException
-     */
-    public KeyPair getKeyPair(String alias)
-            throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
-        PublicKey publicKey = this.keyStore.getCertificate(alias + "_cert").getPublicKey();
-        PrivateKey privateKey = (PrivateKey) this.keyStore.getKey(alias + "_key", this.getKeystorePass());
-        return new KeyPair(publicKey, privateKey);
-    }
-
-    /**
      * Sets a secret key by its alias. Certificate chain can be null unless it
      * is a RSA Key pair.
      *
@@ -291,6 +285,45 @@ public class CipherIO {
     }
 
     /**
+     * Gets a public key entry by its alias.
+     *
+     * @param alias a string that ends with <code>_cert</code>
+     * @return a public key
+     * @throws java.security.KeyStoreException
+     */
+    public PublicKey getPublicKey(String alias) throws KeyStoreException {
+        return this.keyStore.getCertificate(alias + "_cert").getPublicKey();
+    }
+
+    /**
+     * Gets a private entry by its alias.
+     *
+     * @param alias a string that ends with <code>_key</code>
+     * @return a private key
+     * @throws java.security.KeyStoreException
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws java.security.UnrecoverableKeyException
+     */
+    public PrivateKey getPrivateKey(String alias)
+            throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
+        return (PrivateKey) this.keyStore.getKey(alias + "_key", this.getKeystorePass());
+    }
+
+    /**
+     * Gets a RSA key pair key by its alias.
+     *
+     * @param alias
+     * @return
+     * @throws java.security.KeyStoreException
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws java.security.UnrecoverableKeyException
+     */
+    public KeyPair getKeyPair(String alias)
+            throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
+        return new KeyPair(this.getPublicKey(alias), this.getPrivateKey(alias));
+    }
+
+    /**
      * Checks if a RSA KeyPair exists in current KeyStore by its alias.
      *
      * @param alias the alias of the key pair
@@ -300,10 +333,6 @@ public class CipherIO {
     public boolean containsKeyPair(String alias) throws KeyStoreException {
         return this.keyStore.containsAlias(alias + "_cert")
                 && this.keyStore.containsAlias(alias + "_key");
-    }
-
-    public final KeyStore getKeyStore() {
-        return this.keyStore;
     }
 
     /**
@@ -408,5 +437,55 @@ public class CipherIO {
         }
         Reporter.format("Index entry saved. Total file size: %s", rootEntry.getFileSizeReadable());
     }
+
+    /**
+     * Read bytes from cipher file.
+     * @param entry
+     * @return
+     * @throws IOException
+     * @throws GeneralSecurityException
+     * @throws UnsupportedClassVersionError 
+     */
+    public byte[] readFromCipherFile(IndexEntry entry) throws IOException, GeneralSecurityException, UnsupportedClassVersionError {
+        File file = this.getDataFile(entry.getChecksum());
+        if (!file.exists()) {
+            return null;
+        }
+
+        Properties props = this.defaultProperties();
+        PrivateKey key = this.getPrivateKey(entry.getKeyAlias());
+        AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
+
+        try (FileInputStream fis = new FileInputStream(file);
+                CryptoInputStream cis = new CryptoInputStream("RSA", props, fis, key, params)) {
+            byte[] buffer = IOUtils.readFully(cis, cis.available());
+            return buffer;
+        }
+    }
+
+    /**
+     * Writes all bytes to cipher file.
+     * @param entry index entry of the file.
+     * @param buffer the data to write.
+     * @throws IOException
+     * @throws GeneralSecurityException 
+     */
+    public void writeToCipherFile(IndexEntry entry, byte[] buffer) throws IOException, GeneralSecurityException {
+        File file = this.getDataFile(entry.getChecksum());
+
+        Properties props = this.defaultProperties();
+        PrivateKey key = this.getPrivateKey(entry.getKeyAlias());
+        AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
+
+        try (FileOutputStream fos = new FileOutputStream(file);
+                CryptoOutputStream cos = new CryptoOutputStream("RSA", props, fos, key, params)) {
+            cos.write(buffer, 0, buffer.length);
+        } catch (Exception ex) {
+            file.delete();
+            throw ex;
+        }
+    }
+    
+    
 
 }
