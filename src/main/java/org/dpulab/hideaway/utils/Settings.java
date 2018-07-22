@@ -20,7 +20,7 @@ public class Settings {
      */
     // crypto algorithms
     public static final String DEFAULT_CHARSET = "UTF-8";
-    public static final String STORE_TYPE = "PKCS12";
+    public static final String STORE_TYPE = "pkcs12";
     public static final String AES_ALGORITHM = "AES/CBC/PKCS5Padding";
     public static final String INDEX_KEY_ALIAS = "INDEX_PASSWD";
     public static final String INDEX_IV_ALIAS = "INDEX_IvParam";
