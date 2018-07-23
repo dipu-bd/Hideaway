@@ -38,10 +38,8 @@ public final class FileIO {
         int returnVal = fileChooser.showSaveDialog(parent);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File folder = fileChooser.getSelectedFile();
-            if (folder.mkdirs()) {
-                Settings.getDefault().set("LAST_DIRECTORY", folder.getParent());
-                return folder.getAbsolutePath();
-            }
+            Settings.getDefault().set("LAST_DIRECTORY", folder.getParent());
+            return folder.getAbsolutePath();
         }
         return null;
     }
@@ -86,10 +84,8 @@ public final class FileIO {
         int returnVal = fileChooser.showSaveDialog(parent);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
-            if (file.getParentFile().mkdirs()) {
-                Settings.getDefault().set("LAST_DIRECTORY", file.getParent());
-                return file.getAbsolutePath();
-            }
+            Settings.getDefault().set("LAST_DIRECTORY", file.getParent());
+            return file.getAbsolutePath();
         }
         return null;
     }

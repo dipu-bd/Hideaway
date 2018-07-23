@@ -45,7 +45,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
     <name>Hideaway</name>
-    <description>Keeps your files saved with RSA and AES encryptions.</description>
+    <description>Hides your sensitive documents with the help of advanced cryptographic algorithms.</description>
     <build>
         <plugins>
             <plugin>
