@@ -111,7 +111,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addColumn("Key Format", "<code>%s</code>", 85, 90)
                 .addColumn("Length (B)", "<code style=\"color: navy\">%s</code>", 80, 85)
                 .addColumn("Created At", "<span style=\"color: gray\">%s</span>", 135, 145)
-                .addColumn("First few bytes of the key", "<code style=\"color: orange\">%s</code>", 300);
+                .addColumn("Fingerprint", "<code style=\"color: orange\">%s</code>", 300);
 
         // Load data to builder
         int index = 1;

@@ -16,6 +16,8 @@
  */
 package org.dpulab.hideaway.utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -44,8 +46,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import javax.crypto.Cipher;
 import org.apache.commons.crypto.stream.CryptoInputStream;
 import org.apache.commons.crypto.stream.CryptoOutputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.openssl.PasswordException;
@@ -346,7 +350,7 @@ public class CipherIO {
     public String[] allKeyPairAliases() throws KeyStoreException {
         ArrayList<String> result = new ArrayList<>();
         Enumeration<String> aliases = this.keyStore.aliases();
-        while(aliases.hasMoreElements()) {
+        while (aliases.hasMoreElements()) {
             String alias = aliases.nextElement();
             if (this.keyStore.isCertificateEntry(alias)) {
                 alias = StringUtils.removeEnd(alias, "_cert");
@@ -356,16 +360,6 @@ public class CipherIO {
             }
         }
         return result.toArray(new String[0]);
-    }
-
-    /**
-     * Gets a collection of default system properties.
-     *
-     * @return
-     */
-    public Properties defaultProperties() {
-        return new Properties();
-        // org.apache.commons.crypto.utils.Utils.getDefaultProperties();
     }
 
     /**
@@ -427,14 +421,19 @@ public class CipherIO {
     public void loadIndex() throws IOException, GeneralSecurityException, UnsupportedClassVersionError {
         File indexFile = this.getIndexFile();
         Key key = this.getIndexSecret();
-        Properties props = this.defaultProperties();
         AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
 
-        try (FileInputStream fis = new FileInputStream(indexFile);
-                CryptoInputStream cis = new CryptoInputStream(Settings.AES_ALGORITHM, props, fis, key, params);
-                ObjectInputStream ois = new ObjectInputStream(cis)) {
+        Cipher cipher = Cipher.getInstance(Settings.AES_ALGORITHM, "BC");
+        cipher.init(Cipher.DECRYPT_MODE, key, params);
+        
+        byte[] buffer = FileUtils.readFileToByteArray(indexFile);
+        byte[] decrypted = cipher.doFinal(buffer);
+        
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(decrypted);
+                ObjectInputStream ois = new ObjectInputStream(bais)) {
             rootEntry = IndexEntry.readExternal(ois);
         }
+        
         Reporter.format("Index entry loaded. Total file size: %s", rootEntry.getFileSizeReadable());
     }
 
@@ -447,17 +446,21 @@ public class CipherIO {
     public void saveIndex() throws IOException, GeneralSecurityException {
         File indexFile = this.getIndexFile();
         Key key = this.getIndexSecret();
-        Properties props = this.defaultProperties();
         AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
 
-        try (FileOutputStream fos = new FileOutputStream(indexFile);
-                CryptoOutputStream cos = new CryptoOutputStream(Settings.AES_ALGORITHM, props, fos, key, params);
-                ObjectOutputStream oos = new ObjectOutputStream(cos)) {
+        Cipher cipher = Cipher.getInstance(Settings.AES_ALGORITHM, "BC");
+        cipher.init(Cipher.ENCRYPT_MODE, key, params);
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try(ObjectOutputStream oos = new ObjectOutputStream(baos)) {
             rootEntry.writeExternal(oos);
-        } catch (Exception ex) {
-            indexFile.delete();
-            throw ex;
         }
+        baos.close();
+        
+        byte[] buffer = baos.toByteArray();
+        byte[] encrypted = cipher.doFinal(buffer);
+        FileUtils.writeByteArrayToFile(indexFile, encrypted);
+        
         Reporter.format("Index entry saved. Total file size: %s", rootEntry.getFileSizeReadable());
     }
 
@@ -476,15 +479,14 @@ public class CipherIO {
             return null;
         }
 
-        Properties props = this.defaultProperties();
         PrivateKey key = this.getPrivateKey(entry.getKeyAlias());
-        AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
 
-        try (FileInputStream fis = new FileInputStream(file);
-                CryptoInputStream cis = new CryptoInputStream("RSA", props, fis, key, params)) {
-            byte[] buffer = IOUtils.readFully(cis, cis.available());
-            return buffer;
-        }
+        Cipher cipher = Cipher.getInstance(Settings.RSA_ALGORITHM, "BC");
+        cipher.init(Cipher.DECRYPT_MODE, key);
+
+        byte[] buffer = FileUtils.readFileToByteArray(file);
+        byte[] decrypted = cipher.doFinal(buffer);
+        return decrypted;
     }
 
     /**
@@ -497,18 +499,15 @@ public class CipherIO {
      */
     public void writeToCipherFile(IndexEntry entry, byte[] buffer) throws IOException, GeneralSecurityException {
         File file = this.getDataFile(entry.getChecksum());
+        file.createNewFile();
 
-        Properties props = this.defaultProperties();
         PrivateKey key = this.getPrivateKey(entry.getKeyAlias());
-        AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
 
-        try (FileOutputStream fos = new FileOutputStream(file);
-                CryptoOutputStream cos = new CryptoOutputStream("RSA", props, fos, key, params)) {
-            cos.write(buffer, 0, buffer.length);
-        } catch (Exception ex) {
-            file.delete();
-            throw ex;
-        }
+        Cipher cipher = Cipher.getInstance(Settings.RSA_ALGORITHM, "BC");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        
+        byte[] encrypted = cipher.doFinal(buffer);
+        FileUtils.writeByteArrayToFile(file, encrypted);
     }
 
 }

@@ -206,7 +206,7 @@ public final class CryptoService {
      * @return
      * @throws UnsupportedEncodingException
      */
-    public AlgorithmParameterSpec generateParamSpec(String seed) throws UnsupportedEncodingException {
+    public IvParameterSpec generateParamSpec(String seed) throws UnsupportedEncodingException {
         byte[] block = CryptoService.getPasswordBlock(seed, 16);
         return new IvParameterSpec(block);
     }
