@@ -25,6 +25,8 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.dpulab.hideaway.utils.CipherIO;
@@ -33,7 +35,7 @@ import org.dpulab.hideaway.utils.CipherIO;
  *
  * @author dipu
  */
-public class IndexEntry implements Serializable {
+public class IndexEntry implements Serializable, Comparable<IndexEntry> {
 
     public static final String SEPARATOR = "/";
 
@@ -116,6 +118,17 @@ public class IndexEntry implements Serializable {
             //Reporter.format(Level.WARNING, "Unsupported version: ", version);
             throw new UnsupportedClassVersionError(String.format("Version %d is not supported", version));
         }
+    }
+
+    @Override
+    public int compareTo(IndexEntry that) {
+        if (this.isFile() && that.isDirectory()) {
+            return -1; // a < b
+        }
+        if (this.isDirectory() && that.isFile()) {
+            return 1; // a > b
+        }
+        return this.getFileName().compareTo(that.getFileName());
     }
 
     /*------------------------------------------------------------------------*\
@@ -204,16 +217,44 @@ public class IndexEntry implements Serializable {
     /**
      * @return the children
      */
-    public final Collection<IndexEntry> getChildren() {
-        return this.children.values();
+    public final IndexEntry[] getChildren() {
+        IndexEntry[] entries = this.children.values().toArray(new IndexEntry[0]);
+        Arrays.sort(entries);
+        return entries;
+    }
+
+    /**
+     * @return the folders
+     */
+    public final IndexEntry[] getDirectories() {
+        IndexEntry[] entries = getChildren();
+        for (int i = 0; i < entries.length; ++i) {
+            if (entries[i].isFile()) {
+                return Arrays.copyOf(entries, i);
+            }
+        }
+        return entries;
+    }
+
+    /**
+     * @return the files
+     */
+    public final IndexEntry[] getFiles() {
+        IndexEntry[] entries = getChildren();
+        for (int i = 0; i < entries.length; ++i) {
+            if (entries[i].isFile()) {
+                return Arrays.copyOfRange(entries, i, entries.length);
+            }
+        }
+        return new IndexEntry[0];
     }
 
     /*------------------------------------------------------------------------*\
     |                               SETTERS                                    |   
-    \*------------------------------------------------------------------------*/
-    /**
+    \*------------------------------------------------------------------------*/ /**
      * @param fileName the fileName to set
      */
+
     protected final void setFileName(String fileName) {
         this.fileName = fileName;
     }
