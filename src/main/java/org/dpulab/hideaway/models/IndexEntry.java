@@ -40,8 +40,8 @@ public class IndexEntry implements Serializable {
     public static IndexEntry getRoot() {
         return new IndexEntry();
     }
-    
-    public static final String join(String ... path) {
+
+    public static final String join(String... path) {
         return String.join(SEPARATOR, path);
     }
 
@@ -306,6 +306,9 @@ public class IndexEntry implements Serializable {
      * @return true if the child exists
      */
     public final boolean hasChild(String name) {
+        if (StringUtils.isEmpty(name)) {
+            return false;
+        }
         return this.children.containsKey(name);
     }
 
@@ -315,6 +318,9 @@ public class IndexEntry implements Serializable {
      * @return True if the child exists
      */
     public final boolean hasChild(IndexEntry entry) {
+        if (entry == null) {
+            return false;
+        }
         return this.children.containsKey(entry.getFileName());
     }
 

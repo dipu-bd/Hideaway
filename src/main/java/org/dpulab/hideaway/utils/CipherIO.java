@@ -39,7 +39,10 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 import org.apache.commons.crypto.stream.CryptoInputStream;
 import org.apache.commons.crypto.stream.CryptoOutputStream;
@@ -116,15 +119,14 @@ public class CipherIO {
     public char[] getKeystorePass() {
         return this.password.toCharArray();
     }
-    
+
     public final KeyStore getKeyStore() {
         return this.keyStore;
     }
-    
+
     public final IndexEntry getRootIndex() {
         return this.rootEntry;
     }
-
 
     /**
      * Checks the folder
@@ -336,6 +338,27 @@ public class CipherIO {
     }
 
     /**
+     * Gets a list of all available key-pair alias.
+     *
+     * @return
+     * @throws java.security.KeyStoreException
+     */
+    public String[] allKeyPairAliases() throws KeyStoreException {
+        ArrayList<String> result = new ArrayList<>();
+        Enumeration<String> aliases = this.keyStore.aliases();
+        while(aliases.hasMoreElements()) {
+            String alias = aliases.nextElement();
+            if (this.keyStore.isCertificateEntry(alias)) {
+                alias = StringUtils.removeEnd(alias, "_cert");
+                if (this.containsKeyPair(alias)) {
+                    result.add(alias);
+                }
+            }
+        }
+        return result.toArray(new String[0]);
+    }
+
+    /**
      * Gets a collection of default system properties.
      *
      * @return
@@ -440,11 +463,12 @@ public class CipherIO {
 
     /**
      * Read bytes from cipher file.
+     *
      * @param entry
      * @return
      * @throws IOException
      * @throws GeneralSecurityException
-     * @throws UnsupportedClassVersionError 
+     * @throws UnsupportedClassVersionError
      */
     public byte[] readFromCipherFile(IndexEntry entry) throws IOException, GeneralSecurityException, UnsupportedClassVersionError {
         File file = this.getDataFile(entry.getChecksum());
@@ -465,10 +489,11 @@ public class CipherIO {
 
     /**
      * Writes all bytes to cipher file.
+     *
      * @param entry index entry of the file.
      * @param buffer the data to write.
      * @throws IOException
-     * @throws GeneralSecurityException 
+     * @throws GeneralSecurityException
      */
     public void writeToCipherFile(IndexEntry entry, byte[] buffer) throws IOException, GeneralSecurityException {
         File file = this.getDataFile(entry.getChecksum());
@@ -485,7 +510,5 @@ public class CipherIO {
             throw ex;
         }
     }
-    
-    
 
 }

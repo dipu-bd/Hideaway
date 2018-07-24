@@ -11,12 +11,137 @@ package org.dpulab.hideaway.view;
  */
 public class RenameDialog extends javax.swing.JDialog {
 
+    public enum DialogResult {
+        SKIP,
+        REPLACE,
+        RENAME,
+        UNKNOWN
+    }
+
+    /**
+     * Make a new instance of the RenameDialog.
+     * @param parent
+     * @param message
+     * @param initialValue
+     * @param rememberBox
+     * @return 
+     */
+    public static RenameDialog makeDialog(
+            java.awt.Frame parent, String message, String initialValue, boolean rememberBox) {
+        RenameDialog dialog = new RenameDialog(parent);
+        dialog.setMessage(message);
+        dialog.setInitialInput(initialValue);
+        dialog.setRememberVisibility(rememberBox);
+        return dialog;
+    }
+
+    private DialogResult result = DialogResult.UNKNOWN;
+
     /**
      * Creates new form RenameDialog
+     *
+     * @param parent
      */
-    public RenameDialog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public RenameDialog(java.awt.Frame parent) {
+        super(parent, true);
         initComponents();
+    }
+
+    private void setAction(DialogResult result) {
+        this.result = result;
+        this.setVisible(false);
+        this.dispose();
+    }
+
+    /**
+     * @return the result
+     */
+    public DialogResult getDialogResult() {
+        return this.result;
+    }
+
+    /**
+     * @return the entered input
+     */
+    public String getInputText() {
+        return this.inputText.getText();
+    }
+
+    /**
+     * @return whether to remember
+     */
+    public boolean isRemember() {
+        return this.rememberCheckbox.isSelected();
+    }
+
+    /**
+     * @param result the result to set
+     */
+    public void setDialogResult(DialogResult result) {
+        this.result = result;
+    }
+
+    /**
+     * @param text the text to set
+     */
+    public void setMessage(String text) {
+        this.messageText.setText(text);
+    }
+
+    /**
+     * @param text the text to set
+     */
+    public void setInputInput(String text) {
+        this.inputHint.setText(text);
+    }
+
+    /**
+     * @param text the text to set
+     */
+    public void setInitialInput(String text) {
+        this.inputText.setText(text);
+    }
+
+    /**
+     * @param text the text to set
+     */
+    public void setInputLabel(String text) {
+        this.inputTextLabel.setText(text);
+    }
+
+    /**
+     * @param value True to mark the remember box as checked
+     */
+    public void setRemember(boolean value) {
+        this.rememberCheckbox.setSelected(value);
+    }
+
+    /**
+     * @param visible True to show the remember check box
+     */
+    public void setRememberVisibility(boolean visible) {
+        this.rememberCheckbox.setVisible(visible);
+    }
+
+    /**
+     * @param text the text to set
+     */
+    public void setSkipButton(String text) {
+        this.skipButton.setText(text);
+    }
+
+    /**
+     * @param text the text to set
+     */
+    public void setReplaceButton(String text) {
+        this.replaceButton.setText(text);
+    }
+
+    /**
+     * @param text the text to set
+     */
+    public void setRenameButton(String text) {
+        this.renameButton.setText(text);
     }
 
     /**
@@ -41,6 +166,8 @@ public class RenameDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Choose action");
+        setMinimumSize(new java.awt.Dimension(570, 210));
+        setPreferredSize(new java.awt.Dimension(570, 230));
 
         inputTextLabel.setFont(inputTextLabel.getFont().deriveFont(inputTextLabel.getFont().getSize()+2f));
         inputTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -161,59 +288,16 @@ public class RenameDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void renameButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_renameButtonActionPerformed
-        this.generateAndSave();
+        this.setAction(DialogResult.RENAME);
     }//GEN-LAST:event_renameButtonActionPerformed
 
     private void skipButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skipButtonActionPerformed
-        this.clearInputs();
-        this.setVisible(false);
+        this.setAction(DialogResult.SKIP);
     }//GEN-LAST:event_skipButtonActionPerformed
 
     private void replaceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_replaceButtonActionPerformed
-        // TODO add your handling code here:
+        this.setAction(DialogResult.REPLACE);
     }//GEN-LAST:event_replaceButtonActionPerformed
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(RenameDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(RenameDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(RenameDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(RenameDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                RenameDialog dialog = new RenameDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel frameActionPanel;
@@ -227,4 +311,5 @@ public class RenameDialog extends javax.swing.JDialog {
     private javax.swing.JButton replaceButton;
     private javax.swing.JButton skipButton;
     // End of variables declaration//GEN-END:variables
+
 }

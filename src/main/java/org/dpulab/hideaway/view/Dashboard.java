@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
@@ -25,6 +26,7 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.openssl.PasswordException;
 import org.dpulab.hideaway.Program;
 import org.dpulab.hideaway.models.DashboardPage;
@@ -153,15 +155,6 @@ public class Dashboard extends javax.swing.JFrame {
         });
     }
 
-    private void displayKeyGen() {
-        SwingUtilities.invokeLater(() -> {
-            KeyPairGenerator kpGen = new KeyPairGenerator(this);
-            kpGen.setVisible(true);
-            kpGen.dispose();
-            this.selectPage(DashboardPage.KEY_STORE);
-        });
-    }
-
     private void exportSelectedKey() {
         int row = this.dataViewer.getSelectedRow();
         if (row == -1) {
@@ -213,7 +206,16 @@ public class Dashboard extends javax.swing.JFrame {
             }
         }
     }
-    
+
+    private void displayKeyGen() {
+        SwingUtilities.invokeLater(() -> {
+            KeyPairGenerator kpGen = new KeyPairGenerator(this);
+            kpGen.setVisible(true);
+            kpGen.dispose();
+            this.selectPage(DashboardPage.KEY_STORE);
+        });
+    }
+
 
     /*------------------------------------------------------------------------*\
                         BROWSER Controller Methods
@@ -233,39 +235,64 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }
 
-    private String chooseRSAKey() {
-        return "test";
+    private String chooseRSAKey() throws IOException, GeneralSecurityException {
+        String[] aliasList = CipherIO.getDefault().allKeyPairAliases();
+        if (aliasList.length == 0) {
+            return null;
+        }
+        String randomAlias = aliasList[(int) (Math.random() * aliasList.length)];
+        Object selected = JOptionPane.showInputDialog(
+                this,
+                "Choose a RSA key pair to encrypt this file",
+                null,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                aliasList,
+                randomAlias);
+        return (String) selected;
     }
-    
+
+    private String validateFilename(IndexEntry entry, String fileName) {
+        while (entry.hasChild(fileName)) {
+            // get the new fileName
+            RenameDialog dialog = new RenameDialog(this);
+            dialog.setRemember(false);
+            dialog.setSkipButton("Cancel");
+            dialog.setVisible(true);
+            switch (dialog.getDialogResult()) {
+                case RENAME:
+                    fileName = dialog.getInputText();
+                    break;
+                case REPLACE:
+                    return fileName;
+                default:
+                    return null;
+            }
+        }
+        return fileName;
+    }
+
     private void importExternalFile() {
         // check if parent folder is available
         if (this.selectedPage != DashboardPage.BROWSER) {
+            this.selectPage(DashboardPage.BROWSER);
+        }
+        if (this.selectedEntry == null) {
             Reporter.dialog("You should be in Browser page to import files");
             return;
         }
-        
         // choose and validate a file path
         String filePath = FileIO.chooseOpenFile(this);
         if (filePath == null) {
             return;
         }
-        
         // gets the file and the name
         File file = new File(filePath);
         String fileName = file.getName();
         // check if an entry of similar name already exists
-        while (this.selectedEntry.hasChild(fileName)) {
-            // get the new fileName
-            JOptionPane pane = new JOptionPane("A file with same name exists. You can either skip, "
-                    + "replace the old file, or rename the current one:\n:"
-                    + "Enter new name for the file:",
-                    JOptionPane.QUESTION_MESSAGE,
-                    JOptionPane.YES_NO_CANCEL_OPTION);
-            pane.setWantsInput(true);
-            pane.setInitialValue(fileName);
-            
-
-            fileName = "-" + fileName;
+        fileName = this.validateFilename(this.selectedEntry, fileName);
+        if (StringUtils.isEmpty(fileName)) {
+            return;
         }
         // get the possible full path of the file in the index
         String path = IndexEntry.join(this.selectedEntry.getPath(), fileName);
@@ -276,6 +303,10 @@ public class Dashboard extends javax.swing.JFrame {
             String checksum = CryptoService.getDefault().getChecksum(path, data);
             // get alias of an RSA key to use
             String keyAlias = chooseRSAKey();
+            if (keyAlias == null) {
+                Reporter.dialog("You need an RSA key pair to save files");
+                return;
+            }
             // create an file entry and save index
             IndexEntry entry = this.selectedEntry.createNewFile(
                     fileName, data.length, checksum, keyAlias);
