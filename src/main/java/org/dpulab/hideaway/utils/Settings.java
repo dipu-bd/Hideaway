@@ -20,11 +20,8 @@ public class Settings {
      */
     // crypto algorithms
     public static final String DEFAULT_CHARSET = "UTF-8";
-    public static final String STORE_TYPE = "pkcs12";
     public static final String AES_CBC_PKCS5 = "AES/CBC/PKCS5Padding";
     public static final String RSA_ECB_OAEP = "RSA/ECB/OAEPWithSHA1AndMGF1Padding";
-    public static final String INDEX_KEY_ALIAS = "INDEX_PASSWD";
-    public static final String INDEX_IV_ALIAS = "INDEX_IvParam";
     // persistant settings
     public static final String WORK_DIR = "Work Directory";
     // session sessions

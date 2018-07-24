@@ -194,6 +194,7 @@ public final class CryptoService {
      * @return
      * @throws NoSuchAlgorithmException
      */
+    @Deprecated
     public String generateRandomPassword(int digits) throws NoSuchAlgorithmException {
         SecureRandom secureRandom = new SecureRandom();
         int length = (int) Math.ceil(digits * 8.0 / 6.0);

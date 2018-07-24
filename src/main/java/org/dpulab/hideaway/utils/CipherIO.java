@@ -83,6 +83,8 @@ public class CipherIO {
 
     private String password;
     private String passwordHash;
+    private Key secretKey;
+    private AlgorithmParameterSpec parameSpec;
 
     private CipherIO(String folder)
             throws PasswordException, NoSuchAlgorithmException, UnsupportedEncodingException {
@@ -90,7 +92,7 @@ public class CipherIO {
         this.rootEntry = IndexEntry.getRoot();
         this.loadPassword();
     }
-    
+
     public final void loadPassword()
             throws PasswordException, NoSuchAlgorithmException, UnsupportedEncodingException {
         this.password = Settings.getDefault().getSession(Settings.PASSWORD);
@@ -99,6 +101,9 @@ public class CipherIO {
         if (StringUtils.isEmpty(this.password) || StringUtils.isEmpty(this.passwordHash)) {
             throw new PasswordException("No password was found");
         }
+
+        this.secretKey = CryptoService.getDefault().generateKey(this.password);
+        this.parameSpec = CryptoService.getDefault().generateParamSpec(this.password);
     }
 
     /**
@@ -157,7 +162,7 @@ public class CipherIO {
     public final IndexEntry getRootIndex() {
         return this.rootEntry;
     }
-    
+
     /**
      * Verify current password by asking it again.
      *
@@ -166,7 +171,7 @@ public class CipherIO {
      * @throws java.io.UnsupportedEncodingException
      */
     public void confirmPassword()
-        throws PasswordException, NoSuchAlgorithmException, UnsupportedEncodingException {
+            throws PasswordException, NoSuchAlgorithmException, UnsupportedEncodingException {
         PasswordConfirm passwordInput = new PasswordConfirm(null);
         passwordInput.setVisible(true);
         passwordInput.dispose();
@@ -183,9 +188,9 @@ public class CipherIO {
      */
     public void loadIndex() throws IOException, GeneralSecurityException, UnsupportedClassVersionError {
         File indexFile = this.getIndexFile();
+        Key key = this.secretKey;
         Properties props = new Properties();
-        Key key = CryptoService.getDefault().generateKey(this.password);
-        AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
+        AlgorithmParameterSpec params = this.parameSpec;
 
         try (FileInputStream fis = new FileInputStream(indexFile);
                 CryptoInputStream cis = new CryptoInputStream(Settings.AES_CBC_PKCS5, props, fis, key, params);
@@ -203,9 +208,9 @@ public class CipherIO {
      */
     public void saveIndex() throws IOException, GeneralSecurityException {
         File indexFile = this.getIndexFile();
-        Key key = this.getIndexSecret();
+        Key key = this.secretKey;
         Properties props = new Properties();
-        AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
+        AlgorithmParameterSpec params = this.parameSpec;
 
         try (FileOutputStream fos = new FileOutputStream(indexFile);
                 CryptoOutputStream cos = new CryptoOutputStream(Settings.AES_CBC_PKCS5, props, fos, key, params);
@@ -233,33 +238,16 @@ public class CipherIO {
             return null;
         }
 
-        PrivateKey key = this.getPrivateKey(entry.getKeyAlias());
-        
-        File indexFile = this.getIndexFile();
-        Key key = this.getIndexSecret();
+        Key key = this.secretKey;
         Properties props = new Properties();
-        AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
+        AlgorithmParameterSpec params = this.parameSpec;
 
-        try (FileInputStream fis = new FileInputStream(indexFile);
-                CryptoInputStream cis = new CryptoInputStream(Settings.AES_CBC_PKCS5, props, fis, key, params);
-                ObjectInputStream ois = new ObjectInputStream(cis)) {
-            rootEntry = IndexEntry.readExternal(ois);
+        try (FileInputStream fis = new FileInputStream(file);
+                CryptoInputStream cis = new CryptoInputStream(Settings.AES_CBC_PKCS5, props, fis, key, params)) {
+            byte[] buffer = new byte[(int) entry.getFileSize()];
+            cis.read(buffer);
+            return buffer;
         }
-
-        try (FileOutputStream fos = new FileOutputStream(indexFile);
-                CryptoOutputStream cos = new CryptoOutputStream(Settings.AES_CBC_PKCS5, props, fos, key, params);
-                ObjectOutputStream oos = new ObjectOutputStream(cos)) {
-            rootEntry.writeExternal(oos);
-        } catch (Exception ex) {
-            indexFile.delete();
-            throw ex;
-        }
-        Cipher cipher = Cipher.getInstance(Settings.RSA_ALGORITHM, "BC");
-        cipher.init(Cipher.DECRYPT_MODE, key);
-
-        byte[] buffer = FileUtils.readFileToByteArray(file);
-        byte[] decrypted = cipher.doFinal(buffer);
-        return decrypted;
     }
 
     /**
@@ -274,13 +262,87 @@ public class CipherIO {
         File file = this.getDataFile(entry.getChecksum());
         file.createNewFile();
 
-        PrivateKey key = this.getPrivateKey(entry.getKeyAlias());
+        Key key = this.secretKey;
+        Properties props = new Properties();
+        AlgorithmParameterSpec params = this.parameSpec;
 
-        Cipher cipher = Cipher.getInstance(Settings.RSA_ALGORITHM, "BC");
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-
-        byte[] encrypted = cipher.doFinal(buffer);
-        FileUtils.writeByteArrayToFile(file, encrypted);
+        try (FileOutputStream fos = new FileOutputStream(file);
+                CryptoOutputStream cos = new CryptoOutputStream(Settings.AES_CBC_PKCS5, props, fos, key, params)) {
+            cos.write(buffer);
+        } catch (Exception ex) {
+            file.delete();
+            throw ex;
+        }
     }
 
+    /**
+     * Copy a file to destination index encrypted.
+     *
+     * @param source
+     * @param destination
+     * @throws IOException
+     * @throws GeneralSecurityException
+     * @throws UnsupportedClassVersionError
+     */
+    @SuppressWarnings("empty-statement")
+    public void copyFileEncrypted(File source, IndexEntry destination) throws IOException, GeneralSecurityException, UnsupportedClassVersionError {
+        if (!source.exists()) {
+            throw new IOException("Source file not found");
+        }
+
+        File dest = this.getDataFile(destination.getChecksum());
+        dest.getParentFile().mkdirs();
+        dest.createNewFile();
+        if (!dest.exists()) {
+            throw new IOException("Failed to create destination file");
+        }
+
+        Key key = this.secretKey;
+        Properties props = new Properties();
+        AlgorithmParameterSpec params = this.parameSpec;
+
+        try (FileInputStream fis = new FileInputStream(source);
+                FileOutputStream fos = new FileOutputStream(dest);
+                CryptoOutputStream cis = new CryptoOutputStream(Settings.AES_CBC_PKCS5, props, fos, key, params)) {
+            for (int b; (b = fis.read()) != -1; cis.write(b));
+        } catch (Exception err) {
+            dest.delete();
+            throw err;
+        }
+    }
+
+    /**
+     * Copy decrypted content of the entry to a file.
+     *
+     * @param source
+     * @param dest
+     * @throws IOException
+     * @throws GeneralSecurityException
+     */
+    @SuppressWarnings("empty-statement")
+    public void copyFileDecrypted(IndexEntry source, File dest) throws IOException, GeneralSecurityException {
+        File src = this.getDataFile(source.getChecksum());
+        if (!src.exists()) {
+            throw new IOException("Source file not found");
+        }
+
+        dest.getParentFile().mkdirs();
+        dest.createNewFile();
+        if (!dest.exists()) {
+            throw new IOException("Failed to create destination file");
+        }
+
+        Key key = this.secretKey;
+        Properties props = new Properties();
+        AlgorithmParameterSpec params = this.parameSpec;
+
+        try (FileInputStream fis = new FileInputStream(src);
+                CryptoInputStream cis = new CryptoInputStream(Settings.AES_CBC_PKCS5, props, fis, key, params);
+                FileOutputStream fos = new FileOutputStream(dest)) {
+            for (int b; (b = cis.read()) != -1; fos.write(b));
+        } catch (Exception err) {
+            dest.delete();
+            throw err;
+        }
+    }
 }
