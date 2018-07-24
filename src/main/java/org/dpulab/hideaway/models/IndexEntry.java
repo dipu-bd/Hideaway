@@ -16,6 +16,7 @@
  */
 package org.dpulab.hideaway.models;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -26,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import org.apache.commons.lang3.StringUtils;
+import org.dpulab.hideaway.utils.CipherIO;
 
 /**
  *
@@ -254,9 +256,9 @@ public class IndexEntry implements Serializable {
      * @throws java.io.IOException
      * @throws java.security.GeneralSecurityException
      */
-    public final CipherFile getCipherFile() throws IOException, GeneralSecurityException {
+    public final File getCipherFile() throws IOException, GeneralSecurityException {
         if (this.isFile()) {
-            return new CipherFile(this);
+            return CipherIO.instance().getDataFile(this.getChecksum());
         }
         return null;
     }

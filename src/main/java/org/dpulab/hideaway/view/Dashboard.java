@@ -35,6 +35,7 @@ import org.dpulab.hideaway.models.TableModelBuilder;
 import org.dpulab.hideaway.utils.CipherIO;
 import org.dpulab.hideaway.utils.CryptoService;
 import org.dpulab.hideaway.utils.FileIO;
+import org.dpulab.hideaway.utils.GeneralUtils;
 import org.dpulab.hideaway.utils.Reporter;
 import org.dpulab.hideaway.utils.Settings;
 
@@ -115,13 +116,13 @@ public class Dashboard extends javax.swing.JFrame {
 
         // Load data to builder
         int index = 1;
-        KeyStore store = CipherIO.getDefault().getKeyStore();
+        KeyStore store = CipherIO.instance().getKeyStore();
         for (String alias : Collections.list(store.aliases())) {
             Key key = null;
             String keyType = "";
             Date createdAt = store.getCreationDate(alias);
             if (store.isKeyEntry(alias)) {
-                key = store.getKey(alias, CipherIO.getDefault().getKeystorePass());
+                key = store.getKey(alias, CipherIO.instance().getKeystorePass());
                 keyType = "Private";
             } else if (store.isCertificateEntry(alias)) {
                 Certificate cert = store.getCertificate(alias);
@@ -136,7 +137,7 @@ public class Dashboard extends javax.swing.JFrame {
                         key.getAlgorithm(),
                         key.getFormat(),
                         key.getEncoded().length,
-                        new SimpleDateFormat("HH:mm:ss dd/MM/yy").format(createdAt),
+                        GeneralUtils.formatDate(createdAt),
                         CryptoService.getBytePreview(key.getEncoded(), 20)
                 );
             }
@@ -145,11 +146,10 @@ public class Dashboard extends javax.swing.JFrame {
         SwingUtilities.invokeLater(() -> {
             // Set data to viewer
             builder.build(this.dataViewer);
-            this.dataViewer.setRowHeight(22);
+            this.dataViewer.setRowHeight(20);
             this.dataViewer.setRowMargin(0);
 
             // Customize the UI
-            this.dataViewer.setRowSelectionAllowed(true);
             this.dataViewer.setCellSelectionEnabled(false);
             this.pathInput.setText("Keystore");
         });
@@ -164,7 +164,7 @@ public class Dashboard extends javax.swing.JFrame {
         alias = alias.replaceAll("<[^>]+>", "");
 
         try {
-            Key key = CipherIO.getDefault().getKeyEntry(alias);
+            Key key = CipherIO.instance().getKeyEntry(alias);
             String output = CryptoService.getKeyAsString(key);
             FileIO.saveToFile(this, output);
         } catch (IOException | GeneralSecurityException ex) {
@@ -197,7 +197,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         if (result == JOptionPane.YES_OPTION) {
             try {
-                CipherIO.getDefault().deleteKeyEntry(alias);
+                CipherIO.instance().deleteKeyEntry(alias);
                 Reporter.dialog("Deleted keys: %s_cert and %s_key", alias, alias);
                 this.selectPage(DashboardPage.KEY_STORE);
             } catch (IOException | GeneralSecurityException ex) {
@@ -223,20 +223,60 @@ public class Dashboard extends javax.swing.JFrame {
     private IndexEntry selectedEntry = null;
 
     void loadBrowser() {
+        this.loadBrowser(null);
+    }
+
+    void loadBrowser(IndexEntry parent) {
+        TableModelBuilder builder = new TableModelBuilder();
+        builder.addColumn("#", "<b style=\"color: #6e6e6e\">%s</b>", 20, 25)
+                .addColumn("Name", "<b>%s</b>", 130, 250)
+                .addColumn("Size", "<code>%s</code>", 85, 90)
+                .addColumn("Type", "", 85, 90)
+                .addColumn("Key Alias", "<span style=\"color: blue\">%s</span>", 85, 90)
+                .addColumn("Last Modified", "<span style=\"color: #777\">%s</span>", 135, 145)
+                .addColumn("Checksum", "<code style=\"color: gray\">%s</code>", 300);
+
         try {
-            this.selectedEntry = CipherIO.getDefault().getRootIndex();
+            if (parent == null) {
+                parent = CipherIO.instance().getRootIndex();
+            }
+            this.selectedEntry = parent;
+
+            int index = 1;
+            for (IndexEntry entry : this.selectedEntry.getChildren()) {
+                String lastModifyDate = "-";
+                if (entry.isFile()) {
+                    File cipherFile = entry.getCipherFile();
+                    lastModifyDate = GeneralUtils.formatDate(cipherFile.lastModified());
+                }
+                builder.addData(
+                        index++,
+                        entry.getFileName(),
+                        entry.getFileSizeReadable(),
+                        entry.isFile() ? "File" : "Directory",
+                        entry.getKeyAlias(),
+                        lastModifyDate,
+                        entry.getChecksum(),
+                        entry
+                );
+            }
 
             SwingUtilities.invokeLater(() -> {
+                builder.build(this.dataViewer);
+                this.dataViewer.setRowHeight(22);
+                this.dataViewer.setRowMargin(0);
+
                 // Customize the UI
-                this.pathInput.setText(CipherIO.SEPARATOR);
+                this.dataViewer.setCellSelectionEnabled(false);
+                this.pathInput.setText(this.selectedEntry.getPath() + CipherIO.SEPARATOR);
             });
-        } catch (UnsupportedEncodingException | KeyStoreException | NoSuchAlgorithmException | PasswordException ex) {
+        } catch (IOException | GeneralSecurityException ex) {
             Reporter.put(getClass(), ex);
         }
     }
 
     private String chooseRSAKey() throws IOException, GeneralSecurityException {
-        String[] aliasList = CipherIO.getDefault().allKeyPairAliases();
+        String[] aliasList = CipherIO.instance().allKeyPairAliases();
         if (aliasList.length == 0) {
             return null;
         }
@@ -310,9 +350,9 @@ public class Dashboard extends javax.swing.JFrame {
             // create an file entry and save index
             IndexEntry entry = this.selectedEntry.createNewFile(
                     fileName, data.length, checksum, keyAlias);
-            CipherIO.getDefault().saveIndex();
+            CipherIO.instance().saveIndex();
             // encrypt and copy plain text to the file
-            CipherIO.getDefault().writeToCipherFile(entry, data);
+            CipherIO.instance().writeToCipherFile(entry, data);
         } catch (IOException | GeneralSecurityException ex) {
             Reporter.put(Dashboard.class, ex);
         }
@@ -876,7 +916,7 @@ public class Dashboard extends javax.swing.JFrame {
 
     private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshButtonActionPerformed
         try {
-            CipherIO.getDefault().loadKeystore();
+            CipherIO.instance().loadKeystore();
             this.selectPage(DashboardPage.KEY_STORE);
         } catch (IOException | GeneralSecurityException ex) {
             Reporter.put(getClass(), ex);

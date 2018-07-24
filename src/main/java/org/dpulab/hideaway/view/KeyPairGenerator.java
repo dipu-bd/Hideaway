@@ -89,7 +89,7 @@ public class KeyPairGenerator extends javax.swing.JDialog {
                 throw new InputMismatchException("Can not create key without an alias");
             }
             // check if alias exists
-            if (CipherIO.getDefault().containsKeyPair(alias)) {
+            if (CipherIO.instance().containsKeyPair(alias)) {
                 throw new InputMismatchException("Alias <b>" + alias + "</b> already exists in the key store.");
             }
             // get the subjects data
@@ -99,7 +99,7 @@ public class KeyPairGenerator extends javax.swing.JDialog {
             // self sign the key
             Certificate certificate = CryptoService.getDefault().generateSelfSignedX509Certificate(keyPair, subject);
             // save to keystore
-            CipherIO.getDefault().storeKeyPair(alias, keyPair, certificate);
+            CipherIO.instance().storeKeyPair(alias, keyPair, certificate);
             // clear and exit
             this.clearInputs();
             this.setVisible(false);

@@ -82,7 +82,7 @@ public class Program {
 
         // Check the folder
         try {
-            CipherIO.getDefault().checkFolder();
+            CipherIO.instance().checkFolder();
         } catch (IOException | GeneralSecurityException | ClassNotFoundException ex) {
             Reporter.put(Program.class, ex);
             Reporter.dialog(Level.SEVERE, "Failed to configure work directory.\n\n[ %s ]  ", ex.getMessage());
@@ -104,8 +104,8 @@ public class Program {
     public static void beforeExit() {
         try {
             Settings.getDefault().flush();
-            CipherIO.getDefault().saveIndex();
-            CipherIO.getDefault().saveKeystore();
+            CipherIO.instance().saveIndex();
+            CipherIO.instance().saveKeystore();
         } catch (IOException | GeneralSecurityException | BackingStoreException ex) {
             Reporter.put(ex);
         }

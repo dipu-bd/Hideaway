@@ -62,7 +62,7 @@ public class CipherIO {
     //<editor-fold defaultstate="collapsed" desc=" Get instance methods ">
     private static final HashMap<String, CipherIO> STORAGE = new HashMap<>();
 
-    public static CipherIO getFor(String folder)
+    public static CipherIO intanceFor(String folder)
             throws KeyStoreException, PasswordException, NoSuchAlgorithmException, UnsupportedEncodingException {
         if (!CipherIO.STORAGE.containsKey(folder)) {
             // attach a new storage class with the folder
@@ -71,10 +71,10 @@ public class CipherIO {
         return CipherIO.STORAGE.get(folder);
     }
 
-    public static CipherIO getDefault()
+    public static CipherIO instance()
             throws KeyStoreException, PasswordException, NoSuchAlgorithmException, UnsupportedEncodingException {
         String folder = Settings.getDefault().get(Settings.WORK_DIR);
-        return CipherIO.getFor(folder);
+        return CipherIO.intanceFor(folder);
     }
     //</editor-fold>
 
