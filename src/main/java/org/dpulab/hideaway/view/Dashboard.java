@@ -256,6 +256,15 @@ public class Dashboard extends javax.swing.JFrame {
         // check if an entry of similar name already exists
         while (this.selectedEntry.hasChild(fileName)) {
             // get the new fileName
+            JOptionPane pane = new JOptionPane("A file with same name exists. You can either skip, "
+                    + "replace the old file, or rename the current one:\n:"
+                    + "Enter new name for the file:",
+                    JOptionPane.QUESTION_MESSAGE,
+                    JOptionPane.YES_NO_CANCEL_OPTION);
+            pane.setWantsInput(true);
+            pane.setInitialValue(fileName);
+            
+
             fileName = "-" + fileName;
         }
         // get the possible full path of the file in the index
