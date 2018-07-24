@@ -213,6 +213,7 @@ public class Dashboard extends javax.swing.JFrame {
             }
         }
     }
+    
 
     /*------------------------------------------------------------------------*\
                         BROWSER Controller Methods
@@ -232,34 +233,48 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }
 
+    private String chooseRSAKey() {
+        return "test";
+    }
+    
     private void importExternalFile() {
+        // check if parent folder is available
         if (this.selectedPage != DashboardPage.BROWSER) {
             Reporter.dialog("You should be in Browser page to import files");
             return;
         }
-
+        
+        // choose and validate a file path
         String filePath = FileIO.chooseOpenFile(this);
         if (filePath == null) {
             return;
         }
-
+        
+        // gets the file and the name
         File file = new File(filePath);
-        String keyAlias = "test";
-
+        String fileName = file.getName();
+        // check if an entry of similar name already exists
+        while (this.selectedEntry.hasChild(fileName)) {
+            // get the new fileName
+            fileName = "-" + fileName;
+        }
+        // get the possible full path of the file in the index
+        String path = IndexEntry.join(this.selectedEntry.getPath(), fileName);
         try {
-            // read data
+            // read all bytes from file
             byte[] data = FileUtils.readFileToByteArray(file);
-            String checksum = CryptoService.getDefault().getChecksum(data);
-
-            // create a index entry
+            // get the unique checksum of the file
+            String checksum = CryptoService.getDefault().getChecksum(path, data);
+            // get alias of an RSA key to use
+            String keyAlias = chooseRSAKey();
+            // create an file entry and save index
             IndexEntry entry = this.selectedEntry.createNewFile(
-                    file.getName(), data.length, checksum, keyAlias);
+                    fileName, data.length, checksum, keyAlias);
             CipherIO.getDefault().saveIndex();
-
-            // write texts
+            // encrypt and copy plain text to the file
             CipherIO.getDefault().writeToCipherFile(entry, data);
         } catch (IOException | GeneralSecurityException ex) {
-            Logger.getLogger(Dashboard.class.getName()).log(Level.SEVERE, null, ex);
+            Reporter.put(Dashboard.class, ex);
         }
     }
 

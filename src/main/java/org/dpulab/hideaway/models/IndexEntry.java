@@ -40,6 +40,10 @@ public class IndexEntry implements Serializable {
     public static IndexEntry getRoot() {
         return new IndexEntry();
     }
+    
+    public static final String join(String ... path) {
+        return String.join(SEPARATOR, path);
+    }
 
     /*------------------------------------------------------------------------*\
     |                          MAIN FILE CONTENT                               |   

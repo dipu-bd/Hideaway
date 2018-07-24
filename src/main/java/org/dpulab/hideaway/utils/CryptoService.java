@@ -89,6 +89,9 @@ public final class CryptoService {
     }
 
     public static String getBytePreview(byte[] data, int length) {
+        if (data == null || data.length == 0 || length <= 0) {
+            return "<< empty >>";
+        }
         length = Math.min(length, data.length);
         String hex = Hex.toHexString(data, 0, length);
         hex = hex.replaceAll("..", "$0 ").toUpperCase().trim();
@@ -157,14 +160,19 @@ public final class CryptoService {
      * Gets the checksum of the byte array. It calculates the hash of the array
      * using SHA-512 algorithm.
      *
-     * @param data
+     * @param fullPath
+     * @param data file path
      * @return the checksum string
      * @throws NoSuchAlgorithmException
      * @throws UnsupportedEncodingException
      */
-    public String getChecksum(byte[] data) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-512");
+    public String getChecksum(String fullPath, byte[] data) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        if (StringUtils.isEmpty(fullPath) || data == null) {
+            return null;
+        }
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
         digest.update(data);
+        digest.update(fullPath.getBytes(Settings.DEFAULT_CHARSET));
         String hash = Base64.getEncoder().encodeToString(digest.digest());
         hash = hash.replace('/', '-');
         return hash;

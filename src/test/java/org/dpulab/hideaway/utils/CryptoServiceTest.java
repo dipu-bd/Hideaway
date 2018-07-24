@@ -23,7 +23,6 @@ import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.security.spec.AlgorithmParameterSpec;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
@@ -37,7 +36,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
@@ -51,12 +49,11 @@ public class CryptoServiceTest {
 
     @BeforeClass
     public static void setUpClass() {
-        System.out.println("-------------- CryptoService---------------");
+        System.out.println(StringUtils.center(" CryptoService ", 80, "="));
     }
 
     @AfterClass
     public static void tearDownClass() {
-        System.out.println("-------------------------------------------");
     }
 
     @Before
@@ -67,12 +64,16 @@ public class CryptoServiceTest {
     public void tearDown() {
     }
 
+    private void showHeader(String text) {
+        System.out.println(StringUtils.center(" " + text + " ", 60, '-'));
+    }
+
     /**
      * Test of getDefault method, of class CryptoService.
      */
     @org.junit.Test
     public void testGetDefault() {
-        System.out.println("getDefault");
+        showHeader("getDefault");
         CryptoService instance = CryptoService.getDefault();
         assertNotNull(instance);
     }
@@ -85,7 +86,7 @@ public class CryptoServiceTest {
      */
     @org.junit.Test
     public void testGetHash() throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        System.out.println("getHash");
+        showHeader("getHash");
         CryptoService instance = CryptoService.getDefault();
         String hash = instance.getHash("dipu");
         assertNotNull(hash);
@@ -100,11 +101,78 @@ public class CryptoServiceTest {
     }
 
     /**
+     * Test of getBytePreview method, of class CryptoService.
+     *
+     * @throws UnsupportedEncodingException
+     * @throws NoSuchAlgorithmException
+     */
+    @org.junit.Test
+    public void testGetBytePreview() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        showHeader("getBytePreview");
+        String output = CryptoService.getBytePreview(null, 0);
+        assertEquals("<< empty >>", output);
+
+        output = CryptoService.getBytePreview("".getBytes(), 100);
+        assertEquals("<< empty >>", output);
+
+        output = CryptoService.getBytePreview("test".getBytes(), 0);
+        assertEquals("<< empty >>", output);
+
+        output = CryptoService.getBytePreview("hi".getBytes(), -199);
+        assertEquals("<< empty >>", output);
+
+        output = CryptoService.getBytePreview("".getBytes(), 100);
+        assertEquals("<< empty >>", output);
+
+        output = CryptoService.getBytePreview("dipu".getBytes(), 100);
+        assertEquals("64 69 70 75", output);
+
+        output = CryptoService.getBytePreview("dipu".getBytes(), 4);
+        assertEquals("64 69 70 75", output);
+
+        output = CryptoService.getBytePreview("dipu".getBytes(), 3);
+        assertEquals("64 69 70 ...", output);
+
+        output = CryptoService.getBytePreview("my name is dipu".getBytes(), 8);
+        assertEquals("6D 79 20 6E 61 6D 65 20 ...", output);
+    }
+
+    /**
+     * Test of getChecksum method, of class CryptoService.
+     *
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws java.io.UnsupportedEncodingException
+     */
+    @org.junit.Test
+    public void testGetChecksum() throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        showHeader("getChecksum");
+        CryptoService instance = CryptoService.getDefault();
+        String hash = instance.getChecksum("dipu", "dipu".getBytes("utf-8"));
+        assertNotNull(hash);
+        assertNotEquals("dipu", hash);
+        assertFalse(StringUtils.containsAny(hash, '/', ':', '|', '\\', '$', '%', '!', '?', '{', '}'));
+
+        hash = instance.getChecksum("/usr/bin", "".getBytes("utf-8"));
+        assertNotNull(hash);
+        assertFalse(StringUtils.containsAny(hash, '/', ':', '|', '\\', '$', '%', '!', '?', '{', '}'));
+        
+        hash = instance.getChecksum("/usr/bin", "".getBytes("utf-8"));
+        assertNotNull(hash);
+        assertFalse(StringUtils.containsAny(hash, '/', ':', '|', '\\', '$', '%', '!', '?', '{', '}'));
+        
+        hash = instance.getChecksum("", null);
+        assertNull(hash);
+
+        hash = instance.getChecksum("", "".getBytes("utf-8"));
+        assertNull(hash);
+    }
+
+    /**
      * Test of getPasswordBlock method, of class CryptoService.
      */
     @org.junit.Test
     public void testGetKeyBlock() throws Exception {
-        System.out.println("getKeyBlock");
+        showHeader("getKeyBlock");
         int blockSize = 16;
         String[] passwords = {
             "dipu",
@@ -123,7 +191,7 @@ public class CryptoServiceTest {
      */
     @org.junit.Test
     public void testToByteArray() {
-        System.out.println("toByteArray");
+        showHeader("toByteArray");
         Random random = new Random();
         for (int i = 0; i < 100; ++i) {
             int value = random.nextInt();
@@ -140,7 +208,7 @@ public class CryptoServiceTest {
      */
     @org.junit.Test
     public void testFromByteArray() {
-        System.out.println("fromByteArray");
+        showHeader("fromByteArray");
         Random random = new Random();
         for (int i = 0; i < 100; ++i) {
             int expResult = random.nextInt();
@@ -157,7 +225,7 @@ public class CryptoServiceTest {
      */
     @org.junit.Test
     public void testGenerateKey() throws Exception {
-        System.out.println("generateKey");
+        showHeader("generateKey");
         String[] passwords = {
             "dipu",
             "sudipto",
@@ -179,7 +247,7 @@ public class CryptoServiceTest {
      */
     @org.junit.Test
     public void testGenerateParamSpec() throws Exception {
-        System.out.println("generateParamSpec");
+        showHeader("generateParamSpec");
         String[] seeds = {
             "dipu",
             "sudipto",
@@ -211,7 +279,7 @@ public class CryptoServiceTest {
      */
     @org.junit.Test
     public void testGenerateKeyPair4096() throws Exception {
-        System.out.println("generateKeyPair4096");
+        showHeader("generateKeyPair4096");
         int bitSize = 4096;
         CryptoService instance = CryptoService.getDefault();
         KeyPair result = instance.generateKeyPair(bitSize);
@@ -231,7 +299,7 @@ public class CryptoServiceTest {
      */
     //@org.junit.Test
     public void testGenerateKeyPair2048() throws Exception {
-        System.out.println("generateKeyPair2048");
+        showHeader("generateKeyPair2048");
         int bitSize = 2048;
         CryptoService instance = CryptoService.getDefault();
         KeyPair result = instance.generateKeyPair(bitSize);
@@ -249,7 +317,7 @@ public class CryptoServiceTest {
      */
     @org.junit.Test
     public void testGenerateX500Name() {
-        System.out.println("generateX500Name");
+        showHeader("generateX500Name");
         String alias = "Test";
         String clientName = "";
         String clientEmail = "dipu.sudipta@gmail.com";
@@ -277,7 +345,7 @@ public class CryptoServiceTest {
      */
     @org.junit.Test
     public void testGenerateSelfSignedX509Certificate() throws Exception {
-        System.out.println("generateSelfSignedX509Certificate");
+        showHeader("generateSelfSignedX509Certificate");
         String alias = "Test";
         String clientName = "";
         String clientEmail = "dipu.sudipta@gmail.com";
@@ -287,17 +355,17 @@ public class CryptoServiceTest {
         CryptoService instance = CryptoService.getDefault();
         KeyPair keyPair = instance.generateKeyPair(4096);
         X500Name subject = instance.generateX500Name(alias, clientName, clientEmail, organizationalUnit, organization, countryCode);
-        
+
         X509Certificate result = instance.generateSelfSignedX509Certificate(keyPair, subject);
         assertNotNull(result);
         result.checkValidity();
         assertEquals(2147483647, result.getBasicConstraints());
         assertEquals(3, result.getVersion());
         assertEquals(new Date().getYear(), result.getNotBefore().getYear());
-        assertEquals(100 + new Date().getYear(), result.getNotAfter().getYear());        
+        assertEquals(100 + new Date().getYear(), result.getNotAfter().getYear());
         assertEquals("SHA256WITHRSA", result.getSigAlgName());
         assertEquals("1.2.840.113549.1.1.11", result.getSigAlgOID());
-      
+
         Certificate cert = result;
         assertArrayEquals(cert.getPublicKey().getEncoded(), keyPair.getPublic().getEncoded());
         assertEquals("RSA", cert.getPublicKey().getAlgorithm());
