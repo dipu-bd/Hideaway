@@ -27,7 +27,6 @@ import javax.swing.DefaultComboBoxModel;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.operator.OperatorCreationException;
-import org.dpulab.hideaway.utils.CipherIO;
 import org.dpulab.hideaway.utils.CryptoService;
 import org.dpulab.hideaway.utils.Reporter;
 
@@ -35,6 +34,7 @@ import org.dpulab.hideaway.utils.Reporter;
  *
  * @author dipu
  */
+@Deprecated
 public class KeyPairGenerator extends javax.swing.JDialog {
 
     /**
@@ -89,9 +89,9 @@ public class KeyPairGenerator extends javax.swing.JDialog {
                 throw new InputMismatchException("Can not create key without an alias");
             }
             // check if alias exists
-            if (CipherIO.instance().containsKeyPair(alias)) {
-                throw new InputMismatchException("Alias <b>" + alias + "</b> already exists in the key store.");
-            }
+            //if (CipherIO.instance().containsKeyPair(alias)) {
+            //    throw new InputMismatchException("Alias <b>" + alias + "</b> already exists in the key store.");
+            //}
             // get the subjects data
             X500Name subject = this.getSubject();
             // generate RSA key pair
@@ -99,7 +99,7 @@ public class KeyPairGenerator extends javax.swing.JDialog {
             // self sign the key
             Certificate certificate = CryptoService.getDefault().generateSelfSignedX509Certificate(keyPair, subject);
             // save to keystore
-            CipherIO.instance().storeKeyPair(alias, keyPair, certificate);
+            //CipherIO.instance().storeKeyPair(alias, keyPair, certificate);
             // clear and exit
             this.clearInputs();
             this.setVisible(false);

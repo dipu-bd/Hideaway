@@ -16,49 +16,100 @@
  */
 package org.dpulab.hideaway.models;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  *
  * @author dipu
  */
 public class TableColumnInfo {
 
-    private String columnName;
-    private String format;
-    private int minWidth;
-    private int maxWidth;
-    private int preferedWidth;
-    private boolean editable;
+    private String getter;
+    private String name = "Column";
+    private String format = "%s";
+    private int minWidth = 0;
+    private int maxWidth = (1 << 31) - 1;
+    private int preferedWidth = 80;
+    private boolean editable = false;
 
-    public TableColumnInfo(String name) {
-        this.columnName = name;
+    //<editor-fold defaultstate="collapsed" desc="  Constructors  ">
+    public TableColumnInfo(String getter) {
+        this.getter = getter;
     }
 
-    public TableColumnInfo(String name, String format) {
-        this.columnName = name;
+    public TableColumnInfo(String getter, String name) {
+        this(getter);
+        this.name = name;
+    }
+
+    public TableColumnInfo(String getter, String name, String format) {
+        this(getter, name);
         this.format = format;
     }
 
+    public TableColumnInfo(String getter, String name, boolean editable) {
+        this(getter, name);
+        this.editable = editable;
+    }
+
+    public TableColumnInfo(String getter, String name, int preferedWidth) {
+        this(getter, name);
+        this.preferedWidth = preferedWidth;
+    }
+
+    public TableColumnInfo(String getter, String name, String format, boolean editable) {
+        this(getter, name, format);
+        this.editable = editable;
+    }
+
+    public TableColumnInfo(String getter, String name, int minWidth, int maxWidth) {
+        this(getter, name);
+        this.minWidth = minWidth;
+        this.maxWidth = maxWidth;
+    }
+
+    public TableColumnInfo(String getter, String name, int preferedWidth, boolean editable) {
+        this(getter, name, preferedWidth);
+        this.editable = editable;
+    }
+
+    public TableColumnInfo(String getter, String name, int minWidth, int maxWidth, boolean editable) {
+        this(getter, name, maxWidth, minWidth);
+        this.editable = editable;
+    }
+    //</editor-fold>
+
     /**
-     * @return the columnName
+     * @return the name
      */
-    public String getColumnName() {
-        return columnName;
+    public String getName() {
+        return name;
     }
 
     /**
-     * @param columnName the columnName to set
+     * @param name the name to set
      */
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * @return the getter
+     */
+    public String getGetter() {
+        return getter;
+    }
+
+    /**
+     * @param getter the getter to set
+     */
+    public void setGetter(String getter) {
+        this.getter = getter;
     }
 
     /**
      * @return the format
      */
     public String getFormat() {
-        return StringUtils.isEmpty(format) ? "%s" : format;
+        return format;
     }
 
     /**

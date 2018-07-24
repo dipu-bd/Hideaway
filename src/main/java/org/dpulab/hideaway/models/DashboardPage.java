@@ -21,7 +21,6 @@ package org.dpulab.hideaway.models;
  * @author dipu
  */
 public enum DashboardPage {
-    KEY_STORE,
     BROWSER,
     FAVORITES,
     RECENT_ITEMS,

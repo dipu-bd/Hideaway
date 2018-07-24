@@ -20,29 +20,22 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.security.GeneralSecurityException;
-import java.security.Key;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.openssl.PasswordException;
 import org.dpulab.hideaway.Program;
 import org.dpulab.hideaway.models.DashboardPage;
 import org.dpulab.hideaway.models.IndexEntry;
-import org.dpulab.hideaway.models.TableModelBuilder;
+import org.dpulab.hideaway.models.IndexEntryModel;
+import org.dpulab.hideaway.models.ObjectTableModel;
 import org.dpulab.hideaway.utils.CipherIO;
 import org.dpulab.hideaway.utils.CryptoService;
 import org.dpulab.hideaway.utils.FileIO;
@@ -56,7 +49,7 @@ import org.dpulab.hideaway.utils.Settings;
  */
 public class Dashboard extends javax.swing.JFrame {
 
-    private DashboardPage selectedPage = DashboardPage.KEY_STORE;
+    private DashboardPage selectedPage = DashboardPage.UNDEFINED;
 
     /**
      * Creates new form Dashboard
@@ -64,14 +57,26 @@ public class Dashboard extends javax.swing.JFrame {
     public Dashboard() {
         initComponents();
 
-        this.selectPage(DashboardPage.KEY_STORE);
+        this.selectPage(DashboardPage.BROWSER);
     }
 
+    /**
+     * Reload the current page
+     */
+    public final void reloadSelectedPage() {
+        this.selectPage(this.selectedPage);
+    }
+
+    /**
+     * Select the current page
+     *
+     * @param page the page to select
+     */
     public final void selectPage(DashboardPage page) {
         this.selectedPage = page;
         this.dataViewer.setModel(new DefaultTableModel());
         try {
-            String icon = "<html> </html>";
+            String icon = null;
             switch (this.selectedPage) {
                 case BROWSER:
                     this.loadBrowser();
@@ -88,162 +93,61 @@ public class Dashboard extends javax.swing.JFrame {
                     icon = this.recentsButton.getText();
                     this.dataViewer.setComponentPopupMenu(this.recentItemsPopup);
                     break;
-                case KEY_STORE:
                 case UNDEFINED:
-                    this.loadKeyStore();
-                    icon = this.keystoreButton.getText();
-                    this.dataViewer.setComponentPopupMenu(this.keystorePopup);
+                    this.dataViewer.setModel(new DefaultTableModel());
+                    this.dataViewer.setComponentPopupMenu(null);
                     break;
             }
-            icon = icon.split(" ")[0] + "</html>";
+            if (icon == null || StringUtils.containsNone(icon, " ")) {
+                icon = "<html><span color=\"red\">!</span></html>";
+            } else {
+                icon = icon.split(" ")[0] + "</html>";
+            }
             this.rootButton.setText(icon);
         } catch (Exception ex) {
             Reporter.put(Dashboard.class, ex);
         }
     }
 
+    /*------------------------------------------------------------------------*\
+                        FAVORITES Controller Methods
+    \*------------------------------------------------------------------------*/
     void loadFavorites() {
 
     }
 
+    /*------------------------------------------------------------------------*\
+                        RECENT_ITEMS Controller Methods
+    \*------------------------------------------------------------------------*/
     void loadRecentItems() {
 
     }
-
-    /*------------------------------------------------------------------------*\
-                        KEYSTORE Controller Methods
-    \*------------------------------------------------------------------------*/
-    void loadKeyStore() throws Exception {
-        // Create new table model builder
-        TableModelBuilder builder = new TableModelBuilder();
-        builder.addColumn("#", "<b style=\"color: #6e6e6e\">%s</b>", 20, 25)
-                .addColumn("Alias", "<b>%s</b>", 130, 250)
-                .addColumn("Key Type", "<span style=\"color: blue\">%s</span>", 85, 90)
-                .addColumn("Algorithm", "<span style=\"color: red\">%s</span>", 85, 90)
-                .addColumn("Key Format", "<code>%s</code>", 85, 90)
-                .addColumn("Length (B)", "<code style=\"color: navy\">%s</code>", 80, 85)
-                .addColumn("Created At", "<span style=\"color: gray\">%s</span>", 135, 145)
-                .addColumn("Fingerprint", "<code style=\"color: orange\">%s</code>", 300);
-
-        // Load data to builder
-        int index = 1;
-        KeyStore store = CipherIO.instance().getKeyStore();
-        for (String alias : Collections.list(store.aliases())) {
-            Key key = null;
-            String keyType = "";
-            Date createdAt = store.getCreationDate(alias);
-            if (store.isKeyEntry(alias)) {
-                key = store.getKey(alias, CipherIO.instance().getKeystorePass());
-                keyType = "Private";
-            } else if (store.isCertificateEntry(alias)) {
-                Certificate cert = store.getCertificate(alias);
-                key = (Key) cert.getPublicKey();
-                keyType = "Public";
-            }
-            if (key != null) {
-                builder.addData(
-                        index++,
-                        alias,
-                        keyType,
-                        key.getAlgorithm(),
-                        key.getFormat(),
-                        key.getEncoded().length,
-                        GeneralUtils.formatDate(createdAt),
-                        CryptoService.getBytePreview(key.getEncoded(), 20)
-                );
-            }
-        }
-
-        SwingUtilities.invokeLater(() -> {
-            // Set data to viewer
-            builder.build(this.dataViewer);
-            this.dataViewer.setRowHeight(20);
-            this.dataViewer.setRowMargin(0);
-
-            // Customize the UI
-            this.dataViewer.setCellSelectionEnabled(false);
-            this.pathInput.setText("Keystore");
-        });
-    }
-
-    private void exportSelectedKey() {
-        int row = this.dataViewer.getSelectedRow();
-        if (row == -1) {
-            return;
-        }
-        String alias = (String) this.dataViewer.getModel().getValueAt(row, 1);
-        alias = alias.replaceAll("<[^>]+>", "");
-
-        try {
-            Key key = CipherIO.instance().getKeyEntry(alias);
-            String output = CryptoService.getKeyAsString(key);
-            FileIO.saveToFile(this, output);
-        } catch (IOException | GeneralSecurityException ex) {
-            Reporter.put(getClass(), ex);
-            Reporter.dialog(Level.SEVERE, "Failed to save key: %s", alias);
-        }
-    }
-
-    private void removeSelectedKey() {
-        int row = this.dataViewer.getSelectedRow();
-        if (row == -1) {
-            return;
-        }
-        String alias = (String) this.dataViewer.getModel().getValueAt(row, 1);
-        alias = alias.replaceAll("<[^>]+>", "");
-
-        if (alias.endsWith("_cert") || alias.endsWith("_key")) {
-            alias = alias.substring(0, alias.lastIndexOf("_"));
-        } else {
-            Reporter.dialog(Level.SEVERE, "You are only allowed to delete RSA key pairs");
-            return;
-        }
-
-        int result = JOptionPane.showConfirmDialog(
-                this,
-                String.format("Are you sure to remove these keys: %s_cert, %s_key?", alias, alias),
-                "Confirm Delete",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE);
-
-        if (result == JOptionPane.YES_OPTION) {
-            try {
-                CipherIO.instance().deleteKeyEntry(alias);
-                Reporter.dialog("Deleted keys: %s_cert and %s_key", alias, alias);
-                this.selectPage(DashboardPage.KEY_STORE);
-            } catch (IOException | GeneralSecurityException ex) {
-                Reporter.put(getClass(), ex);
-                Reporter.dialog(Level.SEVERE, "Failed to delete keypair: %s", alias);
-            }
-        }
-    }
-
-    private void displayKeyGen() {
-        SwingUtilities.invokeLater(() -> {
-            KeyPairGenerator kpGen = new KeyPairGenerator(this);
-            kpGen.setVisible(true);
-            kpGen.dispose();
-            this.selectPage(DashboardPage.KEY_STORE);
-        });
-    }
-
 
     /*------------------------------------------------------------------------*\
                         BROWSER Controller Methods
     \*------------------------------------------------------------------------*/
     private IndexEntry selectedEntry = null;
 
+    void refreshBrowser() {
+        try {
+            CipherIO.instance().loadIndex();
+            this.loadBrowser(this.selectedEntry);
+        } catch (GeneralSecurityException | IOException | UnsupportedClassVersionError ex) {
+            Reporter.put(getClass(), (Exception) ex);
+        }
+    }
+
     void loadBrowser() {
         this.loadBrowser(null);
     }
 
     void loadBrowser(IndexEntry parent) {
-        TableModelBuilder builder = new TableModelBuilder();
-        builder.addColumn("#", "<b style=\"color: #6e6e6e\">%s</b>", 20, 25)
-                .addColumn("Name", "<b>%s</b>", 130, 250)
+        ObjectTableModel<IndexEntry> model = new ObjectTableModel<>();
+        model.
+                .addColumn("#", "<b style=\"color: #6e6e6e\">%s</b>", 20, 25)
+                .addColumn("Name", "<b>%s</b>", 180, 350)
                 .addColumn("Size", "<code>%s</code>", 85, 90)
                 .addColumn("Type", "", 85, 90)
-                .addColumn("Key Alias", "<span style=\"color: blue\">%s</span>", 85, 90)
                 .addColumn("Last Modified", "<span style=\"color: #777\">%s</span>", 135, 145)
                 .addColumn("Checksum", "<code style=\"color: gray\">%s</code>", 300);
 
@@ -260,20 +164,19 @@ public class Dashboard extends javax.swing.JFrame {
                     File cipherFile = entry.getCipherFile();
                     lastModifyDate = GeneralUtils.formatDate(cipherFile.lastModified());
                 }
-                builder.addData(
+                model.addData(
+                        entry,
                         index++,
                         entry.getFileName(),
                         entry.getFileSizeReadable(),
                         entry.isFile() ? "File" : "Directory",
-                        entry.getKeyAlias(),
                         lastModifyDate,
-                        entry.getChecksum(),
-                        entry
+                        entry.getChecksum()
                 );
             }
 
             SwingUtilities.invokeLater(() -> {
-                builder.build(this.dataViewer);
+                model.attachTo(this.dataViewer);
                 this.dataViewer.setRowHeight(22);
                 this.dataViewer.setRowMargin(0);
 
@@ -284,23 +187,6 @@ public class Dashboard extends javax.swing.JFrame {
         } catch (IOException | GeneralSecurityException ex) {
             Reporter.put(getClass(), ex);
         }
-    }
-
-    private String chooseRSAKey() throws IOException, GeneralSecurityException {
-        String[] aliasList = CipherIO.instance().allKeyPairAliases();
-        if (aliasList.length == 0) {
-            return null;
-        }
-        String randomAlias = aliasList[(int) (Math.random() * aliasList.length)];
-        Object selected = JOptionPane.showInputDialog(
-                this,
-                "Choose a RSA key pair to encrypt this file",
-                null,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                aliasList,
-                randomAlias);
-        return (String) selected;
     }
 
     private String validateFilename(IndexEntry entry, String fileName) {
@@ -348,24 +234,44 @@ public class Dashboard extends javax.swing.JFrame {
         // get the possible full path of the file in the index
         String path = IndexEntry.join(this.selectedEntry.getPath(), fileName);
         try {
-            // read all bytes from file
-            byte[] data = FileUtils.readFileToByteArray(file);
             // get the unique checksum of the file
-            String checksum = CryptoService.getDefault().getChecksum(path, data);
-            // get alias of an RSA key to use
-            String keyAlias = chooseRSAKey();
-            if (keyAlias == null) {
-                Reporter.dialog("You need an RSA key pair to save files");
-                return;
-            }
+            String checksum = CryptoService.getDefault().getChecksum(path, file);
             // create an file entry and save index
-            IndexEntry entry = this.selectedEntry.createNewFile(
-                    fileName, data.length, checksum, keyAlias);
+            IndexEntry entry = this.selectedEntry.createNewFile(fileName, file.length(), checksum);
             CipherIO.instance().saveIndex();
             // encrypt and copy plain text to the file
-            CipherIO.instance().writeToCipherFile(entry, data);
+            CipherIO.instance().copyFileEncrypted(file, entry);
+            // reload the viewer
+            this.loadBrowser(this.selectedEntry);
         } catch (IOException | GeneralSecurityException ex) {
             Reporter.put(Dashboard.class, ex);
+        }
+    }
+
+    private void deleteIndexEntry() {
+        int row = this.dataViewer.getSelectedRow();
+        if (row == -1) {
+            return;
+        }
+        IndexEntryModel model = (IndexEntryModel) this.dataViewer.getModel();
+        IndexEntry entry = (IndexEntry) model.getTag(row);
+
+        int result = JOptionPane.showConfirmDialog(
+                this,
+                String.format("Are you sure to remove: %s?", entry.getFileName()),
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+
+        if (result == JOptionPane.YES_OPTION) {
+            try {
+                entry.remove();
+                CipherIO.instance().saveIndex();
+                Reporter.dialog("Deleted file: %s", entry.getFileName());
+            } catch (IOException | GeneralSecurityException ex) {
+                Reporter.put(getClass(), ex);
+                Reporter.dialog(Level.SEVERE, "Failed to delete file: %s", entry.getFileName());
+            }
         }
     }
 
@@ -378,15 +284,13 @@ public class Dashboard extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        keystorePopup = new javax.swing.JPopupMenu();
-        createKeyMenu = new javax.swing.JMenuItem();
-        removeKeyMenu = new javax.swing.JMenuItem();
-        keystorePopupSeparator1 = new javax.swing.JPopupMenu.Separator();
-        exportKeyButton = new javax.swing.JMenuItem();
-        importKeyButton = new javax.swing.JMenuItem();
-        keystorePopupSeparator2 = new javax.swing.JPopupMenu.Separator();
-        refreshButton = new javax.swing.JMenuItem();
         browserPopup = new javax.swing.JPopupMenu();
+        exportFileMenuItem = new javax.swing.JMenuItem();
+        deleteEntryMenuItem = new javax.swing.JMenuItem();
+        browserPopupSeparator1 = new javax.swing.JPopupMenu.Separator();
+        importFileMenuItem = new javax.swing.JMenuItem();
+        browserPopupSeparator2 = new javax.swing.JPopupMenu.Separator();
+        refreshBrowserMenuItem = new javax.swing.JMenuItem();
         favoritesPopup = new javax.swing.JPopupMenu();
         recentItemsPopup = new javax.swing.JPopupMenu();
         topPanel = new javax.swing.JPanel();
@@ -408,53 +312,37 @@ public class Dashboard extends javax.swing.JFrame {
         homeButton = new javax.swing.JButton();
         recentsButton = new javax.swing.JButton();
         favoriteButton = new javax.swing.JButton();
-        generateKeyPairButton = new javax.swing.JButton();
         horizontalSeparator2 = new javax.swing.JSeparator();
         importFileButton = new javax.swing.JButton();
         importFolderButton = new javax.swing.JButton();
-        horizontalSeparator3 = new javax.swing.JSeparator();
-        keystoreButton = new javax.swing.JButton();
         verticalSeparator3 = new javax.swing.JSeparator();
         mainPanel = new javax.swing.JPanel();
         dataViewerScrollPane = new javax.swing.JScrollPane();
         dataViewer = new javax.swing.JTable();
 
-        createKeyMenu.setText("Create New");
-        createKeyMenu.addActionListener(new java.awt.event.ActionListener() {
+        exportFileMenuItem.setText("Export");
+        browserPopup.add(exportFileMenuItem);
+
+        deleteEntryMenuItem.setText("Delete");
+        deleteEntryMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                createKeyMenuActionPerformed(evt);
+                deleteEntryMenuItemActionPerformed(evt);
             }
         });
-        keystorePopup.add(createKeyMenu);
+        browserPopup.add(deleteEntryMenuItem);
+        browserPopup.add(browserPopupSeparator1);
 
-        removeKeyMenu.setText("Remove");
-        removeKeyMenu.addActionListener(new java.awt.event.ActionListener() {
+        importFileMenuItem.setText("Import File");
+        browserPopup.add(importFileMenuItem);
+        browserPopup.add(browserPopupSeparator2);
+
+        refreshBrowserMenuItem.setText("Refresh");
+        refreshBrowserMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                removeKeyMenuActionPerformed(evt);
+                refreshBrowserMenuItemActionPerformed(evt);
             }
         });
-        keystorePopup.add(removeKeyMenu);
-        keystorePopup.add(keystorePopupSeparator1);
-
-        exportKeyButton.setText("Export Key");
-        exportKeyButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exportKeyButtonActionPerformed(evt);
-            }
-        });
-        keystorePopup.add(exportKeyButton);
-
-        importKeyButton.setText("Import Key");
-        keystorePopup.add(importKeyButton);
-        keystorePopup.add(keystorePopupSeparator2);
-
-        refreshButton.setText("Refresh");
-        refreshButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                refreshButtonActionPerformed(evt);
-            }
-        });
-        keystorePopup.add(refreshButton);
+        browserPopup.add(refreshBrowserMenuItem);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Hideaway");
@@ -499,7 +387,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         rootButton.setFont(rootButton.getFont().deriveFont(rootButton.getFont().getStyle() | java.awt.Font.BOLD, rootButton.getFont().getSize()+16));
         rootButton.setForeground(new java.awt.Color(102, 0, 51));
-        rootButton.setText("<html>&#x26d3;</html>");
+        rootButton.setText("<html><span color=\"red\">!</span></html>");
         rootButton.setToolTipText("Root Folder");
         rootButton.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(192, 197, 203)));
         rootButton.setContentAreaFilled(false);
@@ -516,7 +404,7 @@ public class Dashboard extends javax.swing.JFrame {
         pathInput.setBackground(new java.awt.Color(214, 217, 223));
         pathInput.setFont(new java.awt.Font("Monospaced", 1, 16)); // NOI18N
         pathInput.setForeground(new java.awt.Color(32, 78, 78));
-        pathInput.setText("Keystore");
+        pathInput.setText("/");
         pathInput.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(182, 187, 193)), javax.swing.BorderFactory.createEmptyBorder(3, 8, 3, 8)));
         pathInput.setMargin(new java.awt.Insets(5, 10, 5, 10));
         pathInput.setOpaque(true);
@@ -684,16 +572,6 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
-        generateKeyPairButton.setBackground(new java.awt.Color(186, 182, 180));
-        generateKeyPairButton.setFont(generateKeyPairButton.getFont().deriveFont(generateKeyPairButton.getFont().getSize()+2f));
-        generateKeyPairButton.setText("<html>&#x26cf; Generate Key Pair</html>");
-        generateKeyPairButton.setToolTipText("");
-        generateKeyPairButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                generateKeyPairButtonActionPerformed(evt);
-            }
-        });
-
         importFileButton.setBackground(new java.awt.Color(192, 190, 196));
         importFileButton.setFont(importFileButton.getFont().deriveFont(importFileButton.getFont().getSize()+2f));
         importFileButton.setText("<html><span style=\"font-size: 1.3em\">&#x1f5ba;</span> Import File</html>");
@@ -707,31 +585,19 @@ public class Dashboard extends javax.swing.JFrame {
         importFolderButton.setFont(importFolderButton.getFont().deriveFont(importFolderButton.getFont().getSize()+2f));
         importFolderButton.setText("<html><span style=\"font-size: 1.3em\">&#x1f5bf;</span> Import Folder</html>");
 
-        keystoreButton.setFont(keystoreButton.getFont().deriveFont(keystoreButton.getFont().getSize()+5f));
-        keystoreButton.setText("<html>&#x26d3; Keystore</html>");
-        keystoreButton.setBorderPainted(false);
-        keystoreButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                keystoreButtonActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout sidePanelLayout = new javax.swing.GroupLayout(sidePanel);
         sidePanel.setLayout(sidePanelLayout);
         sidePanelLayout.setHorizontalGroup(
             sidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(horizontalSeparator2)
-            .addComponent(horizontalSeparator3)
             .addGroup(sidePanelLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
                 .addGroup(sidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(importFileButton)
                     .addComponent(favoriteButton, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(homeButton, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(keystoreButton)
                     .addComponent(recentsButton)
-                    .addComponent(generateKeyPairButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
-                    .addComponent(importFolderButton, javax.swing.GroupLayout.Alignment.LEADING))
+                    .addComponent(importFolderButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE))
                 .addGap(10, 10, 10))
         );
         sidePanelLayout.setVerticalGroup(
@@ -749,13 +615,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addComponent(importFileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(importFolderButton, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 191, Short.MAX_VALUE)
-                .addComponent(horizontalSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(generateKeyPairButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(keystoreButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(15, 15, 15))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         verticalSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
@@ -763,6 +623,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         dataViewer.setAutoCreateRowSorter(true);
         dataViewer.setBackground(new java.awt.Color(246, 248, 255));
+        dataViewer.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         dataViewer.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -817,7 +678,7 @@ public class Dashboard extends javax.swing.JFrame {
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addGap(0, 0, 0)
-                .addComponent(dataViewerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 522, Short.MAX_VALUE)
+                .addComponent(dataViewerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 547, Short.MAX_VALUE)
                 .addGap(0, 0, 0))
         );
 
@@ -855,10 +716,6 @@ public class Dashboard extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void generateKeyPairButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generateKeyPairButtonActionPerformed
-        this.displayKeyGen();
-    }//GEN-LAST:event_generateKeyPairButtonActionPerformed
-
     private void goBackButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goBackButtonActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_goBackButtonActionPerformed
@@ -868,12 +725,8 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_goForwardButtonActionPerformed
 
     private void rootButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rootButtonActionPerformed
-        this.selectPage(this.selectedPage);
+        this.reloadSelectedPage();
     }//GEN-LAST:event_rootButtonActionPerformed
-
-    private void keystoreButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_keystoreButtonActionPerformed
-        this.selectPage(DashboardPage.KEY_STORE);
-    }//GEN-LAST:event_keystoreButtonActionPerformed
 
     private void homeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_homeButtonActionPerformed
         this.selectPage(DashboardPage.BROWSER);
@@ -913,27 +766,6 @@ public class Dashboard extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_logoutButtonActionPerformed
 
-    private void createKeyMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createKeyMenuActionPerformed
-        this.displayKeyGen();
-    }//GEN-LAST:event_createKeyMenuActionPerformed
-
-    private void removeKeyMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeKeyMenuActionPerformed
-        this.removeSelectedKey();
-    }//GEN-LAST:event_removeKeyMenuActionPerformed
-
-    private void exportKeyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportKeyButtonActionPerformed
-        this.exportSelectedKey();
-    }//GEN-LAST:event_exportKeyButtonActionPerformed
-
-    private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshButtonActionPerformed
-        try {
-            CipherIO.instance().loadKeystore();
-            this.selectPage(DashboardPage.KEY_STORE);
-        } catch (IOException | GeneralSecurityException ex) {
-            Reporter.put(getClass(), ex);
-        }
-    }//GEN-LAST:event_refreshButtonActionPerformed
-
     private void dataViewerMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_dataViewerMouseReleased
         JTable table = (JTable) evt.getSource();
         int row = table.rowAtPoint(evt.getPoint());
@@ -952,32 +784,36 @@ public class Dashboard extends javax.swing.JFrame {
         this.importExternalFile();
     }//GEN-LAST:event_importFileToolButtonActionPerformed
 
+    private void refreshBrowserMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshBrowserMenuItemActionPerformed
+        this.refreshBrowser();
+    }//GEN-LAST:event_refreshBrowserMenuItemActionPerformed
+
+    private void deleteEntryMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteEntryMenuItemActionPerformed
+        this.deleteIndexEntry();
+    }//GEN-LAST:event_deleteEntryMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToolBar actionToolbar;
     private javax.swing.JButton addBookmarkButton;
     private javax.swing.JPopupMenu browserPopup;
-    private javax.swing.JMenuItem createKeyMenu;
+    private javax.swing.JPopupMenu.Separator browserPopupSeparator1;
+    private javax.swing.JPopupMenu.Separator browserPopupSeparator2;
     private javax.swing.JTable dataViewer;
     private javax.swing.JScrollPane dataViewerScrollPane;
-    private javax.swing.JMenuItem exportKeyButton;
+    private javax.swing.JMenuItem deleteEntryMenuItem;
+    private javax.swing.JMenuItem exportFileMenuItem;
     private javax.swing.JButton favoriteButton;
     private javax.swing.JPopupMenu favoritesPopup;
-    private javax.swing.JButton generateKeyPairButton;
     private javax.swing.JButton goBackButton;
     private javax.swing.JButton goForwardButton;
     private javax.swing.JButton homeButton;
     private javax.swing.JSeparator horizontalSeparator1;
     private javax.swing.JSeparator horizontalSeparator2;
-    private javax.swing.JSeparator horizontalSeparator3;
     private javax.swing.JButton importFileButton;
+    private javax.swing.JMenuItem importFileMenuItem;
     private javax.swing.JButton importFileToolButton;
     private javax.swing.JButton importFolderButton;
     private javax.swing.JButton importFolderToolButton;
-    private javax.swing.JMenuItem importKeyButton;
-    private javax.swing.JButton keystoreButton;
-    private javax.swing.JPopupMenu keystorePopup;
-    private javax.swing.JPopupMenu.Separator keystorePopupSeparator1;
-    private javax.swing.JPopupMenu.Separator keystorePopupSeparator2;
     private javax.swing.JButton logoutButton;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JToolBar navigationToolbar;
@@ -985,8 +821,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel pathSelectorPanel;
     private javax.swing.JPopupMenu recentItemsPopup;
     private javax.swing.JButton recentsButton;
-    private javax.swing.JMenuItem refreshButton;
-    private javax.swing.JMenuItem removeKeyMenu;
+    private javax.swing.JMenuItem refreshBrowserMenuItem;
     private javax.swing.JButton rootButton;
     private javax.swing.JPanel sidePanel;
     private javax.swing.JPanel topPanel;

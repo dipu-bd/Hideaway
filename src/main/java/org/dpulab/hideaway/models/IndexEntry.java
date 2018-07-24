@@ -24,9 +24,6 @@ import java.io.Serializable;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.dpulab.hideaway.utils.CipherIO;
@@ -56,7 +53,6 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
     private String fileName = "";
     private long fileSize = 0;
     private String checksum = null;
-    private String keyAlias = null;
     private final HashMap<String, IndexEntry> children = new HashMap<>();
 
     // hide access to new IndexEntry
@@ -72,7 +68,6 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
         this.setFileName(other.getFileName());
         this.setFileSize(other.getFileSize());
         this.setChecksum(other.getChecksum());
-        this.setKeyAlias(other.getKeyAlias());
         this.setParentEntry(other.getParentEntry());
         this.children.putAll(other.children);
     }
@@ -84,7 +79,6 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
         if (this.isFile()) {
             out.writeLong(this.fileSize);
             out.writeUTF(this.checksum);
-            out.writeUTF(this.keyAlias);
         } else {
             out.writeInt(this.children.size());
             for (IndexEntry entry : this.children.values()) {
@@ -102,7 +96,6 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
             if (file) {
                 entry.setFileSize(in.readLong());
                 entry.setChecksum(in.readUTF());
-                entry.setKeyAlias(in.readUTF());
             } else {
                 long totalFileSize = 0;
                 int childrenCount = in.readInt();
@@ -201,13 +194,6 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
     }
 
     /**
-     * @return the keyAlias
-     */
-    public final String getKeyAlias() {
-        return this.keyAlias;
-    }
-
-    /**
      * @return the parentEntry
      */
     public final IndexEntry getParentEntry() {
@@ -218,35 +204,7 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
      * @return the children
      */
     public final IndexEntry[] getChildren() {
-        IndexEntry[] entries = this.children.values().toArray(new IndexEntry[0]);
-        Arrays.sort(entries);
-        return entries;
-    }
-
-    /**
-     * @return the folders
-     */
-    public final IndexEntry[] getDirectories() {
-        IndexEntry[] entries = getChildren();
-        for (int i = 0; i < entries.length; ++i) {
-            if (entries[i].isFile()) {
-                return Arrays.copyOf(entries, i);
-            }
-        }
-        return entries;
-    }
-
-    /**
-     * @return the files
-     */
-    public final IndexEntry[] getFiles() {
-        IndexEntry[] entries = getChildren();
-        for (int i = 0; i < entries.length; ++i) {
-            if (entries[i].isFile()) {
-                return Arrays.copyOfRange(entries, i, entries.length);
-            }
-        }
-        return new IndexEntry[0];
+        return this.children.values().toArray(new IndexEntry[0]);
     }
 
     /*------------------------------------------------------------------------*\
@@ -271,13 +229,6 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
      */
     protected final void setChecksum(String checksum) {
         this.checksum = checksum;
-    }
-
-    /**
-     * @param keyAlias the keyAlias to set
-     */
-    protected final void setKeyAlias(String keyAlias) {
-        this.keyAlias = keyAlias;
     }
 
     /**
@@ -320,6 +271,38 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
         this.children.put(entry.fileName, entry);
         entry.parentEntry = this;
         return entry;
+    }
+
+    /**
+     * Removes a child entry, and returns it
+     *
+     * @param name the entry name to remove
+     * @return the removed entry
+     * @throws java.io.IOException
+     * @throws java.security.GeneralSecurityException
+     */
+    public final IndexEntry removeChild(String name) throws IOException, GeneralSecurityException {
+        IndexEntry child = getChild(name);
+        if (child != null) {
+            this.children.remove(name);
+            this.fileSize -= child.getFileSize();
+            this.getCipherFile().delete();
+        }
+        return child;
+    }
+
+    /**
+     * Removes the current entry.
+     *
+     * @return true if successfully deleted.
+     * @throws java.io.IOException
+     * @throws java.security.GeneralSecurityException
+     */
+    public final boolean remove() throws IOException, GeneralSecurityException {
+        if (this.isRoot()) {
+            throw new IllegalAccessError("Root entry can not be removed");
+        }
+        return this.getParentEntry().removeChild(this.getFileName()) == this;
     }
 
     /**
@@ -390,10 +373,9 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
      * @param name
      * @param fileSize
      * @param checksum
-     * @param alias
      * @return the created entry
      */
-    public final IndexEntry createNewFile(String name, int fileSize, String checksum, String alias) {
+    public final IndexEntry createNewFile(String name, long fileSize, String checksum) {
         if (name == null || checksum == null) {
             return null;
         }
@@ -402,7 +384,6 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
         entry.setChecksum(checksum);
         entry.setFileSize(fileSize);
         entry.setParentEntry(this);
-        entry.setKeyAlias(alias);
         this.children.put(name, entry);
         return entry;
     }

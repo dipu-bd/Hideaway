@@ -2,60 +2,43 @@
 
 <Form version="1.6" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <NonVisualComponents>
-    <Container class="javax.swing.JPopupMenu" name="keystorePopup">
-
-      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout">
-        <Property name="useNullLayout" type="boolean" value="true"/>
-      </Layout>
-      <SubComponents>
-        <MenuItem class="javax.swing.JMenuItem" name="createKeyMenu">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Create New"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="createKeyMenuActionPerformed"/>
-          </Events>
-        </MenuItem>
-        <MenuItem class="javax.swing.JMenuItem" name="removeKeyMenu">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Remove"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="removeKeyMenuActionPerformed"/>
-          </Events>
-        </MenuItem>
-        <Component class="javax.swing.JPopupMenu$Separator" name="keystorePopupSeparator1">
-        </Component>
-        <MenuItem class="javax.swing.JMenuItem" name="exportKeyButton">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Export Key"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exportKeyButtonActionPerformed"/>
-          </Events>
-        </MenuItem>
-        <MenuItem class="javax.swing.JMenuItem" name="importKeyButton">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Import Key"/>
-          </Properties>
-        </MenuItem>
-        <Component class="javax.swing.JPopupMenu$Separator" name="keystorePopupSeparator2">
-        </Component>
-        <MenuItem class="javax.swing.JMenuItem" name="refreshButton">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Refresh"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="refreshButtonActionPerformed"/>
-          </Events>
-        </MenuItem>
-      </SubComponents>
-    </Container>
     <Container class="javax.swing.JPopupMenu" name="browserPopup">
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout">
         <Property name="useNullLayout" type="boolean" value="true"/>
       </Layout>
+      <SubComponents>
+        <MenuItem class="javax.swing.JMenuItem" name="exportFileMenuItem">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Export"/>
+          </Properties>
+        </MenuItem>
+        <MenuItem class="javax.swing.JMenuItem" name="deleteEntryMenuItem">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Delete"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="deleteEntryMenuItemActionPerformed"/>
+          </Events>
+        </MenuItem>
+        <Component class="javax.swing.JPopupMenu$Separator" name="browserPopupSeparator1">
+        </Component>
+        <MenuItem class="javax.swing.JMenuItem" name="importFileMenuItem">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Import File"/>
+          </Properties>
+        </MenuItem>
+        <Component class="javax.swing.JPopupMenu$Separator" name="browserPopupSeparator2">
+        </Component>
+        <MenuItem class="javax.swing.JMenuItem" name="refreshBrowserMenuItem">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Refresh"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="refreshBrowserMenuItemActionPerformed"/>
+          </Events>
+        </MenuItem>
+      </SubComponents>
     </Container>
     <Container class="javax.swing.JPopupMenu" name="favoritesPopup">
 
@@ -263,7 +246,7 @@
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="33" green="0" red="66" type="rgb"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#x26d3;&lt;/html&gt;"/>
+                <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;span color=&quot;red&quot;&gt;!&lt;/span&gt;&lt;/html&gt;"/>
                 <Property name="toolTipText" type="java.lang.String" value="Root Folder"/>
                 <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                   <Border info="org.netbeans.modules.form.compat2.border.MatteColorBorderInfo">
@@ -295,7 +278,7 @@
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="4e" green="4e" red="20" type="rgb"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Keystore"/>
+                <Property name="text" type="java.lang.String" value="/"/>
                 <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                   <Border info="org.netbeans.modules.form.compat2.border.CompoundBorderInfo">
                     <CompoundBorder>
@@ -517,17 +500,14 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Component id="horizontalSeparator2" max="32767" attributes="0"/>
-              <Component id="horizontalSeparator3" alignment="0" max="32767" attributes="0"/>
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
                       <Component id="importFileButton" max="32767" attributes="0"/>
                       <Component id="favoriteButton" alignment="0" max="32767" attributes="0"/>
                       <Component id="homeButton" alignment="0" max="32767" attributes="0"/>
-                      <Component id="keystoreButton" alignment="1" max="32767" attributes="0"/>
                       <Component id="recentsButton" alignment="1" max="32767" attributes="0"/>
-                      <Component id="generateKeyPairButton" alignment="0" pref="180" max="32767" attributes="0"/>
-                      <Component id="importFolderButton" alignment="0" max="32767" attributes="0"/>
+                      <Component id="importFolderButton" alignment="0" pref="180" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
               </Group>
@@ -548,13 +528,7 @@
                   <Component id="importFileButton" min="-2" pref="39" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="importFolderButton" min="-2" pref="39" max="-2" attributes="0"/>
-                  <EmptySpace pref="191" max="32767" attributes="0"/>
-                  <Component id="horizontalSeparator3" min="-2" pref="2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="generateKeyPairButton" min="-2" pref="40" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="keystoreButton" min="-2" pref="40" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -602,23 +576,6 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="favoriteButtonActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JButton" name="generateKeyPairButton">
-          <Properties>
-            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="b4" green="b6" red="ba" type="rgb"/>
-            </Property>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
-              <FontInfo relative="true">
-                <Font component="generateKeyPairButton" property="font" relativeSize="true" size="2"/>
-              </FontInfo>
-            </Property>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#x26cf; Generate Key Pair&lt;/html&gt;"/>
-            <Property name="toolTipText" type="java.lang.String" value=""/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="generateKeyPairButtonActionPerformed"/>
-          </Events>
-        </Component>
         <Component class="javax.swing.JSeparator" name="horizontalSeparator2">
         </Component>
         <Component class="javax.swing.JButton" name="importFileButton">
@@ -650,22 +607,6 @@
             <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;span style=&quot;font-size: 1.3em&quot;&gt;&amp;#x1f5bf;&lt;/span&gt; Import Folder&lt;/html&gt;"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JSeparator" name="horizontalSeparator3">
-        </Component>
-        <Component class="javax.swing.JButton" name="keystoreButton">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
-              <FontInfo relative="true">
-                <Font component="keystoreButton" property="font" relativeSize="true" size="5"/>
-              </FontInfo>
-            </Property>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt;&amp;#x26d3; Keystore&lt;/html&gt;"/>
-            <Property name="borderPainted" type="boolean" value="false"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="keystoreButtonActionPerformed"/>
-          </Events>
-        </Component>
       </SubComponents>
     </Container>
     <Component class="javax.swing.JSeparator" name="verticalSeparator3">
@@ -690,7 +631,7 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
-                  <Component id="dataViewerScrollPane" pref="522" max="32767" attributes="0"/>
+                  <Component id="dataViewerScrollPane" pref="547" max="32767" attributes="0"/>
                   <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -709,6 +650,11 @@
                 <Property name="autoCreateRowSorter" type="boolean" value="true"/>
                 <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="ff" green="f8" red="f6" type="rgb"/>
+                </Property>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                    <EmptyBorder bottom="0" left="0" right="0" top="0"/>
+                  </Border>
                 </Property>
                 <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
                   <Table columnCount="4" rowCount="4">

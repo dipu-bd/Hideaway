@@ -105,7 +105,6 @@ public class Program {
         try {
             Settings.getDefault().flush();
             CipherIO.instance().saveIndex();
-            CipherIO.instance().saveKeystore();
         } catch (IOException | GeneralSecurityException | BackingStoreException ex) {
             Reporter.put(ex);
         }

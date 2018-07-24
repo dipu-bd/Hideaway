@@ -63,7 +63,7 @@ public class CipherIO {
     private static final HashMap<String, CipherIO> STORAGE = new HashMap<>();
 
     public static CipherIO intanceFor(String folder)
-            throws KeyStoreException, PasswordException, NoSuchAlgorithmException, UnsupportedEncodingException {
+            throws PasswordException, NoSuchAlgorithmException, UnsupportedEncodingException {
         if (!CipherIO.STORAGE.containsKey(folder)) {
             // attach a new storage class with the folder
             CipherIO.STORAGE.put(folder, new CipherIO(folder));
@@ -72,7 +72,7 @@ public class CipherIO {
     }
 
     public static CipherIO instance()
-            throws KeyStoreException, PasswordException, NoSuchAlgorithmException, UnsupportedEncodingException {
+            throws PasswordException, NoSuchAlgorithmException, UnsupportedEncodingException {
         String folder = Settings.getDefault().get(Settings.WORK_DIR);
         return CipherIO.intanceFor(folder);
     }
@@ -233,8 +233,8 @@ public class CipherIO {
      * @throws UnsupportedClassVersionError
      */
     public byte[] readFromCipherFile(IndexEntry entry) throws IOException, GeneralSecurityException, UnsupportedClassVersionError {
-        File file = this.getDataFile(entry.getChecksum());
-        if (!file.exists()) {
+        File file = entry.getCipherFile();
+        if (file == null || !file.exists()) {
             return null;
         }
 
@@ -259,7 +259,7 @@ public class CipherIO {
      * @throws GeneralSecurityException
      */
     public void writeToCipherFile(IndexEntry entry, byte[] buffer) throws IOException, GeneralSecurityException {
-        File file = this.getDataFile(entry.getChecksum());
+        File file = entry.getCipherFile();
         file.createNewFile();
 
         Key key = this.secretKey;
@@ -290,7 +290,7 @@ public class CipherIO {
             throw new IOException("Source file not found");
         }
 
-        File dest = this.getDataFile(destination.getChecksum());
+        File dest = destination.getCipherFile();
         dest.getParentFile().mkdirs();
         dest.createNewFile();
         if (!dest.exists()) {
@@ -321,7 +321,7 @@ public class CipherIO {
      */
     @SuppressWarnings("empty-statement")
     public void copyFileDecrypted(IndexEntry source, File dest) throws IOException, GeneralSecurityException {
-        File src = this.getDataFile(source.getChecksum());
+        File src = source.getCipherFile();
         if (!src.exists()) {
             throw new IOException("Source file not found");
         }

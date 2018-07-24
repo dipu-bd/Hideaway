@@ -5,9 +5,13 @@
  */
 package org.dpulab.hideaway.utils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -166,10 +170,10 @@ public final class CryptoService {
 
     /**
      * Gets the checksum of the byte array. It calculates the hash of the array
-     * using SHA-512 algorithm.
+     * using SHA-256 algorithm.
      *
-     * @param fullPath
-     * @param data file path
+     * @param fullPath the file path in index entry
+     * @param data bytes
      * @return the checksum string
      * @throws NoSuchAlgorithmException
      * @throws UnsupportedEncodingException
@@ -181,6 +185,29 @@ public final class CryptoService {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         digest.update(data);
         digest.update(fullPath.getBytes(Settings.DEFAULT_CHARSET));
+        String hash = Base64.getEncoder().encodeToString(digest.digest());
+        hash = hash.replace('/', '-');
+        return hash;
+    }
+
+    /**
+     * Gets the checksum of file. It calculates the hash of the file using
+     * SHA-256 algorithm.
+     *
+     * @param fullPath the file path in index entry
+     * @param file the file path
+     * @return the checksum string
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws java.io.UnsupportedEncodingException
+     * @throws java.io.FileNotFoundException
+     */
+    public String getChecksum(String fullPath, File file) throws NoSuchAlgorithmException, UnsupportedEncodingException, FileNotFoundException, IOException {
+        if (StringUtils.isEmpty(fullPath) || file == null || !file.exists()) {
+            return null;
+        }
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        digest.update(fullPath.getBytes(Settings.DEFAULT_CHARSET));
+        digest.update(ByteBuffer.allocate(8).putLong(file.length()));
         String hash = Base64.getEncoder().encodeToString(digest.digest());
         hash = hash.replace('/', '-');
         return hash;
