@@ -18,14 +18,12 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.spec.AlgorithmParameterSpec;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -50,14 +48,13 @@ import org.bouncycastle.util.encoders.Hex;
  */
 public final class CryptoService {
 
+    /*------------------------------------------------------------------------*\
+    |                             Static Methods                               |
+    \*------------------------------------------------------------------------*/
     private static final CryptoService INSTANCE = new CryptoService();
 
     public static CryptoService getDefault() {
         return CryptoService.INSTANCE;
-    }
-
-    private CryptoService() {
-        Security.addProvider(new BouncyCastleProvider());
     }
 
     /**
@@ -122,13 +119,24 @@ public final class CryptoService {
      * @throws UnsupportedEncodingException
      */
     public static byte[] getPasswordBlock(String password, int blockSize) throws UnsupportedEncodingException {
-        StringBuilder sb = new StringBuilder();
-        while (sb.length() < blockSize) {
-            sb.append(password);
-            sb.reverse();
+        StringBuilder builder = new StringBuilder();
+        while (builder.length() < blockSize) {
+            builder.reverse();
+            builder.append(password);
         }
-        byte[] bytes = sb.toString().getBytes(Settings.DEFAULT_CHARSET);
+        byte[] bytes = builder.toString().getBytes(Settings.DEFAULT_CHARSET);
+        byte[] key = "~!@#$%^&*()\\/+_|?\":<>?".getBytes();
+        for (int i = 0; i < blockSize; i += 3) {
+            bytes[i] ^= key[i % key.length];
+        }
         return Arrays.copyOf(bytes, blockSize);
+    }
+
+    /*------------------------------------------------------------------------*\
+    |                             Local Methods                                |
+    \*------------------------------------------------------------------------*/
+    private CryptoService() {
+        Security.addProvider(new BouncyCastleProvider());
     }
 
     /**
@@ -139,7 +147,7 @@ public final class CryptoService {
      * @throws java.security.NoSuchAlgorithmException
      * @throws java.io.UnsupportedEncodingException
      */
-    public String getHash(String text) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public String getPasswordHash(String text) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         if (StringUtils.isEmpty(text)) {
             return null;
         }
@@ -204,15 +212,8 @@ public final class CryptoService {
      * @throws NoSuchAlgorithmException
      */
     public Key generateKey(String password) throws UnsupportedEncodingException, NoSuchAlgorithmException {
-        int keyBitSize = 256;
-        byte[] seed = password.getBytes(Settings.DEFAULT_CHARSET);
-        SecureRandom secureRandom = new SecureRandom(seed);
-        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-
-        keyGen.init(keyBitSize, secureRandom);
-        SecretKey secret = keyGen.generateKey();
-
-        return secret;
+        byte[] data = getPasswordBlock(password, 32);
+        return (Key) new SecretKeySpec(data, "AES");
     }
 
     /**
@@ -223,10 +224,13 @@ public final class CryptoService {
      * @throws UnsupportedEncodingException
      */
     public IvParameterSpec generateParamSpec(String seed) throws UnsupportedEncodingException {
-        byte[] block = CryptoService.getPasswordBlock(seed, 16);
+        byte[] block = getPasswordBlock(seed, 16);
         return new IvParameterSpec(block);
     }
 
+    /*------------------------------------------------------------------------*\
+    |                                DEPRECATED                                |
+    \*------------------------------------------------------------------------*/
     /**
      * Generates a bit RSA KeyPair using BountyCastle provider.
      *
@@ -235,6 +239,7 @@ public final class CryptoService {
      * @throws java.security.NoSuchAlgorithmException
      * @throws java.security.NoSuchProviderException
      */
+    @Deprecated
     public KeyPair generateKeyPair(int bitSize) throws NoSuchAlgorithmException, NoSuchProviderException {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", "BC");
         keyPairGenerator.initialize(bitSize, new SecureRandom());
@@ -253,6 +258,7 @@ public final class CryptoService {
      * @param countryCode
      * @return
      */
+    @Deprecated
     public X500Name generateX500Name(
             String alias,
             String clientName,
@@ -295,6 +301,7 @@ public final class CryptoService {
      * @throws org.bouncycastle.operator.OperatorCreationException
      * @throws java.security.cert.CertificateException
      */
+    @Deprecated
     public X509Certificate generateSelfSignedX509Certificate(KeyPair keyPair, X500Name subject) throws IOException, OperatorCreationException, CertificateException {
         X500Name issuer = generateX500Name("dpulab", "Hideaway", "dipu.sudipta@gmail.com", "org", "dpulab", "BD");
         // use 100 year validity between start and end dates

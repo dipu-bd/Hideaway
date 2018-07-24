@@ -26,6 +26,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Random;
 import javax.crypto.spec.IvParameterSpec;
 import org.apache.commons.lang3.StringUtils;
@@ -85,18 +86,18 @@ public class CryptoServiceTest {
      * @throws java.io.UnsupportedEncodingException
      */
     @org.junit.Test
-    public void testGetHash() throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public void testGetPasswordHash() throws NoSuchAlgorithmException, UnsupportedEncodingException {
         showHeader("getHash");
         CryptoService instance = CryptoService.getDefault();
-        String hash = instance.getHash("dipu");
+        String hash = instance.getPasswordHash("dipu");
         assertNotNull(hash);
         assertNotEquals("dipu", hash);
         assertFalse(StringUtils.containsAny(hash, '/', ':', '|', '\\', '$', '%', '!', '?', '{', '}'));
 
-        hash = instance.getHash("");
+        hash = instance.getPasswordHash("");
         assertNull(hash);
 
-        hash = instance.getHash(null);
+        hash = instance.getPasswordHash(null);
         assertNull(hash);
     }
 
@@ -155,11 +156,11 @@ public class CryptoServiceTest {
         hash = instance.getChecksum("/usr/bin", "".getBytes("utf-8"));
         assertNotNull(hash);
         assertFalse(StringUtils.containsAny(hash, '/', ':', '|', '\\', '$', '%', '!', '?', '{', '}'));
-        
+
         hash = instance.getChecksum("/usr/bin", "".getBytes("utf-8"));
         assertNotNull(hash);
         assertFalse(StringUtils.containsAny(hash, '/', ':', '|', '\\', '$', '%', '!', '?', '{', '}'));
-        
+
         hash = instance.getChecksum("", null);
         assertNull(hash);
 
@@ -169,6 +170,8 @@ public class CryptoServiceTest {
 
     /**
      * Test of getPasswordBlock method, of class CryptoService.
+     *
+     * @throws java.lang.Exception
      */
     @org.junit.Test
     public void testGetKeyBlock() throws Exception {
@@ -178,11 +181,23 @@ public class CryptoServiceTest {
             "dipu",
             "sudipto",
             "AReallyLongText",
-            "a very long Key with Spaces"
+            "a very long Key with Spaces",
+            "97982923094lkdfl hoi",
+            "UHkjE(*#JKbSO(l3k",
+            "~!@#$%^&*()~!@#$%^&*(|}?>"
         };
         for (String password : passwords) {
             byte[] result = CryptoService.getPasswordBlock(password, blockSize);
-            System.out.println(">>> " + password + " = " + new String(result));
+            assertEquals(blockSize, result.length);
+            if (blockSize == 16) {
+                blockSize = 24;
+            } else if (blockSize == 24) {
+                blockSize = 32;
+            } else {
+                blockSize = 16;
+            }
+            int fuzzy = StringUtils.getFuzzyDistance(password, new String(result, "UTF-8"), Locale.ENGLISH);
+            assertEquals(fuzzy, 0);
         }
     }
 
@@ -222,6 +237,8 @@ public class CryptoServiceTest {
 
     /**
      * Test of generateKey method, of class CryptoService.
+     *
+     * @throws java.lang.Exception
      */
     @org.junit.Test
     public void testGenerateKey() throws Exception {
@@ -239,11 +256,14 @@ public class CryptoServiceTest {
             assertEquals("AES", result.getAlgorithm());
             assertEquals("RAW", result.getFormat());
             assertEquals(32, result.getEncoded().length);
+            // System.out.println(password + " = " + CryptoService.getBytePreview(result.getEncoded(), 32));
         }
     }
 
     /**
      * Test of generateParamSpec method, of class CryptoService.
+     *
+     * @throws java.lang.Exception
      */
     @org.junit.Test
     public void testGenerateParamSpec() throws Exception {
@@ -254,21 +274,13 @@ public class CryptoServiceTest {
             "WhatANiceDay",
             "a very long Key with Spacesss"
         };
-        String[] expResults = {
-            "dXBpZHVwaWRkaXB1ZGlwdQ==",
-            "b3RwaWR1c290cGlkdXNzdQ==",
-            "eWFEZWNpTkF0YWhXV2hhdA==",
-            "c3NzZWNhcFMgaHRpdyB5ZQ=="
-        };
         CryptoService instance = CryptoService.getDefault();
         for (int i = 0; i < seeds.length; ++i) {
             String seed = seeds[i];
-            String expResult = expResults[i];
             IvParameterSpec result = (IvParameterSpec) instance.generateParamSpec(seed);
             assertNotNull(result);
             assertEquals(16, result.getIV().length);
             assertArrayEquals(result.getIV(), CryptoService.getPasswordBlock(seed, 16));
-            assertEquals(expResult, Base64.getEncoder().encodeToString(result.getIV()));
         }
     }
 
@@ -277,7 +289,7 @@ public class CryptoServiceTest {
      *
      * @throws java.lang.Exception
      */
-    @org.junit.Test
+    // @org.junit.Test
     public void testGenerateKeyPair4096() throws Exception {
         showHeader("generateKeyPair4096");
         int bitSize = 4096;
@@ -297,7 +309,7 @@ public class CryptoServiceTest {
      *
      * @throws java.lang.Exception
      */
-    //@org.junit.Test
+    // @org.junit.Test
     public void testGenerateKeyPair2048() throws Exception {
         showHeader("generateKeyPair2048");
         int bitSize = 2048;
@@ -315,7 +327,7 @@ public class CryptoServiceTest {
     /**
      * Test of generateX500Name method, of class CryptoService.
      */
-    @org.junit.Test
+    // @org.junit.Test
     public void testGenerateX500Name() {
         showHeader("generateX500Name");
         String alias = "Test";
@@ -342,8 +354,10 @@ public class CryptoServiceTest {
 
     /**
      * Test of generateSelfSignedX509Certificate method, of class CryptoService.
+     *
+     * @throws java.lang.Exception
      */
-    @org.junit.Test
+    // @org.junit.Test
     public void testGenerateSelfSignedX509Certificate() throws Exception {
         showHeader("generateSelfSignedX509Certificate");
         String alias = "Test";
