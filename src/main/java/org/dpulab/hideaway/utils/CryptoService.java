@@ -179,6 +179,22 @@ public final class CryptoService {
     }
 
     /**
+     * Generate a random password. It is recommended to set the constraints the
+     * number of digits using this formula: <code>digit * 8 = 0 (mod 6)</code>
+     *
+     * @param digits number of digits in final string.
+     * @return
+     * @throws NoSuchAlgorithmException
+     */
+    public String generateRandomPassword(int digits) throws NoSuchAlgorithmException {
+        SecureRandom secureRandom = new SecureRandom();
+        int length = (int) Math.ceil(digits * 8.0 / 6.0);
+        byte[] password = new byte[length];
+        secureRandom.nextBytes(password);
+        return Base64.getEncoder().encodeToString(password);
+    }
+
+    /**
      * Generates a secret key using given password as a seed to a SecureRandom
      * instance.
      *

@@ -1,29 +1,56 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2018 Sudipto Chandra
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.dpulab.hideaway.view;
+
+import java.util.logging.Level;
+import org.dpulab.hideaway.utils.Reporter;
+import org.dpulab.hideaway.utils.Settings;
 
 /**
  *
  * @author dipu
  */
-public class PasswordInput extends javax.swing.JDialog {
+public class PasswordConfirm extends javax.swing.JDialog {
 
     /**
      * Creates new form VerifyPassword
+     *
      * @param parent
      */
-    public PasswordInput(java.awt.Frame parent) {
+    public PasswordConfirm(java.awt.Frame parent) {
         super(parent);
         initComponents();
+
+        String pasword = Settings.getDefault().getSession(Settings.PASSWORD);
+        this.oldPasswordInput.setText(pasword);
+        this.oldPasswordInput.requestFocus();
     }
-    
-    public String getPassword() {
-        return new String(this.passwordInput.getPassword());
+
+    public void checkPasswords() {
+        String oldPass = new String(this.oldPasswordInput.getPassword());
+        String newPass = new String(this.newPasswordInput.getPassword());
+        if (!oldPass.equals(newPass)) {
+            Reporter.dialog(Level.WARNING, "Entered passwords does not match.");
+            return;
+        }
+        Settings.getDefault().setSession(Settings.PASSWORD, newPass);
+        this.setVisible(false);
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -36,22 +63,25 @@ public class PasswordInput extends javax.swing.JDialog {
         frameHeaderPanel = new javax.swing.JPanel();
         frameTitleLabel = new javax.swing.JLabel();
         frameBodyPanel = new javax.swing.JPanel();
-        passwordInputLabel = new javax.swing.JLabel();
-        passwordInput = new javax.swing.JPasswordField();
-        passwordInputHintLabel = new javax.swing.JLabel();
+        oldPasswordInputLabel = new javax.swing.JLabel();
+        oldPasswordInput = new javax.swing.JPasswordField();
+        oldPasswordInputHintLabel = new javax.swing.JLabel();
+        newPasswordInput = new javax.swing.JPasswordField();
+        newPasswordInputLabel = new javax.swing.JLabel();
+        newPasswordInputHintLabel = new javax.swing.JLabel();
         frameActionPanel = new javax.swing.JPanel();
         submitButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Verify Password");
+        setTitle("Verify your password");
         setModalityType(java.awt.Dialog.ModalityType.APPLICATION_MODAL);
         setName("passwordConfirmDialog"); // NOI18N
 
         frameHeaderPanel.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(0, 204, 204)));
 
-        frameTitleLabel.setFont(frameTitleLabel.getFont().deriveFont(frameTitleLabel.getFont().getSize()+6f));
+        frameTitleLabel.setFont(frameTitleLabel.getFont().deriveFont(frameTitleLabel.getFont().getSize()+10f));
         frameTitleLabel.setForeground(new java.awt.Color(0, 153, 153));
-        frameTitleLabel.setText("Verify Your Password");
+        frameTitleLabel.setText("Verify your password");
 
         javax.swing.GroupLayout frameHeaderPanelLayout = new javax.swing.GroupLayout(frameHeaderPanel);
         frameHeaderPanel.setLayout(frameHeaderPanelLayout);
@@ -65,25 +95,41 @@ public class PasswordInput extends javax.swing.JDialog {
         frameHeaderPanelLayout.setVerticalGroup(
             frameHeaderPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(frameHeaderPanelLayout.createSequentialGroup()
-                .addGap(15, 15, 15)
+                .addGap(10, 10, 10)
                 .addComponent(frameTitleLabel)
-                .addGap(15, 15, 15))
+                .addGap(10, 10, 10))
         );
 
-        passwordInputLabel.setFont(passwordInputLabel.getFont().deriveFont(passwordInputLabel.getFont().getSize()+2f));
-        passwordInputLabel.setText("Enter your password here:");
+        oldPasswordInputLabel.setFont(oldPasswordInputLabel.getFont().deriveFont(oldPasswordInputLabel.getFont().getSize()+2f));
+        oldPasswordInputLabel.setText("Your previously entered password:");
 
-        passwordInput.setFont(passwordInput.getFont());
-        passwordInput.setToolTipText("Enter your password");
-        passwordInput.setEchoChar('\u25cf');
-        passwordInput.addActionListener(new java.awt.event.ActionListener() {
+        oldPasswordInput.setFont(oldPasswordInput.getFont());
+        oldPasswordInput.setText("testtest");
+        oldPasswordInput.setToolTipText("Enter your password");
+        oldPasswordInput.setEchoChar('\u25cf');
+        oldPasswordInput.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                passwordInputActionPerformed(evt);
+                oldPasswordInputActionPerformed(evt);
             }
         });
 
-        passwordInputHintLabel.setForeground(new java.awt.Color(0, 153, 153));
-        passwordInputHintLabel.setText("Your password is non-recoverable. Keep it safe.");
+        oldPasswordInputHintLabel.setForeground(new java.awt.Color(0, 153, 153));
+        oldPasswordInputHintLabel.setText("You can change your previously entered password here");
+
+        newPasswordInput.setFont(newPasswordInput.getFont());
+        newPasswordInput.setToolTipText("Enter your password");
+        newPasswordInput.setEchoChar('\u25cf');
+        newPasswordInput.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                newPasswordInputActionPerformed(evt);
+            }
+        });
+
+        newPasswordInputLabel.setFont(newPasswordInputLabel.getFont().deriveFont(newPasswordInputLabel.getFont().getSize()+2f));
+        newPasswordInputLabel.setText("Enter your password again to confirm:");
+
+        newPasswordInputHintLabel.setForeground(new java.awt.Color(0, 153, 153));
+        newPasswordInputHintLabel.setText("Your password is non-recoverable. Keep it safe.");
 
         javax.swing.GroupLayout frameBodyPanelLayout = new javax.swing.GroupLayout(frameBodyPanel);
         frameBodyPanel.setLayout(frameBodyPanelLayout);
@@ -92,20 +138,31 @@ public class PasswordInput extends javax.swing.JDialog {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, frameBodyPanelLayout.createSequentialGroup()
                 .addGap(25, 25, 25)
                 .addGroup(frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(passwordInput)
-                    .addComponent(passwordInputHintLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 472, Short.MAX_VALUE)
-                    .addComponent(passwordInputLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(oldPasswordInput)
+                    .addComponent(oldPasswordInputHintLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 472, Short.MAX_VALUE)
+                    .addComponent(oldPasswordInputLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, frameBodyPanelLayout.createSequentialGroup()
+                        .addComponent(newPasswordInputLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(180, 180, 180))
+                    .addComponent(newPasswordInput, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(newPasswordInputHintLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 472, Short.MAX_VALUE))
                 .addGap(25, 25, 25))
         );
         frameBodyPanelLayout.setVerticalGroup(
             frameBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(frameBodyPanelLayout.createSequentialGroup()
                 .addGap(25, 25, 25)
-                .addComponent(passwordInputLabel)
+                .addComponent(oldPasswordInputLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(passwordInput, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(oldPasswordInput, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(2, 2, 2)
-                .addComponent(passwordInputHintLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(oldPasswordInputHintLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(newPasswordInputLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(newPasswordInput, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(2, 2, 2)
+                .addComponent(newPasswordInputHintLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(25, 25, 25))
         );
 
@@ -124,7 +181,7 @@ public class PasswordInput extends javax.swing.JDialog {
         frameActionPanelLayout.setHorizontalGroup(
             frameActionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, frameActionPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(357, Short.MAX_VALUE)
                 .addComponent(submitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(15, 15, 15))
         );
@@ -159,22 +216,28 @@ public class PasswordInput extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void submitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitButtonActionPerformed
-        this.setVisible(false);
+        this.checkPasswords();
     }//GEN-LAST:event_submitButtonActionPerformed
 
-    private void passwordInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passwordInputActionPerformed
-        this.setVisible(false);
-    }//GEN-LAST:event_passwordInputActionPerformed
+    private void oldPasswordInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_oldPasswordInputActionPerformed
+        this.newPasswordInput.requestFocus();
+    }//GEN-LAST:event_oldPasswordInputActionPerformed
 
+    private void newPasswordInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newPasswordInputActionPerformed
+        this.checkPasswords();
+    }//GEN-LAST:event_newPasswordInputActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel frameActionPanel;
     private javax.swing.JPanel frameBodyPanel;
     private javax.swing.JPanel frameHeaderPanel;
     private javax.swing.JLabel frameTitleLabel;
-    private javax.swing.JPasswordField passwordInput;
-    private javax.swing.JLabel passwordInputHintLabel;
-    private javax.swing.JLabel passwordInputLabel;
+    private javax.swing.JPasswordField newPasswordInput;
+    private javax.swing.JLabel newPasswordInputHintLabel;
+    private javax.swing.JLabel newPasswordInputLabel;
+    private javax.swing.JPasswordField oldPasswordInput;
+    private javax.swing.JLabel oldPasswordInputHintLabel;
+    private javax.swing.JLabel oldPasswordInputLabel;
     private javax.swing.JButton submitButton;
     // End of variables declaration//GEN-END:variables
 }

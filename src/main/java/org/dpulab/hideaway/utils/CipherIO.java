@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 dipu
+ * Copyright (C) 2018 Sudipto Chandra
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,12 +44,15 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Properties;
 import javax.crypto.Cipher;
+import org.apache.commons.crypto.stream.CryptoInputStream;
+import org.apache.commons.crypto.stream.CryptoOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.openssl.PasswordException;
 import org.dpulab.hideaway.models.IndexEntry;
-import org.dpulab.hideaway.view.PasswordInput;
+import org.dpulab.hideaway.view.PasswordConfirm;
 
 /**
  *
@@ -187,27 +190,6 @@ public class CipherIO {
     }
 
     /**
-     * Get the key to encrypt/decrypt the index file.
-     *
-     * @return The saved key or a new key.
-     * @throws IOException
-     * @throws KeyStoreException
-     * @throws NoSuchAlgorithmException
-     * @throws java.security.cert.CertificateException
-     * @throws java.security.UnrecoverableKeyException
-     * @throws UnsupportedEncodingException
-     */
-    public Key getIndexSecret()
-            throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
-        if (!this.keyStore.containsAlias(Settings.INDEX_KEY_ALIAS)) {
-            Key key = CryptoService.getDefault().generateKey(this.password);
-            this.storeSecretKey(Settings.INDEX_KEY_ALIAS, key);
-        }
-        Key key = this.keyStore.getKey(Settings.INDEX_KEY_ALIAS, this.getKeystorePass());
-        return key;
-    }
-
-    /**
      * Stores a secret symmetric key.
      *
      * @param alias
@@ -224,23 +206,31 @@ public class CipherIO {
     }
 
     /**
-     * Sets a secret key by its alias. Certificate chain can be null unless it
-     * is a RSA Key pair.
+     * Gets a secret entry by its alias.
      *
-     * @param alias
-     * @param keyPair
-     * @param certificate
-     * @throws IOException
-     * @throws KeyStoreException
-     * @throws NoSuchAlgorithmException
-     * @throws CertificateException
+     * @param alias a string that ends with <code>_key</code>
+     * @return a private key
+     * @throws java.io.IOException
+     * @throws java.security.GeneralSecurityException
      */
-    public void storeKeyPair(String alias, KeyPair keyPair, Certificate certificate)
-            throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
-        Certificate[] certChain = {certificate};
-        this.keyStore.setCertificateEntry(alias + "_cert", certificate);
-        this.keyStore.setKeyEntry(alias + "_key", keyPair.getPrivate(), this.getKeystorePass(), certChain);
-        this.saveKeystore();
+    public Key getSecretKey(String alias) throws IOException, GeneralSecurityException {
+        if (!this.keyStore.containsAlias(alias)) {
+            Key key = CryptoService.getDefault().generateKey(alias);
+            this.storeSecretKey(alias, key);
+        }
+        Key key = this.keyStore.getKey(alias, this.getKeystorePass());
+        return key;
+    }
+
+    /**
+     * Get the key to encrypt/decrypt the index file.
+     *
+     * @return The saved key or a new key.
+     * @throws java.io.IOException
+     * @throws java.security.GeneralSecurityException
+     */
+    public Key getIndexSecret() throws IOException, GeneralSecurityException {
+        return this.getSecretKey(Settings.INDEX_KEY_ALIAS);
     }
 
     /**
@@ -258,11 +248,6 @@ public class CipherIO {
         if (this.keyStore.containsAlias(alias)) {
             this.keyStore.deleteEntry(alias);
         }
-        // delete paired alias
-        if (this.containsKeyPair(alias)) {
-            this.keyStore.deleteEntry(alias + "_key");
-            this.keyStore.deleteEntry(alias + "_cert");
-        }
         // save keystore
         this.saveKeystore();
     }
@@ -279,7 +264,7 @@ public class CipherIO {
      */
     public Key getKeyEntry(String alias)
             throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
-        if (alias.endsWith("_cert")) {
+        if (this.keyStore.isCertificateEntry(alias)) {
             return this.keyStore.getCertificate(alias).getPublicKey();
         }
         return this.keyStore.getKey(alias, this.getKeystorePass());
@@ -290,24 +275,27 @@ public class CipherIO {
      *
      * @param alias a string that ends with <code>_cert</code>
      * @return a public key
-     * @throws java.security.KeyStoreException
+     * @throws KeyStoreException
+     * @throws NoSuchAlgorithmException
+     * @throws UnrecoverableKeyException
      */
-    public PublicKey getPublicKey(String alias) throws KeyStoreException {
-        return this.keyStore.getCertificate(alias + "_cert").getPublicKey();
+    public PublicKey getPublicKey(String alias)
+            throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
+        return (PublicKey) this.getKeyEntry(alias + "_cert");
     }
 
     /**
-     * Gets a private entry by its alias.
+     * Gets a private key entry by its alias.
      *
      * @param alias a string that ends with <code>_key</code>
-     * @return a private key
-     * @throws java.security.KeyStoreException
-     * @throws java.security.NoSuchAlgorithmException
-     * @throws java.security.UnrecoverableKeyException
+     * @return a public key
+     * @throws KeyStoreException
+     * @throws NoSuchAlgorithmException
+     * @throws UnrecoverableKeyException
      */
     public PrivateKey getPrivateKey(String alias)
             throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
-        return (PrivateKey) this.keyStore.getKey(alias + "_key", this.getKeystorePass());
+        return (PrivateKey) this.getKeyEntry(alias + "_key");
     }
 
     /**
@@ -363,7 +351,7 @@ public class CipherIO {
      * @throws java.nio.file.AccessDeniedException
      */
     public void confirmPassword() throws AccessDeniedException {
-        PasswordInput passwordInput = new PasswordInput(null);
+        PasswordConfirm passwordInput = new PasswordConfirm(null);
         passwordInput.setVisible(true);
         String verifyPassword = passwordInput.getPassword();
         passwordInput.dispose();
@@ -416,19 +404,14 @@ public class CipherIO {
     public void loadIndex() throws IOException, GeneralSecurityException, UnsupportedClassVersionError {
         File indexFile = this.getIndexFile();
         Key key = this.getIndexSecret();
+        Properties props = new Properties();
         AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
 
-        Cipher cipher = Cipher.getInstance(Settings.AES_ALGORITHM, "BC");
-        cipher.init(Cipher.DECRYPT_MODE, key, params);
-        
-        byte[] buffer = FileUtils.readFileToByteArray(indexFile);
-        byte[] decrypted = cipher.doFinal(buffer);
-        
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(decrypted);
-                ObjectInputStream ois = new ObjectInputStream(bais)) {
+        try (FileInputStream fis = new FileInputStream(indexFile);
+                CryptoInputStream cis = new CryptoInputStream(Settings.AES_CBC_PKCS5, props, fis, key, params);
+                ObjectInputStream ois = new ObjectInputStream(cis)) {
             rootEntry = IndexEntry.readExternal(ois);
         }
-        
         Reporter.format("Index entry loaded. Total file size: %s", rootEntry.getFileSizeReadable());
     }
 
@@ -441,21 +424,17 @@ public class CipherIO {
     public void saveIndex() throws IOException, GeneralSecurityException {
         File indexFile = this.getIndexFile();
         Key key = this.getIndexSecret();
+        Properties props = new Properties();
         AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
 
-        Cipher cipher = Cipher.getInstance(Settings.AES_ALGORITHM, "BC");
-        cipher.init(Cipher.ENCRYPT_MODE, key, params);
-        
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try(ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+        try (FileOutputStream fos = new FileOutputStream(indexFile);
+                CryptoOutputStream cos = new CryptoOutputStream(Settings.AES_CBC_PKCS5, props, fos, key, params);
+                ObjectOutputStream oos = new ObjectOutputStream(cos)) {
             rootEntry.writeExternal(oos);
+        } catch (Exception ex) {
+            indexFile.delete();
+            throw ex;
         }
-        baos.close();
-        
-        byte[] buffer = baos.toByteArray();
-        byte[] encrypted = cipher.doFinal(buffer);
-        FileUtils.writeByteArrayToFile(indexFile, encrypted);
-        
         Reporter.format("Index entry saved. Total file size: %s", rootEntry.getFileSizeReadable());
     }
 
@@ -475,7 +454,26 @@ public class CipherIO {
         }
 
         PrivateKey key = this.getPrivateKey(entry.getKeyAlias());
+        
+        File indexFile = this.getIndexFile();
+        Key key = this.getIndexSecret();
+        Properties props = new Properties();
+        AlgorithmParameterSpec params = CryptoService.getDefault().generateParamSpec(this.password);
 
+        try (FileInputStream fis = new FileInputStream(indexFile);
+                CryptoInputStream cis = new CryptoInputStream(Settings.AES_CBC_PKCS5, props, fis, key, params);
+                ObjectInputStream ois = new ObjectInputStream(cis)) {
+            rootEntry = IndexEntry.readExternal(ois);
+        }
+
+        try (FileOutputStream fos = new FileOutputStream(indexFile);
+                CryptoOutputStream cos = new CryptoOutputStream(Settings.AES_CBC_PKCS5, props, fos, key, params);
+                ObjectOutputStream oos = new ObjectOutputStream(cos)) {
+            rootEntry.writeExternal(oos);
+        } catch (Exception ex) {
+            indexFile.delete();
+            throw ex;
+        }
         Cipher cipher = Cipher.getInstance(Settings.RSA_ALGORITHM, "BC");
         cipher.init(Cipher.DECRYPT_MODE, key);
 
@@ -500,7 +498,7 @@ public class CipherIO {
 
         Cipher cipher = Cipher.getInstance(Settings.RSA_ALGORITHM, "BC");
         cipher.init(Cipher.ENCRYPT_MODE, key);
-        
+
         byte[] encrypted = cipher.doFinal(buffer);
         FileUtils.writeByteArrayToFile(file, encrypted);
     }
