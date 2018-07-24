@@ -5,14 +5,10 @@
  */
 package org.dpulab.hideaway;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Properties;
 import java.util.Scanner;
@@ -23,8 +19,6 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import org.apache.commons.crypto.stream.CryptoInputStream;
-import org.apache.commons.crypto.stream.CryptoOutputStream;
 import org.apache.commons.text.WordUtils;
 
 /**
@@ -112,53 +106,6 @@ public class Playground {
         }
 
     }
-
-    void commonsCryptoTest() {
-        System.out.println();
-        System.out.println("Testing commons-crypto...");
-        Scanner scanner = new Scanner(System.in);
-        try {
-            System.out.print("Enter message: ");
-            String message = scanner.nextLine();
-            System.out.print("Enter password: ");
-            String password = scanner.next();
-
-            StringBuilder sb = new StringBuilder();
-            while (sb.length() < 16) {
-                sb.append(password);
-                sb.reverse();
-            }
-            byte[] keyBytes = Arrays.copyOf(sb.toString().getBytes("UTF-8"), 16);
-            System.out.printf("%s %d\n", new String(keyBytes), keyBytes.length);
-
-            final String transformation = "AES/CBC/PKCS5Padding";
-            Properties props = new Properties();
-            SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
-            IvParameterSpec iv = new IvParameterSpec("ZGlwdQ49dm2kllfa".getBytes());
-            
-            byte[] cipherText;
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try (CryptoOutputStream cos = new CryptoOutputStream(transformation, props, baos, key, iv);
-                    DataOutputStream dos = new DataOutputStream(cos)) {
-                dos.writeUTF(message);
-            }
-            baos.close();
-            cipherText = baos.toByteArray();
-            System.out.println("Encrypted message:");
-            System.out.println(Base64.getEncoder().encodeToString(cipherText));
-
-            try(ByteArrayInputStream bais = new ByteArrayInputStream(cipherText);
-                    CryptoInputStream cis = new CryptoInputStream(transformation, props, bais, key, iv);
-                    DataInputStream dis = new DataInputStream(cis)) {
-                System.out.println("Decrypted message:");
-                System.out.println(dis.readUTF());
-            }
-            
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-    
     
     public void generateKey(String password) {
         try {
@@ -173,7 +120,7 @@ public class Playground {
             System.out.println("Secret Key: " + secret.getFormat() + ", " + secret.getAlgorithm());
             System.out.println(Base64.getEncoder().encodeToString(secret.getEncoded()));
             
-            Properties props = org.apache.commons.crypto.utils.Utils.getDefaultProperties();
+            Properties props = new Properties();
             for (String key : props.stringPropertyNames()) {
                 System.out.println(key + " - " + props.getProperty(key));
             }
