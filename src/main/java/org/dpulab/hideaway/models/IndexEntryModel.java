@@ -5,18 +5,43 @@
  */
 package org.dpulab.hideaway.models;
 
+import org.dpulab.hideaway.models.objecttable.TableColumnStyle;
+import org.dpulab.hideaway.models.objecttable.TableColumnInfo;
+import org.dpulab.hideaway.utils.GeneralUtils;
+
 /**
  *
  * @author dipu
  */
 public class IndexEntryModel {
-    
-    // create a model that provides table data for ObjectTableModel
-    // change ObjectTableModel to build it directly from this model
-    
-    
-    
+
+    /**
+     * Name of the file
+     */
+    @TableColumnInfo(
+            name = "File Name",
+            min = 180,
+            max = Integer.MAX_VALUE,
+            prefer = 250,
+            editable = true)
+    @TableColumnStyle("color: black")
+    public String fileName;
+
+    public long fileSize;
+
     public IndexEntryModel() {
-        
+
     }
+
+    @TableColumnInfo(
+            name = "Size",
+            min = 80,
+            max = 90,
+            prefer = 85,
+            editable = false)
+    @TableColumnStyle("color: #000")
+    public String fileSizeReadable() {
+        return GeneralUtils.formatFileSize(fileSize);
+    }
+
 }

@@ -1,6 +1,7 @@
 package org.dpulab.hideaway.utils;
 
 import java.awt.Component;
+import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.JFileChooser;

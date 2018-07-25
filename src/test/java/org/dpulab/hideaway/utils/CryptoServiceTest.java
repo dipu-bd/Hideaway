@@ -24,7 +24,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
@@ -55,6 +54,7 @@ public class CryptoServiceTest {
 
     @AfterClass
     public static void tearDownClass() {
+        System.out.println(StringUtils.center("", 80, "-"));
     }
 
     @Before
@@ -160,9 +160,6 @@ public class CryptoServiceTest {
         hash = instance.getChecksum("/usr/bin", "".getBytes("utf-8"));
         assertNotNull(hash);
         assertFalse(StringUtils.containsAny(hash, '/', ':', '|', '\\', '$', '%', '!', '?', '{', '}'));
-
-        hash = instance.getChecksum("", null);
-        assertNull(hash);
 
         hash = instance.getChecksum("", "".getBytes("utf-8"));
         assertNull(hash);

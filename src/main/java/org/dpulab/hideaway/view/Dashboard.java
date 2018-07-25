@@ -35,8 +35,8 @@ import org.dpulab.hideaway.Program;
 import org.dpulab.hideaway.models.DashboardPage;
 import org.dpulab.hideaway.models.IndexEntry;
 import org.dpulab.hideaway.models.IndexEntryModel;
-import org.dpulab.hideaway.models.ObjectTableModel;
-import org.dpulab.hideaway.models.TableColumnInfo;
+import org.dpulab.hideaway.models.objecttable.ObjectTableModel;
+import org.dpulab.hideaway.models.objecttable.TableColumnInfo;
 import org.dpulab.hideaway.utils.CipherIO;
 import org.dpulab.hideaway.utils.CryptoService;
 import org.dpulab.hideaway.utils.FileIO;
@@ -144,13 +144,13 @@ public class Dashboard extends javax.swing.JFrame {
 
     void loadBrowser(IndexEntry parent) {
         ObjectTableModel<IndexEntry> model = new ObjectTableModel<>();
-        model.addColumn(new TableColumnInfo(""))
-                .addColumn("#", "<b style=\"color: #6e6e6e\">%s</b>", 20, 25)
-                .addColumn("Name", "<b>%s</b>", 180, 350)
-                .addColumn("Size", "<code>%s</code>", 85, 90)
-                .addColumn("Type", "", 85, 90)
-                .addColumn("Last Modified", "<span style=\"color: #777\">%s</span>", 135, 145)
-                .addColumn("Checksum", "<code style=\"color: gray\">%s</code>", 300);
+        model.addColumn(new TableColumnInfo(""));
+//                .addColumn("#", "<b style=\"color: #6e6e6e\">%s</b>", 20, 25)
+//                .addColumn("Name", "<b>%s</b>", 180, 350)
+//                .addColumn("Size", "<code>%s</code>", 85, 90)
+//                .addColumn("Type", "", 85, 90)
+//                .addColumn("Last Modified", "<span style=\"color: #777\">%s</span>", 135, 145)
+//                .addColumn("Checksum", "<code style=\"color: gray\">%s</code>", 300);
 
         try {
             if (parent == null) {
@@ -165,15 +165,15 @@ public class Dashboard extends javax.swing.JFrame {
                     File cipherFile = entry.getCipherFile();
                     lastModifyDate = GeneralUtils.formatDate(cipherFile.lastModified());
                 }
-                model.addData(
-                        entry,
-                        index++,
-                        entry.getFileName(),
-                        entry.getFileSizeReadable(),
-                        entry.isFile() ? "File" : "Directory",
-                        lastModifyDate,
-                        entry.getChecksum()
-                );
+//                model.addData(
+//                        entry,
+//                        index++,
+//                        entry.getFileName(),
+//                        entry.getFileSizeReadable(),
+//                        entry.isFile() ? "File" : "Directory",
+//                        lastModifyDate,
+//                        entry.getChecksum()
+//                );
             }
 
             SwingUtilities.invokeLater(() -> {
@@ -255,7 +255,7 @@ public class Dashboard extends javax.swing.JFrame {
             return;
         }
         IndexEntryModel model = (IndexEntryModel) this.dataViewer.getModel();
-        IndexEntry entry = (IndexEntry) model.getTag(row);
+        IndexEntry entry = (IndexEntry) null; //model.getTag(row);
 
         int result = JOptionPane.showConfirmDialog(
                 this,
