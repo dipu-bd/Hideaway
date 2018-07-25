@@ -36,6 +36,7 @@ import org.dpulab.hideaway.models.DashboardPage;
 import org.dpulab.hideaway.models.IndexEntry;
 import org.dpulab.hideaway.models.IndexEntryModel;
 import org.dpulab.hideaway.models.ObjectTableModel;
+import org.dpulab.hideaway.models.TableColumnInfo;
 import org.dpulab.hideaway.utils.CipherIO;
 import org.dpulab.hideaway.utils.CryptoService;
 import org.dpulab.hideaway.utils.FileIO;
@@ -143,7 +144,7 @@ public class Dashboard extends javax.swing.JFrame {
 
     void loadBrowser(IndexEntry parent) {
         ObjectTableModel<IndexEntry> model = new ObjectTableModel<>();
-        model.
+        model.addColumn(new TableColumnInfo(""))
                 .addColumn("#", "<b style=\"color: #6e6e6e\">%s</b>", 20, 25)
                 .addColumn("Name", "<b>%s</b>", 180, 350)
                 .addColumn("Size", "<code>%s</code>", 85, 90)

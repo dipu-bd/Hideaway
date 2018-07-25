@@ -12,8 +12,9 @@ package org.dpulab.hideaway.models;
 public class IndexEntryModel {
     
     // create a model that provides table data for ObjectTableModel
-    
     // change ObjectTableModel to build it directly from this model
+    
+    
     
     public IndexEntryModel() {
         
