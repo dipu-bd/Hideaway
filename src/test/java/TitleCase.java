@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 /**
- * Contains methods to convert any string to title case.
+ * Convert a string to title case in java (with tests).
  *
  * @author Sudipto Chandra
  */
@@ -61,30 +60,35 @@ public abstract class TitleCase {
         if (text == null || text.length() == 0) {
             return text;
         }
-        StringBuilder sb = new StringBuilder();
+
         char[] str = text.toCharArray();
+        StringBuilder sb = new StringBuilder();
+
         boolean capRepeated = false;
         for (int i = 0, prev = -1, next; i < str.length; ++i, prev = next) {
             next = getCharType(str[i]);
             // trace consecutive capital cases
             if (prev == 1 && next == 1) {
                 capRepeated = true;
-            } else if (prev != 1 || next != 0) {
+            } else if (next != 0) {
                 capRepeated = false;
             }
             // next is ignorable
             if (next == -1) {
+                // System.out.printf("case 0, %d %d %s\n", prev, next, sb.toString());
                 continue; // does not append anything
             }
             // prev and next are of same type
             if (prev == next) {
                 sb.append(str[i]);
-                continue; // take the current one
+                // System.out.printf("case 1, %d %d %s\n", prev, next, sb.toString());
+                continue;
             }
             // next is not an alphabet
             if (next == 2) {
                 sb.append(str[i]);
-                continue; // take the current one
+                // System.out.printf("case 2, %d %d %s\n", prev, next, sb.toString());
+                continue;
             }
             // next is an alphabet, prev was not +
             // next is uppercase and prev was lowercase
@@ -93,6 +97,7 @@ public abstract class TitleCase {
                     sb.append(' ');
                 }
                 sb.append(Character.toUpperCase(str[i]));
+                // System.out.printf("case 3, %d %d %s\n", prev, next, sb.toString());
                 continue;
             }
             // next is lowercase and prev was uppercase
@@ -102,10 +107,20 @@ public abstract class TitleCase {
                     capRepeated = false;
                 }
                 sb.append(str[i]);
+                // System.out.printf("case 4, %d %d %s\n", prev, next, sb.toString());
             }
         }
         String output = sb.toString().trim();
-        return (output.length() == 0) ? text : output;
+        output = (output.length() == 0) ? text : output;
+        //return output;
+
+        // Capitalize all words (Optional)
+        String[] result = output.split(" ");
+        for (int i = 0; i < result.length; ++i) {
+            result[i] = result[i].charAt(0) + result[i].substring(1).toLowerCase();
+        }
+        output = String.join(" ", result);
+        return output;
     }
 
     /**
@@ -120,7 +135,7 @@ public abstract class TitleCase {
             {"aa", "Aa"},
             {"aaa", "Aaa"},
             {"aC", "A C"},
-            {"AC", "AC"},
+            {"AC", "Ac"},
             {"aCa", "A Ca"},
             {"ACa", "A Ca"},
             {"aCamel", "A Camel"},
@@ -129,35 +144,43 @@ public abstract class TitleCase {
             {"camelCase", "Camel Case"},
             {"snake_case", "Snake Case"},
             {"toCamelCaseString", "To Camel Case String"},
-            {"ABDTest", "ABD Test"},
-            {"toCAMELCase", "To CAMEL Case"},
+            {"toCAMELCase", "To Camel Case"},
+            {"_under_the_scoreCamelWith_", "Under The Score Camel With"},
+            {"ABDTest", "Abd Test"},
             {"title123Case", "Title123 Case"},
             {"expect11", "Expect11"},
             {"all0verMe3", "All0 Ver Me3"},
-            {"_under_the_scoreCamelWith_", "Under The Score Camel With"},
             {"___", "___"},
             {"__a__", "A"},
             {"_A_b_c____aa", "A B C Aa"},
             {"_get$It132done", "Get It132 Done"},
             {"_122_", "122"},
             {"_no112", "No112"},
+            {"Case-13title", "Case13 Title"},
+            {"-no-allow-", "No Allow"},
+            {"_paren-_-allow--not!", "Paren Allow Not"},
+            {"Other.Allow.--False?", "Other Allow False"},
+            {"$39$ldl%LK3$lk_389$klnsl-32489  3 42034 ", "39 Ldl Lk3 Lk389 Klnsl32489342034"},
+            {"tHis will BE MY EXAMple", "T His Will Be My Exa Mple"},
+            {"stripEvery.damn-paren- -_now", "Strip Every Damn Paren Now"},
+            {"getMe", "Get Me"},
             {"whatSthePoint", "What Sthe Point"},
             {"n0pe_aLoud", "N0 Pe A Loud"},
             {"canHave SpacesThere", "Can Have Spaces There"},
             {"  why_underScore exists  ", "Why Under Score Exists"},
-            {"Case-13title", "Case13 Title"},
             {"small-to-be-seen", "Small To Be Seen"},
-            {"-no-allow-", "No Allow"},
-            {"_paren-_-allow--not!", "Paren Allow Not"},
-            {"Other.Allow.--False?", "Other Allow False"},
-            {"stripEvery.damn-paren- -_now", "Strip Every Damn Paren Now"},
-            {"getMe", "Get Me"},
-            {"$39$ldl%LK3$lk_389$klnsl-32489  3 42034 ", "39 Ldl LK3 Lk389 Klnsl32489342034"},
-            {"last one onTheList", "Last One On The List"}
+            {"toCAMELCase", "To Camel Case"},
+            {"_under_the_scoreCamelWith_", "Under The Score Camel With"},
+            {"last one onTheList", "Last One On The List"},
+            {"a string", "A String"},
+            {"maRTin o'maLLEY", "Ma R Tin O Ma Lley"},
+            {"john wilkes-booth", "John Wilkes Booth"},
+            {"YET ANOTHER STRING", "Yet Another String"}
         };
         int pass = 0;
         for (String[] inp : samples) {
             String out = titleCase(inp[0]);
+            //String out = WordUtils.capitalizeFully(inp[0]);
             System.out.printf("TEST '%s'\nWANTS '%s'\nFOUND '%s'\n", inp[0], inp[1], out);
             boolean passed = (out == null ? inp[1] == null : out.equals(inp[1]));
             pass += passed ? 1 : 0;

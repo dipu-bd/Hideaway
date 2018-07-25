@@ -130,7 +130,14 @@ public class GeneralUtils {
             }
         }
         String output = sb.toString().trim();
-        return (StringUtils.isEmpty(output)) ? text : output;
+        output = (output.length() == 0) ? text : output;
+        // Capitalize all words 
+        String[] result = output.split(" ");
+        for (int i = 0; i < result.length; ++i) {
+            result[i] = result[i].charAt(0) + result[i].substring(1).toLowerCase();
+        }
+        output = String.join(" ", result);
+        return output;
     }
 
     /**
@@ -142,10 +149,10 @@ public class GeneralUtils {
      */
     public static String titleCase(String text, boolean ignoreFirstWord) {
         text = titleCase(text);
-        if (StringUtils.containsAny(text, ' ')) {
+        if (ignoreFirstWord && StringUtils.containsAny(text, ' ')) {
             return text.substring(text.indexOf(' ') + 1);
         }
-        return null;
+        return text;
     }
 
 }

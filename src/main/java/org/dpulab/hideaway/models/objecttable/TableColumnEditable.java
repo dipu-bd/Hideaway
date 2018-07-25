@@ -22,15 +22,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Use this to use a field as a column.
+ * Use this to set the column editable. By default fields are editable and
+ * methods are not.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
-public @interface TableColumn {    
+public @interface TableColumnEditable {
+
     /**
      * True if editable, false otherwise.
      *
      * @return
      */
-    String value();
+    boolean value();
 }

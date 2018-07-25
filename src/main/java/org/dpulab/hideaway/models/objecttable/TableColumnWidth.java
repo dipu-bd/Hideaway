@@ -22,15 +22,30 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Use this to use a field as a column.
+ * Use this to set the minimum and maximum width constraints on the column.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
-public @interface TableColumn {    
+public @interface TableColumnWidth {
+
     /**
-     * True if editable, false otherwise.
+     * the minimum width.
      *
      * @return
      */
-    String value();
+    int min();
+
+    /**
+     * the maximum width.
+     *
+     * @return
+     */
+    int max();
+
+    /**
+     * the prefered width.
+     *
+     * @return
+     */
+    int prefer();
 }

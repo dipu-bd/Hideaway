@@ -5,8 +5,9 @@
  */
 package org.dpulab.hideaway.models;
 
+import org.dpulab.hideaway.models.objecttable.TableColumn;
 import org.dpulab.hideaway.models.objecttable.TableColumnStyle;
-import org.dpulab.hideaway.models.objecttable.TableColumnInfo;
+import org.dpulab.hideaway.models.objecttable.TableColumnWidth;
 import org.dpulab.hideaway.utils.GeneralUtils;
 
 /**
@@ -18,14 +19,14 @@ public class IndexEntryModel {
     /**
      * Name of the file
      */
-    @TableColumnInfo(
-            name = "File Name",
-            min = 180,
-            max = Integer.MAX_VALUE,
-            prefer = 250,
-            editable = true)
+    @TableColumn("File Name")
+    @TableColumnWidth(min = 180, max = Integer.MAX_VALUE, prefer = 250)
     @TableColumnStyle("color: black")
     public String fileName;
+
+    @TableColumn("")
+    @TableColumnStyle("color: white")
+    public String testEntry;
 
     public long fileSize;
 
@@ -33,13 +34,9 @@ public class IndexEntryModel {
 
     }
 
-    @TableColumnInfo(
-            name = "Size",
-            min = 80,
-            max = 90,
-            prefer = 85,
-            editable = false)
+    @TableColumn("Size")
     @TableColumnStyle("color: #000")
+    @TableColumnWidth(min = 80, max = 90, prefer = 85)
     public String fileSizeReadable() {
         return GeneralUtils.formatFileSize(fileSize);
     }

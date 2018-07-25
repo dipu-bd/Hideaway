@@ -22,15 +22,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Use this to use a field as a column.
+ * Use this to set the preferred width only.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
-public @interface TableColumn {    
+public @interface TableColumnPreferWidth {
+
     /**
-     * True if editable, false otherwise.
+     * the preferred width.
      *
      * @return
      */
-    String value();
+    int value();
 }

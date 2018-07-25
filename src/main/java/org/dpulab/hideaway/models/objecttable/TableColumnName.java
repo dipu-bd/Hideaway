@@ -22,11 +22,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Use this to use a field as a column.
+ * Use this to set the column name.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
-public @interface TableColumn {    
+public @interface TableColumnName {
+
     /**
      * True if editable, false otherwise.
      *
