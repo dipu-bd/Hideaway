@@ -53,7 +53,7 @@ public class IndexEntryModelTest {
         TableColumnInfo[] items = TableColumnInfo.build(IndexEntryModel.class);
         for (TableColumnInfo col : items) {
             System.out.printf("* %s = %s (edit: %s, update: %s, style: %s)\n",
-                    col.getColumnName(), col.extractValue(entry), col.isEditable(), col.canUpdate(), col.getColumnStyle());
+                    col.getName(), col.extractValue(entry), col.isEditable(), col.canUpdate(), col.getStyle());
         }
     }
 

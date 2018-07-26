@@ -22,15 +22,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Use this to use a field as a column.
+ * Use this to use a field as a column. The value is the column position.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
-public @interface TableColumn {    
+public @interface TableColumn {
+
     /**
      * True if editable, false otherwise.
      *
      * @return
      */
-    String value();
+    int value();
 }

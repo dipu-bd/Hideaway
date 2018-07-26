@@ -6,13 +6,8 @@
 package org.dpulab.hideaway.utils;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.concurrent.Callable;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.CaseUtils;
 
 /**
  *
@@ -20,10 +15,8 @@ import org.apache.commons.text.CaseUtils;
  */
 public class GeneralUtils {
 
-    private static final String[] SIZE_SUFFIX = {"B", "KB", "MB", "GB", "TB", "PB"};
-
     public static String formatDate(long unixTime) {
-        return GeneralUtils.formatDate(new Date(unixTime));
+        return unixTime == 0 ? "" : GeneralUtils.formatDate(new Date(unixTime));
     }
 
     public static String formatDate(Date date) {
@@ -31,7 +24,7 @@ public class GeneralUtils {
     }
 
     public static String formatDate(Date date, String formatter) {
-        return new SimpleDateFormat(formatter).format(date);
+        return date == null ? "" : new SimpleDateFormat(formatter).format(date);
     }
 
     public static String formatFileSize(long size) {
@@ -39,6 +32,7 @@ public class GeneralUtils {
     }
 
     public static String formatFileSize(double size) {
+        final String[] SIZE_SUFFIX = {"B", "KB", "MB", "GB", "TB", "PB"};
         int p = 0;
         while (size > 1024) {
             size /= 1024;

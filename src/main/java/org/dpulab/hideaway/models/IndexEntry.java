@@ -25,8 +25,16 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
+import org.dpulab.hideaway.models.objecttable.TableColumn;
+import org.dpulab.hideaway.models.objecttable.TableColumnEditable;
+import org.dpulab.hideaway.models.objecttable.TableColumnName;
+import org.dpulab.hideaway.models.objecttable.TableColumnStyle;
+import org.dpulab.hideaway.models.objecttable.TableColumnWidth;
 import org.dpulab.hideaway.utils.CipherIO;
+import org.dpulab.hideaway.utils.GeneralUtils;
 
 /**
  *
@@ -49,10 +57,8 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
     /*------------------------------------------------------------------------*\
     |                          MAIN FILE CONTENT                               |   
     \*------------------------------------------------------------------------*/
-    private IndexEntry parentEntry;
-    private String fileName = "";
     private long fileSize = 0;
-    private String checksum = null;
+    private IndexEntry parentEntry;
     private final HashMap<String, IndexEntry> children = new HashMap<>();
 
     // hide access to new IndexEntry
@@ -65,10 +71,10 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
      * @param other The entry to clone
      */
     public IndexEntry(IndexEntry other) {
-        this.setFileName(other.getFileName());
-        this.setFileSize(other.getFileSize());
-        this.setChecksum(other.getChecksum());
-        this.setParentEntry(other.getParentEntry());
+        this.fileName = other.fileName;
+        this.fileSize = other.fileSize;
+        this.checksum = other.checksum;
+        this.parentEntry = other.parentEntry;
         this.children.putAll(other.children);
     }
 
@@ -92,10 +98,10 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
         if (version == 1) {
             IndexEntry entry = new IndexEntry();
             boolean file = in.readBoolean();
-            entry.setFileName(in.readUTF());
+            entry.fileName = in.readUTF();
             if (file) {
-                entry.setFileSize(in.readLong());
-                entry.setChecksum(in.readUTF());
+                entry.fileSize = in.readLong();
+                entry.checksum = in.readUTF();
             } else {
                 long totalFileSize = 0;
                 int childrenCount = in.readInt();
@@ -104,7 +110,7 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
                     totalFileSize += child.fileSize;
                     entry.addChild(child);
                 }
-                entry.setFileSize(totalFileSize);
+                entry.fileSize = totalFileSize;
             }
             return entry;
         } else {
@@ -121,8 +127,46 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
         if (this.isDirectory() && that.isFile()) {
             return 1; // a > b
         }
-        return this.getFileName().compareTo(that.getFileName());
+        return this.fileName.compareTo(that.fileName);
     }
+
+    /*------------------------------------------------------------------------*\
+    |                             Table Entries                                 |   
+    \*------------------------------------------------------------------------*/
+    @TableColumn(1)
+    @TableColumnEditable(true)
+    @TableColumnStyle("font-weight: bold")
+    @TableColumnWidth(min = 180, prefer = 350, max = Integer.MAX_VALUE)
+    public String fileName = "";
+
+    @TableColumn(2)
+    @TableColumnName("Size")
+    @TableColumnStyle("color: navy")
+    @TableColumnWidth(min = 80, max = 90, prefer = 85)
+    public final String getFileSizeReadable() {
+        return GeneralUtils.formatFileSize(this.fileSize);
+    }
+
+    @TableColumn(3)
+    @TableColumnName("Type")
+    @TableColumnWidth(min = 80, max = 90, prefer = 85)
+    public final String getFileType() {
+        return isFile() ? "File" : "Directory";
+    }
+
+    @TableColumn(3)
+    @TableColumnName("Last Modified")
+    @TableColumnStyle("color: green")
+    @TableColumnWidth(min = 130, max = 145, prefer = 135)
+    public final String getLastModifiedReadable() {
+        return GeneralUtils.formatDate(getLastModified());
+    }
+
+    @TableColumn(5)
+    @TableColumnStyle("color: gray")
+    @TableColumnWidth(min = 180, prefer = 350, max = Integer.MAX_VALUE)
+    public String checksum = null;
+
 
     /*------------------------------------------------------------------------*\
     |                               GETTERS                                    |   
@@ -149,48 +193,10 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
     }
 
     /**
-     * @return the absolute path
-     */
-    public final String getPath() {
-        if (this.isRoot()) {
-            return "";
-        }
-        return this.getParentEntry().getPath() + SEPARATOR + this.getFileName();
-    }
-
-    /**
-     * @return the fileName
-     */
-    public final String getFileName() {
-        return this.fileName;
-    }
-
-    /**
-     * @return the fileSize
+     * @return the file size in bytes
      */
     public final long getFileSize() {
         return this.fileSize;
-    }
-
-    /**
-     * @return the fileSize
-     */
-    public final String getFileSizeReadable() {
-        final String[] suffix = {"B", "KB", "MB", "GB", "TB"};
-        int p = 0;
-        double size = this.fileSize;
-        while (size > 1024) {
-            size /= 1024;
-            p++;
-        }
-        return String.format("%.2f %s", size, suffix[p]);
-    }
-
-    /**
-     * @return the checksum
-     */
-    public final String getChecksum() {
-        return this.checksum;
     }
 
     /**
@@ -209,28 +215,7 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
 
     /*------------------------------------------------------------------------*\
     |                               SETTERS                                    |   
-    \*------------------------------------------------------------------------*/ /**
-     * @param fileName the fileName to set
-     */
-
-    protected final void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    /**
-     * @param fileSize the fileSize to set
-     */
-    protected final void setFileSize(long fileSize) {
-        this.fileSize = fileSize;
-    }
-
-    /**
-     * @param checksum the checksum to set
-     */
-    protected final void setChecksum(String checksum) {
-        this.checksum = checksum;
-    }
-
+    \*------------------------------------------------------------------------*/
     /**
      * @param parentEntry the parentEntry to set
      */
@@ -242,6 +227,16 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
     |                               METHODS                                    |   
     \*------------------------------------------------------------------------*/
     /**
+     * @return the absolute path
+     */
+    public final String getPath() {
+        if (this.isRoot()) {
+            return "";
+        }
+        return this.getParentEntry().getPath() + SEPARATOR + this.fileName;
+    }
+
+    /**
      * Gets the CipherFile that this entry represents.
      *
      * @return a CipherFile instance
@@ -250,9 +245,22 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
      */
     public final File getCipherFile() throws IOException, GeneralSecurityException {
         if (this.isFile()) {
-            return CipherIO.instance().getDataFile(this.getChecksum());
+            return CipherIO.instance().getDataFile(this.checksum);
         }
         return null;
+    }
+
+    /**
+     * Gets the last time when the file content was modified in Unix timestamp.
+     *
+     * @return
+     */
+    public final long getLastModified() {
+        try {
+            return getCipherFile().lastModified();
+        } catch (IOException | GeneralSecurityException ex) {
+        }
+        return 0;
     }
 
     /**
@@ -285,7 +293,7 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
         IndexEntry child = getChild(name);
         if (child != null) {
             this.children.remove(name);
-            this.fileSize -= child.getFileSize();
+            this.fileSize -= child.fileSize;
             this.getCipherFile().delete();
         }
         return child;
@@ -302,7 +310,7 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
         if (this.isRoot()) {
             throw new IllegalAccessError("Root entry can not be removed");
         }
-        return this.getParentEntry().removeChild(this.getFileName()) == this;
+        return this.getParentEntry().removeChild(this.fileName) == this;
     }
 
     /**
@@ -347,7 +355,7 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
         if (entry == null) {
             return false;
         }
-        return this.children.containsKey(entry.getFileName());
+        return this.children.containsKey(entry.fileName);
     }
 
     /**
@@ -361,7 +369,7 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
             return null;
         }
         IndexEntry entry = new IndexEntry();
-        entry.setFileName(name);
+        entry.fileName = name;
         entry.setParentEntry(this);
         this.children.put(name, entry);
         return entry;
@@ -380,10 +388,10 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
             return null;
         }
         IndexEntry entry = new IndexEntry();
-        entry.setFileName(name);
-        entry.setChecksum(checksum);
-        entry.setFileSize(fileSize);
-        entry.setParentEntry(this);
+        entry.fileName = name;
+        entry.checksum = checksum;
+        entry.fileSize = fileSize;
+        entry.parentEntry = this;
         this.children.put(name, entry);
         return entry;
     }

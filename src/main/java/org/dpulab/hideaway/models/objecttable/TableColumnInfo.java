@@ -23,17 +23,17 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
-import org.dpulab.hideaway.models.IndexEntryModel;
 import org.dpulab.hideaway.utils.GeneralUtils;
 
 /**
  *
  * @author dipu
  */
-public class TableColumnInfo {
+public class TableColumnInfo implements Comparable<TableColumnInfo> {
 
     private final AccessibleObject field;
 
+    private int columnIndex;
     private String columnName;
     private int minWidth;
     private int maxWidth;
@@ -56,7 +56,9 @@ public class TableColumnInfo {
                 columns.add(col);
             }
         });
-        return columns.toArray(new TableColumnInfo[0]);
+        TableColumnInfo[] result = columns.toArray(new TableColumnInfo[0]);
+        Arrays.sort(result);
+        return result;
     }
 
     public static TableColumnInfo build(AccessibleObject field) {
@@ -65,7 +67,16 @@ public class TableColumnInfo {
             return null;
         }
 
+        // create new instance
         TableColumnInfo col = new TableColumnInfo(field);
+
+        // set column index
+        TableColumn index = field.getAnnotation(TableColumn.class);
+        if (index != null) {
+            col.columnIndex = index.value();
+        } else {
+            col.columnIndex = col.hashCode();
+        }
 
         // set style
         TableColumnStyle style = field.getAnnotation(TableColumnStyle.class);
@@ -74,7 +85,7 @@ public class TableColumnInfo {
         }
 
         // set column name
-        TableColumn name = field.getAnnotation(TableColumn.class);
+        TableColumnName name = field.getAnnotation(TableColumnName.class);
         if (name != null && !StringUtils.isEmpty(name.value())) {
             col.columnName = name.value();
         } else {
@@ -127,9 +138,16 @@ public class TableColumnInfo {
     }
 
     /**
+     * @return the column index
+     */
+    public int getIndex() {
+        return columnIndex;
+    }
+
+    /**
      * @return the columnName
      */
-    public String getColumnName() {
+    public String getName() {
         return columnName;
     }
 
@@ -164,7 +182,7 @@ public class TableColumnInfo {
     /**
      * @return the columnStyle
      */
-    public String getColumnStyle() {
+    public String getStyle() {
         return columnStyle;
     }
 
@@ -225,6 +243,14 @@ public class TableColumnInfo {
         } catch (IllegalAccessException | IllegalArgumentException ex) {
         }
         return false;
+    }
+
+    @Override
+    public int compareTo(TableColumnInfo that) {
+        if (this.columnIndex != that.columnIndex) {
+            return this.columnIndex - that.columnIndex;
+        }
+        return this.columnName.compareTo(that.columnName);
     }
 
 }

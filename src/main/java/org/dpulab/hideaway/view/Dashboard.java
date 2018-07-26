@@ -19,28 +19,20 @@ package org.dpulab.hideaway.view;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.openssl.PasswordException;
 import org.dpulab.hideaway.Program;
 import org.dpulab.hideaway.models.DashboardPage;
 import org.dpulab.hideaway.models.IndexEntry;
-import org.dpulab.hideaway.models.IndexEntryModel;
 import org.dpulab.hideaway.models.objecttable.ObjectTableModel;
-import org.dpulab.hideaway.models.objecttable.TableColumnInfo;
 import org.dpulab.hideaway.utils.CipherIO;
 import org.dpulab.hideaway.utils.CryptoService;
 import org.dpulab.hideaway.utils.FileIO;
-import org.dpulab.hideaway.utils.GeneralUtils;
 import org.dpulab.hideaway.utils.Reporter;
 import org.dpulab.hideaway.utils.Settings;
 
@@ -143,38 +135,14 @@ public class Dashboard extends javax.swing.JFrame {
     }
 
     void loadBrowser(IndexEntry parent) {
-        ObjectTableModel<IndexEntry> model = new ObjectTableModel<>();
-        model.addColumn(new TableColumnInfo(""));
-//                .addColumn("#", "<b style=\"color: #6e6e6e\">%s</b>", 20, 25)
-//                .addColumn("Name", "<b>%s</b>", 180, 350)
-//                .addColumn("Size", "<code>%s</code>", 85, 90)
-//                .addColumn("Type", "", 85, 90)
-//                .addColumn("Last Modified", "<span style=\"color: #777\">%s</span>", 135, 145)
-//                .addColumn("Checksum", "<code style=\"color: gray\">%s</code>", 300);
-
         try {
             if (parent == null) {
                 parent = CipherIO.instance().getRootIndex();
             }
             this.selectedEntry = parent;
 
-            int index = 1;
-            for (IndexEntry entry : this.selectedEntry.getChildren()) {
-                String lastModifyDate = "-";
-                if (entry.isFile()) {
-                    File cipherFile = entry.getCipherFile();
-                    lastModifyDate = GeneralUtils.formatDate(cipherFile.lastModified());
-                }
-//                model.addData(
-//                        entry,
-//                        index++,
-//                        entry.getFileName(),
-//                        entry.getFileSizeReadable(),
-//                        entry.isFile() ? "File" : "Directory",
-//                        lastModifyDate,
-//                        entry.getChecksum()
-//                );
-            }
+            ObjectTableModel<IndexEntry> model = new ObjectTableModel<>(IndexEntry.class);
+            model.setEntries(this.selectedEntry.getChildren());
 
             SwingUtilities.invokeLater(() -> {
                 model.attachTo(this.dataViewer);
@@ -249,17 +217,19 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }
 
+    private IndexEntry getSelectedRow() {
+        return ((ObjectTableModel<IndexEntry>) this.dataViewer.getModel()).getSelectedRow();
+    }
+
     private void deleteIndexEntry() {
-        int row = this.dataViewer.getSelectedRow();
-        if (row == -1) {
+        IndexEntry entry = getSelectedRow();
+        if (entry == null) {
             return;
         }
-        IndexEntryModel model = (IndexEntryModel) this.dataViewer.getModel();
-        IndexEntry entry = (IndexEntry) null; //model.getTag(row);
 
         int result = JOptionPane.showConfirmDialog(
                 this,
-                String.format("Are you sure to remove: %s?", entry.getFileName()),
+                String.format("Are you sure to remove: %s?", entry.fileName),
                 "Confirm Delete",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE);
@@ -268,10 +238,10 @@ public class Dashboard extends javax.swing.JFrame {
             try {
                 entry.remove();
                 CipherIO.instance().saveIndex();
-                Reporter.dialog("Deleted file: %s", entry.getFileName());
+                Reporter.dialog("Deleted file: %s", entry.fileName);
             } catch (IOException | GeneralSecurityException ex) {
                 Reporter.put(getClass(), ex);
-                Reporter.dialog(Level.SEVERE, "Failed to delete file: %s", entry.getFileName());
+                Reporter.dialog(Level.SEVERE, "Failed to delete file: %s", entry.fileName);
             }
         }
     }

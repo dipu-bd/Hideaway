@@ -17,11 +17,15 @@
 package org.dpulab.hideaway.models.objecttable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import javax.swing.JTable;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import org.dpulab.hideaway.models.IndexEntry;
 
 /**
  *
@@ -32,6 +36,8 @@ public final class ObjectTableModel<T> extends AbstractTableModel {
 
     private final ArrayList<T> entries;
     private final TableColumnInfo[] columns;
+    private boolean indexVisible = true;
+    private JTable table = null;
 
     public ObjectTableModel(Class<T> type) {
         this.entries = new ArrayList<>();
@@ -39,14 +45,19 @@ public final class ObjectTableModel<T> extends AbstractTableModel {
     }
 
     public void attachTo(JTable table) {
+        this.table = table;
+
         // set tp table model
         table.setModel(this);
 
         // set column constraints
         TableColumnModel columnModel = table.getColumnModel();
-        for (int i = 0; i < columnModel.getColumnCount() && i < this.columns.length; ++i) {
+        for (int i = 0; i < columnModel.getColumnCount(); ++i) {
             TableColumn column = columnModel.getColumn(i);
             TableColumnInfo info = this.getColumn(i);
+            if (info == null) {
+                continue;
+            }
             if (info.getMinWidth() > 0) {
                 column.setMinWidth(info.getMinWidth());
             }
@@ -59,48 +70,51 @@ public final class ObjectTableModel<T> extends AbstractTableModel {
         }
     }
 
-    public ObjectTableModel addData(T entry) {
-        this.entries.add(entry);
-        return this;
-    }
-
     public T getData(int row) {
         return this.entries.get(row);
     }
 
     public TableColumnInfo getColumn(int col) {
-        return this.columns[col];
-    }
-
-    public void clear() {
-        this.entries.clear();
+        if (this.indexVisible) {
+            col--;
+        }
+        return col >= 0 ? this.columns[col] : null;
     }
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return this.columns[columnIndex].isEditable();
+        return getColumn(columnIndex).isEditable();
     }
 
     @Override
     public int getColumnCount() {
-        return this.columns.length;
+        return this.columns.length + (this.indexVisible ? 1 : 0);
     }
 
     @Override
     public String getColumnName(int columnIndex) {
-        return this.columns[columnIndex].getColumnName();
+        if (columnIndex == 0 && this.indexVisible) {
+            return "#";
+        }
+        return getColumn(columnIndex).getName();
     }
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        return this.columns[columnIndex].getColumnClass();
+        if (columnIndex == 0 && this.indexVisible) {
+            return Integer.class;
+        }
+        return getColumn(columnIndex).getColumnClass();
     }
 
     @Override
     public String getValueAt(int rowIndex, int columnIndex) {
+        if (columnIndex == 0 && this.indexVisible) {
+            return String.valueOf(rowIndex + 1);
+        }
         T data = this.entries.get(rowIndex);
-        Object value = this.columns[columnIndex].extractValue(data);
-        String style = this.columns[columnIndex].getColumnStyle();
+        Object value = getColumn(columnIndex).extractValue(data);
+        String style = getColumn(columnIndex).getStyle();
         String item = String.format(
                 "<html><span style=\"%s\">%s</span></html>",
                 style == null ? "" : style,
@@ -115,10 +129,13 @@ public final class ObjectTableModel<T> extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object val, int row, int col) {
-        if (!this.columns[col].isEditable()) {
+        if (col == 0 && this.indexVisible) {
+            throw new UnsupportedOperationException("Index is not editable");
+        }
+        if (!getColumn(col).isEditable()) {
             throw new UnsupportedOperationException("Update is not permitted");
         } else {
-            this.columns[col].updateValue(this.entries.get(row), val);
+            getColumn(col).updateValue(this.entries.get(row), val);
         }
     }
 
@@ -131,4 +148,60 @@ public final class ObjectTableModel<T> extends AbstractTableModel {
     public void removeTableModelListener(TableModelListener l) {
         super.removeTableModelListener(l);
     }
+
+    /**
+     * @return the indexVisible
+     */
+    public boolean isIndexVisible() {
+        return indexVisible;
+    }
+
+    /**
+     * @param indexVisible the indexVisible to set
+     */
+    public void setIndexVisible(boolean indexVisible) {
+        this.indexVisible = indexVisible;
+    }
+
+    /**
+     * Clears all rows
+     */
+    public void clear() {
+        this.entries.clear();
+    }
+
+    /**
+     * Adds a row to the model
+     *
+     * @param entry the row entry to add
+     * @return
+     */
+    public ObjectTableModel addData(T entry) {
+        this.entries.add(entry);
+        return this;
+    }
+
+    /**
+     * Adds batch of rows to the model
+     *
+     * @param entries the list of rows to add
+     * @return
+     */
+    public ObjectTableModel setEntries(T... entries) {
+        Collections.addAll(this.entries, entries);
+        return this;
+    }
+
+    /**
+     * Gets the selected row
+     *
+     * @return the row data, or null if none.
+     */
+    public T getSelectedRow() {
+        if (this.table != null && this.table.getSelectedRow() != -1) {
+            return this.getData(this.table.getSelectedRow());
+        }
+        return null;
+    }
+
 }
