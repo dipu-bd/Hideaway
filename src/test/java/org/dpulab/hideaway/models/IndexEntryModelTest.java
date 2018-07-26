@@ -6,7 +6,7 @@
 package org.dpulab.hideaway.models;
 
 import org.apache.commons.lang3.StringUtils;
-import org.dpulab.hideaway.models.objecttable.TableColumnItem;
+import org.dpulab.hideaway.models.objecttable.TableColumnInfo;
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -39,7 +39,7 @@ public class IndexEntryModelTest {
 
     @Test
     public void testColumnEntries() {
-        TableColumnItem[] columns = TableColumnItem.build(IndexEntryModel.class);
+        TableColumnInfo[] columns = TableColumnInfo.build(IndexEntryModel.class);
         assertNotNull(columns);
         assertTrue(columns.length > 0);
     }
@@ -50,8 +50,8 @@ public class IndexEntryModelTest {
         IndexEntryModel entry = new IndexEntryModel();
         entry.fileName = "My Sample Entry";
         entry.fileSize = 80105325;
-        TableColumnItem[] items = TableColumnItem.build(IndexEntryModel.class);
-        for (TableColumnItem col : items) {
+        TableColumnInfo[] items = TableColumnInfo.build(IndexEntryModel.class);
+        for (TableColumnInfo col : items) {
             System.out.printf("* %s = %s (edit: %s, update: %s, style: %s)\n",
                     col.getColumnName(), col.extractValue(entry), col.isEditable(), col.canUpdate(), col.getColumnStyle());
         }
