@@ -22,7 +22,6 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import org.dpulab.hideaway.models.IndexEntryModel;
 
 /**
  *
@@ -34,9 +33,9 @@ public final class ObjectTableModel<T> extends AbstractTableModel {
     private final ArrayList<T> entries;
     private final TableColumnInfo[] columns;
 
-    public ObjectTableModel() {
+    public ObjectTableModel(Class<T> type) {
         this.entries = new ArrayList<>();
-        this.columns = TableColumnInfo.build(IndexEntryModel.class);
+        this.columns = TableColumnInfo.build(type);
     }
 
     public void attachTo(JTable table) {
@@ -94,7 +93,7 @@ public final class ObjectTableModel<T> extends AbstractTableModel {
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        return String.class;
+        return this.columns[columnIndex].getColumnClass();
     }
 
     @Override

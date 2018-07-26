@@ -45,7 +45,7 @@ public class TableColumnInfo {
         this.field = field;
     }
 
-    public static TableColumnInfo[] build(Class clazz) {
+    public static TableColumnInfo[] build(Class<?> clazz) {
         ArrayList<TableColumnInfo> columns = new ArrayList<>();
         ArrayList<AccessibleObject> list = new ArrayList<>();
         list.addAll(Arrays.asList(clazz.getFields()));
@@ -176,6 +176,15 @@ public class TableColumnInfo {
             return ((Field) field).getName();
         } else if (Method.class.isInstance(field)) {
             return ((Method) field).getName();
+        }
+        return null;
+    }
+
+    public Class<?> getColumnClass() {
+        if (Field.class.isInstance(field)) {
+            return ((Field) field).getType();
+        } else if (Method.class.isInstance(field)) {
+            return ((Method) field).getReturnType();
         }
         return null;
     }
