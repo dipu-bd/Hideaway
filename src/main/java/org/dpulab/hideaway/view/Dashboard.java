@@ -178,6 +178,10 @@ public class Dashboard extends javax.swing.JFrame {
         return fileName;
     }
 
+    private void importExternalFolder() {
+
+    }
+
     private void importExternalFile() {
         // check if parent folder is available
         if (this.selectedPage != DashboardPage.BROWSER) {
@@ -211,7 +215,7 @@ public class Dashboard extends javax.swing.JFrame {
             // encrypt and copy plain text to the file
             CipherIO.instance().copyFileEncrypted(file, entry);
             // reload the viewer
-            this.loadBrowser(this.selectedEntry);
+            this.refreshBrowser();
         } catch (IOException | GeneralSecurityException ex) {
             Reporter.put(Dashboard.class, ex);
         }
@@ -219,6 +223,28 @@ public class Dashboard extends javax.swing.JFrame {
 
     private IndexEntry getSelectedRow() {
         return ((ObjectTableModel<IndexEntry>) this.dataViewer.getModel()).getSelectedRow();
+    }
+
+    private void exportInternalFile() {
+        IndexEntry entry = getSelectedRow();
+        if (entry == null) {
+            return;
+        }
+
+        // choose and validate a file path
+        String filePath = FileIO.chooseSaveFile(this, entry.fileName);
+        if (filePath == null) {
+            return;
+        }
+        File file = new File(filePath);
+
+        try {
+            CipherIO.instance().copyFileDecrypted(entry, file);
+            Reporter.dialog("'%s' is exported to: '%s'", entry.fileName, filePath);
+        } catch (IOException | GeneralSecurityException ex) {
+            Reporter.put(Dashboard.class, ex);
+            Reporter.dialog(Level.SEVERE, "Failed to export file: '%s'", entry.fileName);
+        }
     }
 
     private void deleteIndexEntry() {
@@ -238,7 +264,7 @@ public class Dashboard extends javax.swing.JFrame {
             try {
                 entry.remove();
                 CipherIO.instance().saveIndex();
-                this.loadBrowser(this.selectedEntry);
+                this.refreshBrowser();
                 // Reporter.dialog("Deleted file: %s", entry.fileName);
             } catch (IOException | GeneralSecurityException ex) {
                 Reporter.put(getClass(), ex);
@@ -261,6 +287,7 @@ public class Dashboard extends javax.swing.JFrame {
         deleteEntryMenuItem = new javax.swing.JMenuItem();
         browserPopupSeparator1 = new javax.swing.JPopupMenu.Separator();
         importFileMenuItem = new javax.swing.JMenuItem();
+        importFolderMenuItem = new javax.swing.JMenuItem();
         browserPopupSeparator2 = new javax.swing.JPopupMenu.Separator();
         refreshBrowserMenuItem = new javax.swing.JMenuItem();
         favoritesPopup = new javax.swing.JPopupMenu();
@@ -293,6 +320,11 @@ public class Dashboard extends javax.swing.JFrame {
         dataViewer = new javax.swing.JTable();
 
         exportFileMenuItem.setText("Export");
+        exportFileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportFileMenuItemActionPerformed(evt);
+            }
+        });
         browserPopup.add(exportFileMenuItem);
 
         deleteEntryMenuItem.setText("Delete");
@@ -305,7 +337,20 @@ public class Dashboard extends javax.swing.JFrame {
         browserPopup.add(browserPopupSeparator1);
 
         importFileMenuItem.setText("Import File");
+        importFileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importFileMenuItemActionPerformed(evt);
+            }
+        });
         browserPopup.add(importFileMenuItem);
+
+        importFolderMenuItem.setText("Import Folder");
+        importFolderMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importFolderMenuItemActionPerformed(evt);
+            }
+        });
+        browserPopup.add(importFolderMenuItem);
         browserPopup.add(browserPopupSeparator2);
 
         refreshBrowserMenuItem.setText("Refresh");
@@ -627,7 +672,8 @@ public class Dashboard extends javax.swing.JFrame {
         dataViewer.setFillsViewportHeight(true);
         dataViewer.setGridColor(new java.awt.Color(225, 231, 240));
         dataViewer.setRowHeight(24);
-        dataViewer.setSelectionBackground(new java.awt.Color(0, 204, 204));
+        dataViewer.setSelectionBackground(new java.awt.Color(220, 220, 230));
+        dataViewer.setSelectionForeground(new java.awt.Color(0, 0, 0));
         dataViewer.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         dataViewer.getTableHeader().setReorderingAllowed(false);
         dataViewer.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -764,6 +810,18 @@ public class Dashboard extends javax.swing.JFrame {
         this.deleteIndexEntry();
     }//GEN-LAST:event_deleteEntryMenuItemActionPerformed
 
+    private void exportFileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportFileMenuItemActionPerformed
+        this.exportInternalFile();
+    }//GEN-LAST:event_exportFileMenuItemActionPerformed
+
+    private void importFileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importFileMenuItemActionPerformed
+        this.importExternalFile();
+    }//GEN-LAST:event_importFileMenuItemActionPerformed
+
+    private void importFolderMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importFolderMenuItemActionPerformed
+        this.importExternalFolder();
+    }//GEN-LAST:event_importFolderMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToolBar actionToolbar;
     private javax.swing.JButton addBookmarkButton;
@@ -785,6 +843,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JMenuItem importFileMenuItem;
     private javax.swing.JButton importFileToolButton;
     private javax.swing.JButton importFolderButton;
+    private javax.swing.JMenuItem importFolderMenuItem;
     private javax.swing.JButton importFolderToolButton;
     private javax.swing.JButton logoutButton;
     private javax.swing.JPanel mainPanel;

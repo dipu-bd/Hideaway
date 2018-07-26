@@ -73,14 +73,18 @@ public final class FileIO {
      * the last visited folder path in memory.
      *
      * @param parent The parent component. Can be <code>null</code>.
+     * @param initialValue
      * @return The selected file, or null if nothing is selected.
      */
-    public static String chooseSaveFile(Component parent) {
+    public static String chooseSaveFile(Component parent, String initialValue) {
         String lastDirectory = Settings.getDefault().get("LAST_DIRECTORY");
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new java.io.File(lastDirectory));
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fileChooser.setFileHidingEnabled(false);
+        if (initialValue != null) { 
+            fileChooser.setSelectedFile(new File(initialValue));
+        }
         fileChooser.setApproveButtonText("Save");
         int returnVal = fileChooser.showSaveDialog(parent);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -99,7 +103,7 @@ public final class FileIO {
      * @throws IOException
      */
     public static void saveToFile(Component parent, String content) throws IOException {
-        String filePath = FileIO.chooseSaveFile(parent);
+        String filePath = FileIO.chooseSaveFile(parent, null);
         if (filePath != null) {
             File file = new File(filePath);
             Settings.getDefault().set("LAST_DIRECTORY", file.getParent());

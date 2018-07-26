@@ -16,6 +16,7 @@
  */
 package org.dpulab.hideaway.models.objecttable;
 
+import java.awt.Color;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -39,7 +40,7 @@ public class TableColumnInfo implements Comparable<TableColumnInfo> {
     private int maxWidth;
     private int prefWidth;
     private boolean editable;
-    private String columnStyle;
+    private TableColumnStyle columnStyle;
 
     private TableColumnInfo(AccessibleObject field) {
         this.field = field;
@@ -81,7 +82,7 @@ public class TableColumnInfo implements Comparable<TableColumnInfo> {
         // set style
         TableColumnStyle style = field.getAnnotation(TableColumnStyle.class);
         if (style != null) {
-            col.columnStyle = String.join(";", style.value());
+            col.columnStyle = style;
         }
 
         // set column name
@@ -182,8 +183,19 @@ public class TableColumnInfo implements Comparable<TableColumnInfo> {
     /**
      * @return the columnStyle
      */
-    public String getStyle() {
+    public TableColumnStyle getStyle() {
         return columnStyle;
+    }
+
+    /**
+     * @return Gets the foreground color
+     */
+    public Color getColor() {
+        try {
+            return Color.decode(getStyle().color());
+        } catch (NumberFormatException ex) {
+            return Color.BLACK;
+        }
     }
 
     /**

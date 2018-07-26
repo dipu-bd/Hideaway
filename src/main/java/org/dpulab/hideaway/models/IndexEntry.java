@@ -134,14 +134,14 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
     \*------------------------------------------------------------------------*/
     @TableColumn(1)
     @TableColumnEditable(true)
-    @TableColumnStyle("font-weight: bold")
     @TableColumnWidth(min = 180, prefer = 350, max = Integer.MAX_VALUE)
+    @TableColumnStyle(fontStyle = 1, align = 10, color = "")
     public String fileName = "";
 
     @TableColumn(2)
     @TableColumnName("Size")
-    @TableColumnStyle("color: navy")
     @TableColumnWidth(min = 80, max = 90, prefer = 85)
+    @TableColumnStyle(fontStyle = 0, align = 10, color = "#0000FF")
     public final String getFileSizeReadable() {
         return GeneralUtils.formatFileSize(this.fileSize);
     }
@@ -149,21 +149,22 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
     @TableColumn(3)
     @TableColumnName("Type")
     @TableColumnWidth(min = 80, max = 90, prefer = 85)
+    @TableColumnStyle(fontStyle = 0, align = 10, color = "")
     public final String getFileType() {
         return isFile() ? "File" : "Directory";
     }
 
-    @TableColumn(3)
+    @TableColumn(4)
     @TableColumnName("Last Modified")
-    @TableColumnStyle("color: green")
     @TableColumnWidth(min = 130, max = 145, prefer = 135)
+    @TableColumnStyle(fontStyle = 0, align = 0, color = "#2F4F4F")
     public final String getLastModifiedReadable() {
         return GeneralUtils.formatDate(getLastModified());
     }
 
     @TableColumn(5)
-    @TableColumnStyle("color: gray")
     @TableColumnWidth(min = 180, prefer = 350, max = Integer.MAX_VALUE)
+    @TableColumnStyle(fontStyle = 0, align = 0, color = "#AA8500")
     public String checksum = null;
 
 

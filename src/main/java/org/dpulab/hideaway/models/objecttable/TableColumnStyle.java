@@ -29,9 +29,32 @@ import java.lang.annotation.Target;
 public @interface TableColumnStyle {
 
     /**
-     * List CSS Styles
+     * List font style. <br>
+     * Available items:<br>
+     * <ul>
+     * <li>Font.PLAIN = 0</li>
+     * <li>Font.BOLD = 1</li>
+     * <li>Font.ITALIC = 2</li>
+     * <li>Font.BOLD | Font.ITALIC = 3</li>
+     * </ul>
+     */
+    int fontStyle();
+
+    /**
+     * Horizontal alignment of the column.  <br>
+     * Available items:<br>
+     * <ul>
+     * <li>JLabel.CENTER= 0</li>
+     * <li>JLabel.LEADING= 10</li>
+     * <li>JLabel.TRAILING= 11</li>
+     * </ul>
+     */
+    int align();
+
+    /**
+     * The foreground color
      *
      * @return
      */
-    String[] value();
+    String color();
 }
