@@ -238,7 +238,8 @@ public class Dashboard extends javax.swing.JFrame {
             try {
                 entry.remove();
                 CipherIO.instance().saveIndex();
-                Reporter.dialog("Deleted file: %s", entry.fileName);
+                this.loadBrowser(this.selectedEntry);
+                // Reporter.dialog("Deleted file: %s", entry.fileName);
             } catch (IOException | GeneralSecurityException ex) {
                 Reporter.put(getClass(), ex);
                 Reporter.dialog(Level.SEVERE, "Failed to delete file: %s", entry.fileName);

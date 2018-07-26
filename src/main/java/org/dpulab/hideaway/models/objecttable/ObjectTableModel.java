@@ -17,15 +17,12 @@
 package org.dpulab.hideaway.models.objecttable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import javax.swing.JTable;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import org.dpulab.hideaway.models.IndexEntry;
 
 /**
  *
@@ -68,6 +65,12 @@ public final class ObjectTableModel<T> extends AbstractTableModel {
                 column.setPreferredWidth(info.getPrefWidth());
             }
         }
+        if (this.indexVisible) {
+            TableColumn column = columnModel.getColumn(0);
+            column.setMinWidth(25);
+            column.setMaxWidth(50);
+            column.setPreferredWidth(30);
+        }
     }
 
     public T getData(int row) {
@@ -93,10 +96,11 @@ public final class ObjectTableModel<T> extends AbstractTableModel {
 
     @Override
     public String getColumnName(int columnIndex) {
-        if (columnIndex == 0 && this.indexVisible) {
-            return "#";
+        String name = "#";
+        if (!(columnIndex == 0 && this.indexVisible)) {
+            name = getColumn(columnIndex).getName();
         }
-        return getColumn(columnIndex).getName();
+        return String.format("<html><b>%s</b></html>", name);
     }
 
     @Override
@@ -110,7 +114,7 @@ public final class ObjectTableModel<T> extends AbstractTableModel {
     @Override
     public String getValueAt(int rowIndex, int columnIndex) {
         if (columnIndex == 0 && this.indexVisible) {
-            return String.valueOf(rowIndex + 1);
+            return String.format("<html><code style=\"color: #666\">%d</cod></html>", rowIndex + 1);
         }
         T data = this.entries.get(rowIndex);
         Object value = getColumn(columnIndex).extractValue(data);

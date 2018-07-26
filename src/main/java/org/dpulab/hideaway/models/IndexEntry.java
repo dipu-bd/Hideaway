@@ -25,8 +25,6 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.dpulab.hideaway.models.objecttable.TableColumn;
 import org.dpulab.hideaway.models.objecttable.TableColumnEditable;
@@ -35,6 +33,7 @@ import org.dpulab.hideaway.models.objecttable.TableColumnStyle;
 import org.dpulab.hideaway.models.objecttable.TableColumnWidth;
 import org.dpulab.hideaway.utils.CipherIO;
 import org.dpulab.hideaway.utils.GeneralUtils;
+import org.dpulab.hideaway.utils.Reporter;
 
 /**
  *
@@ -291,10 +290,10 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
      */
     public final IndexEntry removeChild(String name) throws IOException, GeneralSecurityException {
         IndexEntry child = getChild(name);
-        if (child != null) {
+        if (child != null && this.children.containsKey(name)) {
             this.children.remove(name);
             this.fileSize -= child.fileSize;
-            this.getCipherFile().delete();
+            child.getCipherFile().delete();
         }
         return child;
     }
@@ -306,11 +305,16 @@ public class IndexEntry implements Serializable, Comparable<IndexEntry> {
      * @throws java.io.IOException
      * @throws java.security.GeneralSecurityException
      */
-    public final boolean remove() throws IOException, GeneralSecurityException {
+    public final boolean remove() {
         if (this.isRoot()) {
-            throw new IllegalAccessError("Root entry can not be removed");
+            return false;
         }
-        return this.getParentEntry().removeChild(this.fileName) == this;
+        try {
+            return this.getParentEntry().removeChild(this.fileName) == this;
+        } catch (IOException | GeneralSecurityException ex) {
+            Reporter.put(getClass(), ex);
+        }
+        return false;
     }
 
     /**
